@@ -3,517 +3,584 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Llévatelo Seguro - Compra Directa y Segura</title>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <title>Calculadora de Divisas</title>
     <style>
+        /* Variables de Tema Claro (Por Defecto) */
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --success: #10b981;
-            --border: #e2e8f0;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding-bottom: 3rem; }
-
-        /* Banner Psicológico Superior */
-        .psy-top-bar {
-            background: #dc2626; color: white; text-align: center; padding: 6px 12px; font-size: 0.82rem; font-weight: 700;
-            letter-spacing: 0.5px; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 8px;
-            animation: pulseBanner 2s infinite;
-        }
-        @keyframes pulseBanner { 0%, 100% { background: #dc2626; } 50% { background: #b91c1c; } }
-
-        /* Header & Banner */
-        header {
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-            color: white; padding: 1.2rem 1rem; position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.3); border-bottom: 2px solid #3b82f6;
-        }
-        .header-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; }
-        .logo-title { font-size: 1.7rem; font-weight: 900; display: flex; align-items: center; gap: 8px; color: #fff; letter-spacing: -0.5px; }
-        
-        .trust-badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .trust-badge { font-size: 0.78rem; background: rgba(16,185,129,0.15); color: #34d399; padding: 5px 12px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(16,185,129,0.4); }
-        .urgency-badge { font-size: 0.78rem; background: rgba(234,179,8,0.15); color: #facc15; padding: 5px 12px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(234,179,8,0.4); }
-
-        .btn-auth-header {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white; border: none; padding: 0.65rem 1.3rem; border-radius: 50px;
-            font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.4);
-            transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
-        }
-        .btn-auth-header:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.6); }
-
-        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; }
-        .search-wrapper input {
-            flex: 1; min-width: 200px; padding: 0.8rem 1rem; border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.2); outline: none; font-size: 0.95rem; background: #ffffff;
-        }
-        .search-wrapper select {
-            padding: 0.8rem 1rem; border-radius: 10px; border: none; outline: none; font-size: 0.95rem; background: #ffffff; cursor: pointer; font-weight: 600;
+            --bg-body: #f4f5f9;
+            --bg-container: #ffffff;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --border-color: #e5e7eb;
+            --accent-color: #d97706; /* Dorado/Naranja de los bolívares */
+            --bg-subtab-active: #ffffff;
+            --btn-theme-bg: #ffffff;
+            --btn-theme-border: #e5e7eb;
+            --shadow: 0 4px 20px rgba(0,0,0,0.05);
+            --history-badge-bg: rgba(217, 119, 6, 0.1);
         }
 
-        /* Modal de Registro */
-        .reg-modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 2000;
-            justify-content: center; align-items: center; padding: 1rem;
-        }
-        .reg-modal-card {
-            background: #ffffff; width: 100%; max-width: 480px; border-radius: 20px;
-            padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); position: relative; max-height: 90vh; overflow-y: auto;
-        }
-        .reg-modal-header { text-align: center; margin-bottom: 1.5rem; }
-        .reg-modal-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem; }
-        .reg-modal-sub { font-size: 0.85rem; color: #64748b; }
-        
-        .btn-google {
-            width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 10px;
-            background: #ffffff; color: #334155; font-weight: 700; font-size: 0.9rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
-            transition: background 0.2s; margin-bottom: 1.2rem;
-        }
-        .btn-google:hover { background: #f8fafc; }
-
-        .divider-text { display: flex; align-items: center; text-align: center; color: #94a3b8; font-size: 0.8rem; margin: 1rem 0; }
-        .divider-text::before, .divider-text::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
-        .divider-text:not(:empty)::before { margin-right: .5em; }
-        .divider-text:not(:empty)::after { margin-left: .5em; }
-
-        .form-group { margin-bottom: 1rem; text-align: left; }
-        .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; }
-        .form-group input {
-            width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1;
-            font-size: 0.9rem; outline: none; transition: border 0.2s;
-        }
-        .form-group input:focus { border-color: #2563eb; }
-
-        .btn-submit-reg {
-            width: 100%; padding: 0.9rem; border-radius: 10px; border: none;
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white;
-            font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 1rem;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); transition: transform 0.2s;
-        }
-        .btn-submit-reg:hover { transform: translateY(-2px); }
-
-        /* Container principal */
-        main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .grid-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.5rem; }
-
-        /* Tarjeta */
-        .card {
-            background: var(--card-bg); border-radius: 16px; overflow: hidden;
-            border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.12); }
-
-      /* Galería Tarjeta */
-        .card-gallery { position: relative; height: 220px; background: #f1f5f9; overflow: hidden; }
-        .scroll-gallery {
-            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
-            width: 100%; height: 100%; scrollbar-width: none; -ms-overflow-style: none;
-        }
-        .scroll-gallery::-webkit-scrollbar { display: none; }
-        .scroll-gallery img {
-            flex: 0 0 100%; height: 100%; object-fit: cover;
-            scroll-snap-align: start; cursor: pointer;
-        }
-        .badge-verificado {
-            position: absolute; top: 12px; right: 12px; background: var(--success);
-            color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); pointer-events: none;
+        /* Variables de Tema Oscuro */
+        [data-theme="dark"] {
+            --bg-body: #050505;
+            --bg-container: #0a0a0a;
+            --text-primary: #ffffff;
+            --text-secondary: #9ca3af;
+            --border-color: #1f2937;
+            --accent-color: #d97706;
+            --bg-subtab-active: #0a0a0a;
+            --btn-theme-bg: #111827;
+            --btn-theme-border: #374151;
+            --shadow: 0 4px 20px rgba(0,0,0,0.5);
+            --history-badge-bg: rgba(217, 119, 6, 0.2);
         }
 
-        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex: 1; }
-        .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text); }
-        .card-desc { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4; flex: 1; }
-
-        .card-info { font-size: 0.82rem; background: #f8fafc; padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f1f5f9; }
-        .card-info div { margin-bottom: 3px; }
-
-        .card-price { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; }
-
-        .btn-buy {
-            background-color: var(--primary); color: white; text-align: center;
-            padding: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 700;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;
-        }
-        .btn-buy:hover { background-color: var(--primary-dark); }
-
-        /* Modal Imagen Completa / Lightbox */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;
-        }
-        .modal-content { max-width: 90%; max-height: 85vh; border-radius: 8px; object-fit: contain; }
-        .modal-close { position: absolute; top: 20px; right: 25px; color: white; font-size: 2rem; cursor: pointer; font-weight: bold; z-index: 1002; }
-        .modal-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(255,255,255,0.2); color: white; border: none; padding: 12px 18px;
-            cursor: pointer; border-radius: 50%; font-size: 1.5rem; backdrop-filter: blur(4px); z-index: 1001;
-        }
-        .modal-btn.prev { left: 15px; }
-        .modal-btn.next { right: 15px; }
-        .modal-counter {
-            position: absolute; bottom: 20px; color: white; font-size: 0.9rem;
-            background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 12px;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
         }
 
-        .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 400px;
+            margin-top: 20px;
+        }
+
+        /* Header y Botón de Tema */
+        .top-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .logo-placeholder {
+            width: 32px;
+            height: 32px;
+            /* Simulación del logo de la app */
+            background: conic-gradient(from 90deg, #ef4444, #3b82f6, #f59e0b);
+            border-radius: 50%;
+            mask: radial-gradient(transparent 40%, black 41%);
+            -webkit-mask: radial-gradient(transparent 40%, black 41%);
+        }
+
+        .theme-btn {
+            background-color: var(--btn-theme-bg);
+            border: 1px solid var(--btn-theme-border);
+            color: var(--text-primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: var(--shadow);
+            outline: none;
+        }
+
+        .theme-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Tabs de navegación superior */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 24px;
+        }
+
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        /* Tarjeta Principal (Mercado) */
+        .main-card {
+            background-color: var(--bg-container);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            overflow: hidden;
+        }
+
+        /* Sub-tabs de tasas */
+        .sub-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sub-tab {
+            flex: 1;
+            text-align: center;
+            padding: 16px 0;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+        .sub-tab.active {
+            color: var(--text-primary);
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        /* Área de conversión y campos de entrada */
+        .input-area {
+            padding: 24px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .currency-symbol {
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .amount-input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            outline: none;
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .input-label-small {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            margin-top: 24px;
+            font-weight: 700;
+        }
+
+        .divider {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 20px 0;
+        }
+
+        .ves-text {
+            color: var(--accent-color) !important;
+        }
+
+        /* Lista de Tasas Actuales */
+        .rates-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 8px;
+        }
+
+        .rates-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .rates-ref {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .rates-card {
+            background-color: var(--bg-container);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            padding: 8px 20px;
+            box-shadow: var(--shadow);
+        }
+
+        .rate-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .rate-row:last-child {
+            border-bottom: none;
+        }
+
+        .rate-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .rate-sub {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        .rate-value {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        /* Pestaña de Historial */
+        .history-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            padding: 0 8px;
+        }
+
+        .history-card {
+            background-color: var(--bg-container);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+        }
+
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .history-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .history-badge {
+            background-color: var(--history-badge-bg);
+            color: var(--accent-color);
+            font-size: 10px;
+            font-weight: 800;
+            padding: 4px 8px;
+            border-radius: 6px;
+        }
+
+        .history-body {
+            display: flex;
+            align-items: center;
+        }
+
+        .history-col {
+            flex: 1;
+        }
+
+        .history-divider {
+            width: 1px;
+            height: 35px;
+            background-color: var(--border-color);
+            margin: 0 16px;
+        }
+
+        .history-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            font-weight: 700;
+        }
+
+        .history-val {
+            font-size: 15px;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
 
-    <div class="psy-top-bar">
-        ⚡ 🔥 ÚLTIMAS 24 HORAS: COMPRAS 100% PROTEGIDAS CON GARANTÍA DE REEMBOLSO DIRECTO
-    </div>
-
-    <header>
-        <div class="header-container">
-            <div class="header-top">
-                <div class="logo-title">🛡️ Llévatelo Seguro</div>
-                
-                <div class="trust-badge-group">
-                    <span class="trust-badge">✔️ 100% Verificado</span>
-                    <span class="urgency-badge">🔒 Protección Antifraude</span>
-                    <button class="btn-auth-header" onclick="openRegModal()">👤 Registrar / Iniciar Sesión</button>
-                </div>
-            </div>
-
-            <!-- Banner de prueba social psicológica -->
-            <div style="background: rgba(255,255,255,0.05); padding: 8px 14px; border-radius: 10px; font-size: 0.82rem; color: #cbd5e1; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border: 1px solid rgba(255,255,255,0.1);">
-                <span>👥 <strong>+14,290 Usuarios Activos</strong> comprando de forma transparente hoy.</span>
-                <span style="color: #34d399; font-weight: 700;">🟢 En línea y respondiendo</span>
-            </div>
-
-            <div class="search-wrapper">
-                <input type="text" id="searchInput" placeholder="¿Qué buscas hoy? Ej: Samsung, PS5, Vehículos...">
-                <select id="filterSelect">
-                    <option value="todos">Todos los Estados</option>
-                    <option value="Nuevo">Nuevos</option>
-                    <option value="Usado">Usados</option>
-                </select>
-            </div>
-        </div>
-    </header>
-
+<div class="app-container">
     
-<main>
-        <div class="grid-products" id="productGrid">
-            <div class="empty-state">Cargando catálogo en tiempo real...</div>
-        </div>
-    </main>
+    <!-- Encabezado y Botón de Tema -->
+    <div class="top-header">
+        <div class="logo-placeholder"></div>
+        <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
+            <!-- Icono Luna (Modo Claro) -->
+            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+            <!-- Icono Sol (Modo Oscuro) -->
+            <svg id="sun-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        </button>
+    </div>
 
-    <!-- Modal de Registro e Inicio de Sesión -->
-    <div class="reg-modal-overlay" id="regModal">
-        <div class="reg-modal-card">
-            <span class="modal-close" style="color: #0f172a;" onclick="closeRegModal()">&times;</span>
-            <div class="reg-modal-header">
-                <div class="reg-modal-title">🔐 Registro Verificado</div>
-                <div class="reg-modal-sub">Completa tus datos reales para habilitar compras seguras</div>
+    <!-- Pestañas Principales -->
+    <div class="tabs">
+        <div class="tab active" onclick="switchMainTab('mercado', this)">MERCADO</div>
+        <div class="tab" onclick="switchMainTab('historial', this)">HISTORIAL</div>
+    </div>
+
+    <!-- VISTA: MERCADO -->
+    <div id="view-mercado">
+        <div class="main-card">
+            <!-- Selección de Tasa Fuente -->
+            <div class="sub-tabs">
+                <div class="sub-tab active" onclick="setTasa(832.49, this)">BCV $</div>
+                <div class="sub-tab" onclick="setTasa(968.07, this)">BCV €</div>
+                <div class="sub-tab" onclick="setTasa(962.00, this)">USDT</div>
             </div>
 
-            <button class="btn-google" id="btnGoogleAuth">
-                <svg width="18" height="18" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.15C3.26 21.3 7.31 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.29c-.8 1.6-1.29 3.41-1.29 5.39s.49 3.79 1.29 5.39l3.99-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.72-4.96z"/></svg>
-                Continuar con Google
-            </button>
-
-            <div class="divider-text">o con tus datos personales</div>
-
-            <form id="registrationForm">
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Nombres</label>
-                        <input type="text" id="regFirstName" required placeholder="Ej: Juan Carlos">
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Apellidos</label>
-                        <input type="text" id="regLastName" required placeholder="Ej: Pérez Gómez">
-                    </div>
+            <!-- Campos de Conversión (Diseño idéntico a la imagen) -->
+            <div class="input-area">
+                <div class="input-row">
+                    <span class="currency-symbol">$</span>
+                    <input type="text" id="inputUSD" class="amount-input" inputmode="numeric" placeholder="1,00">
                 </div>
 
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;">
-                        <label>Fecha Nacimiento</label>
-                        <input type="date" id="regDob" required>
-                    </div>
-                    <div class="form-group" style="flex: 1;">
-                        <label>Cédula de Identidad</label>
-                        <input type="text" id="regCedula" required placeholder="V-12345678">
-                    </div>
-                </div>
+                <div class="divider"></div>
 
-                <div class="form-group">
-                    <label>Adjuntar Foto de Cédula (Legible)</label>
-                    <input type="file" id="regIdImage" accept="image/*" required style="padding: 0.4rem;">
+                <div class="input-label-small">BOLÍVARES (VES)</div>
+                <div class="input-row">
+                    <span class="currency-symbol ves-text">Bs.</span>
+                    <input type="text" id="inputVES" class="amount-input ves-text" inputmode="numeric" placeholder="832,49">
                 </div>
+            </div>
+        </div>
 
-                <button type="submit" class="btn-submit-reg" id="btnSubmitForm">🛡️ Validar y Guardar Registro</button>
-            </form>
+        <!-- Listado de Tasas -->
+        <div class="rates-header">
+            <span class="rates-title">Tasas Actuales</span>
+            <span class="rates-ref">Ref. Oficiales</span>
+        </div>
+        <div class="rates-card">
+            <div class="rate-row">
+                <div>
+                    <div class="rate-name">Dólar Oficial</div>
+                    <div class="rate-sub">BCV / VES</div>
+                </div>
+                <div class="rate-value">832,49 Bs.</div>
+            </div>
+            <div class="rate-row">
+                <div>
+                    <div class="rate-name">USDT P2P</div>
+                    <div class="rate-sub">Binance / VES</div>
+                </div>
+                <div class="rate-value">961,55 Bs.</div>
+            </div>
+            <div class="rate-row">
+                <div>
+                    <div class="rate-name">Euro Oficial</div>
+                    <div class="rate-sub">BCV / VES</div>
+                </div>
+                <div class="rate-value">968,07 Bs.</div>
+            </div>
         </div>
     </div>
-    <!-- Modal para ver foto en grande -->
-    <div class="modal" id="imageModal">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
-        <button class="modal-btn prev" id="modalPrevBtn" onclick="cambiarFotoModal(-1)">❮</button>
-        <img class="modal-content" id="modalImage" alt="Foto Ampliada">
-        <button class="modal-btn next" id="modalNextBtn" onclick="cambiarFotoModal(1)">❯</button>
-        <div class="modal-counter" id="modalCounter"></div>
+
+    <!-- VISTA: HISTORIAL -->
+    <div id="view-historial" style="display: none;">
+        <h3 class="history-title">Historial de Variaciones</h3>
+        <div id="history-list">
+            <!-- El contenido se inyecta dinámicamente mediante JS -->
+        </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+</div>
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDFCJfaYGgcgQuRia1qc4hmZkEWmiBuX2k",
-          authDomain: "llevatelo-seguro.firebaseapp.com",
-          databaseURL: "https://llevatelo-seguro-default-rtdb.firebaseio.com",
-          projectId: "llevatelo-seguro",
-          storageBucket: "llevatelo-seguro.firebasestorage.app",
-          messagingSenderId: "1010159796781",
-          appId: "1:1010159796781:web:42706c5108a2fc08ceaea4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
-
-        let todosLosProductos = {};
-        let fotoIndices = {};
-
-        const grid = document.getElementById('productGrid');
-
-        // Modal Controls
-        window.openRegModal = function() {
-            document.getElementById('regModal').style.display = 'flex';
-        };
-        window.closeRegModal = function() {
-            document.getElementById('regModal').style.display = 'none';
-        };
-
-        // Google Auth Integration
-        document.getElementById('btnGoogleAuth').addEventListener('click', async () => {
-            try {
-                const result = await signInWithPopup(auth, provider);
-                const user = result.user;
-                const names = user.displayName ? user.displayName.split(' ') : ['', ''];
-                document.getElementById('regFirstName').value = names[0] || '';
-                document.getElementById('regLastName').value = names.slice(1).join(' ') || '';
-                alert(`¡Cuenta de Google (${user.email}) vinculada exitosamente! Por favor completa tu cédula, fecha de nacimiento y foto.`);
-            } catch (error) {
-                alert("Error al autenticar con Google: " + error.message);
-            }
-        });
-
-        // Subida de imagen a ImgBB
-        async function uploadImageToImgBB(file) {
-            const formData = new FormData();
-            formData.append('image', file);
-            const response = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', {
-                method: 'POST',
-                body: formData
-            });
-            const data = await response.json();
-            if (data.success) {
-                return data.data.url;
-            } else {
-                throw new Error('No se pudo subir la foto de la cédula.');
-            }
-        }
-// Envío de Formulario al Backend (Vercel UVI 1)
-        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSubmitForm');
-            btn.disabled = true;
-            btn.innerText = '⏳ Iniciando validación...';
-
-            try {
-                const fileInput = document.getElementById('regIdImage');
-                if (!fileInput.files[0]) throw new Error('Debes adjuntar la foto de la cédula.');
-                
-                const cedulaIngresada = document.getElementById('regCedula').value.trim().replace(/[^0-9]/g, '');
-
-                btn.innerText = '🤖 Analizando foto con IA...';
-                
-                const workerResult = await Tesseract.recognize(
-                    fileInput.files[0],
-                    'spa'
-                );
-                
-                const textoExtraido = workerResult.data.text.replace(/\s+/g, ''); 
-
-                if (!textoExtraido.includes(cedulaIngresada)) {
-                    throw new Error('Rechazado: La IA no detectó la cédula ingresada en la foto. Asegúrate de que la foto sea clara.');
-                }
-
-                btn.innerText = '⏳ Subiendo foto segura...';
-                const imageUrl = await uploadImageToImgBB(fileInput.files[0]);
-
-                const payload = {
+<script>
+    // --- LÓGICA DEL TEMA ---
+    function toggleTheme() {
+        const html = document.documentElement;
+        const moon = document.getElementById('moon-icon');
+        const sun = document.getElementById('sun-icon');
         
-                    firstname: document.getElementById('regFirstName').value.trim(),
-                    lastname: document.getElementById('regLastName').value.trim(),
-                    dob: document.getElementById('regDob').value,
-                    cedula: document.getElementById('regCedula').value.trim(),
-                    idImage: imageUrl
-                };
-
-                const res = await fetch('https://llevatelo-seguro.vercel.app/api', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'handleRegistrationSubmit', payload })
-            });
-
-            const textResponse = await res.text();
-            let data;
-            try {
-                data = JSON.parse(textResponse);
-            } catch (e) {
-                throw new Error("Error del servidor (" + res.status + "): Vercel no encontró la ruta. Asegúrate de que el archivo backend sea '.js' y esté en una carpeta 'api'.");
-            }
-
-     if (res.ok && data.success) {
-                alert('🎉 ' + data.message);
-                closeRegModal();
-                document.getElementById('registrationForm').reset();
-            } else {
-                alert('❌ Error de Validación: ' + (data.error || 'No coinciden los datos'));
-            }
-            } catch (err) {
-                alert('❌ Error: ' + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = '🛡️ Validar y Guardar Registro';
-            }
-        });
-
-        onValue(ref(db, 'productos'), (snapshot) => {
-            todosLosProductos = snapshot.val() || {};
-            renderProducts();
-        });
-
-        function renderProducts() {
-            grid.innerHTML = '';
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const filter = document.getElementById('filterSelect').value;
-
-            const keys = Object.keys(todosLosProductos);
-
-            if(keys.length === 0) {
-                grid.innerHTML = '<div class="empty-state">No hay productos publicados por el momento. ¡Vuelve pronto!</div>';
-                return;
-            }
-
-            let contador = 0;
-
-            keys.forEach(key => {
-                const prod = todosLosProductos[key];
-                
-                // Normalizar fotos por si Firebase devuelve objeto o array
-                const fotos = Array.isArray(prod.fotos) ? prod.fotos : (prod.fotos ? Object.values(prod.fotos) : []);
-
-                // Filtros
-                const coincideNombre = prod.nombre.toLowerCase().includes(search) || prod.descripcion.toLowerCase().includes(search);
-                const coincideEstado = filter === 'todos' || prod.estado.includes(filter);
-
-                if(coincideNombre && coincideEstado) {
-                    contador++;
-                    
-                    // Crear las imágenes para el carrusel horizontal
-                    const imageTags = fotos.map((foto, index) => 
-                        `<img src="${foto}" onclick="openModal('${key}', ${index})" alt="${prod.nombre} - Foto ${index + 1}" loading="lazy">`
-                    ).join('');
-
-                    const mensajeWa = encodeURIComponent(`Hola, estoy interesado en comprar: *${prod.nombre}* ($${prod.precioVenta}) visto en Llévatelo Seguro.`);
-                    const linkWa = `https://wa.me/584120000000?text=${mensajeWa}`;
-
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-gallery">
-                            <div class="scroll-gallery">
-                                ${imageTags}
-                            </div>
-                            ${prod.verificado ? '<div class="badge-verificado">✔️ Verificado</div>' : ''}
-                        </div>
-
-                        <div class="card-body">
-                            <h2 class="card-title">${prod.nombre}</h2>
-                            <p class="card-desc">${prod.descripcion}</p>
-                            <div class="card-info">
-                                <div>📍 <strong>Ubicación:</strong> ${prod.ubicacion}</div>
-                                <div>📦 <strong>Estado:</strong> ${prod.estado}</div>
-                                <div>💳 <strong>Pago:</strong> ${prod.metodoPago}</div>
-                            </div>
-                            <div class="card-price">$${prod.precioVenta}</div>
-                            <a href="${linkWa}" target="_blank" class="btn-buy">💬 Comprar vía WhatsApp</a>
-                        </div>
-                    `;
-                    grid.appendChild(card);
-                }
-            });
-            if(contador === 0) {
-                grid.innerHTML = '<div class="empty-state">No se encontraron productos con esos criterios de búsqueda.</div>';
-            }
+        if (html.getAttribute('data-theme') === 'dark') {
+            html.removeAttribute('data-theme');
+            moon.style.display = 'block';
+            sun.style.display = 'none';
+        } else {
+            html.setAttribute('data-theme', 'dark');
+            moon.style.display = 'none';
+            sun.style.display = 'block';
         }
-let currentModalKey = null;
-        let currentModalIndex = 0;
+    }
 
-        window.openModal = function(key, index = 0) {
-            currentModalKey = key;
-            currentModalIndex = index;
-            actualizarModal();
-            document.getElementById('imageModal').style.display = 'flex';
-        };
+    // --- LÓGICA DE PESTAÑAS (MERCADO / HISTORIAL) ---
+    function switchMainTab(tabName, element) {
+        document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+        element.classList.add('active');
 
-        function actualizarModal() {
-            if (!currentModalKey || !todosLosProductos[currentModalKey]) return;
-            const prod = todosLosProductos[currentModalKey];
-            const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
-            const total = fotos.length;
-
-            document.getElementById('modalImage').src = fotos[currentModalIndex];
-             
-            const prevBtn = document.getElementById('modalPrevBtn');
-            const nextBtn = document.getElementById('modalNextBtn');
-            const counter = document.getElementById('modalCounter');
-
-            if (total > 1) {
-                prevBtn.style.display = 'block';
-                nextBtn.style.display = 'block';
-                counter.style.display = 'block';
-                counter.innerText = (currentModalIndex + 1) + ' / ' + total;
-            } else {
-                prevBtn.style.display = 'none';
-                nextBtn.style.display = 'none';
-                counter.style.display = 'none';
-            }
+        if (tabName === 'mercado') {
+            document.getElementById('view-mercado').style.display = 'block';
+            document.getElementById('view-historial').style.display = 'none';
+        } else {
+            document.getElementById('view-mercado').style.display = 'none';
+            document.getElementById('view-historial').style.display = 'block';
+            renderizarHistorial();
         }
+    }
 
-        window.cambiarFotoModal = function(dir) {
-            if (!currentModalKey || !todosLosProductos[currentModalKey]) return;
-            const prod = todosLosProductos[currentModalKey];
-            const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
-            currentModalIndex = (currentModalIndex + dir + fotos.length) % fotos.length;
-            
-            actualizarModal();
-        };
+    // --- LÓGICA DEL HISTORIAL DE TRANSACCIONES ---
+    // Datos simulados exactamente como en tu captura de pantalla
+    const historialDatos = [
+        { fecha: '10/9/2026', hora: '7:00 p. m.', bcv: '832.4883', binance: '961.55' },
+        { fecha: '10/9/2026', hora: '6:55 p. m.', bcv: '832.4883', binance: '961.89' },
+        { fecha: '10/9/2026', hora: '6:40 p. m.', bcv: '832.4883', binance: '962.02' },
+        { fecha: '10/9/2026', hora: '6:36 p. m.', bcv: '832.4883', binance: '962.58' },
+        { fecha: '10/9/2026', hora: '6:25 p. m.', bcv: '832.4883', binance: '962.04' }
+    ];
 
-        window.closeModal = function() {
-            document.getElementById('imageModal').style.display = 'none';
-        };
+    function renderizarHistorial() {
+        const list = document.getElementById('history-list');
+        list.innerHTML = ''; // Limpiar antes de renderizar
+        
+        historialDatos.forEach(item => {
+            list.innerHTML += `
+                <div class="history-card">
+                    <div class="history-header">
+                        <div class="history-time">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                            ${item.fecha} • ${item.hora}
+                        </div>
+                        <div class="history-badge">REF</div>
+                    </div>
+                    <div class="history-body">
+                        <div class="history-col">
+                            <div class="history-label">BCV USD</div>
+                            <div class="history-val">Bs. ${item.bcv}</div>
+                        </div>
+                        <div class="history-divider"></div>
+                        <div class="history-col">
+                            <div class="history-label">BINANCE P2P</div>
+                            <div class="history-val">Bs. ${item.binance}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+    }
 
-        document.getElementById('searchInput').addEventListener('input', renderProducts);
-        document.getElementById('filterSelect').addEventListener('change', renderProducts);
-    </script>
+    // --- LÓGICA DE LA CALCULADORA (Adaptada al nuevo diseño fijo) ---
+    let tasaActual = 832.49;
+    let centavosUsd = 0;
+    let centavosVes = 0;
+
+    function setTasa(nuevaTasa, elemento) {
+        tasaActual = nuevaTasa;
+        document.querySelectorAll('.sub-tab').forEach(tab => tab.classList.remove('active'));
+        elemento.classList.add('active');
+        calcularDesdeUsd();
+    }
+
+    function formatearNumero(centavos) {
+        let valor = centavos / 100;
+        // Si el valor es cero, no mostrar para simular el placeholder, o mostrar 0,00
+        if (centavos === 0) return ""; 
+        return valor.toLocaleString('de-DE', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 4 // Permitido hasta 4 decimales como en tu captura (.4883)
+        });
+    }
+
+    function vincularEventos() {
+        const inputUSD = document.getElementById('inputUSD');
+        const inputVES = document.getElementById('inputVES');
+
+        inputUSD.addEventListener('keydown', (e) => manejarTeclado(e, 'USD'));
+        inputVES.addEventListener('keydown', (e) => manejarTeclado(e, 'VES'));
+
+        // Prevenir ingreso de cursor libre en campos numéricos
+        inputUSD.addEventListener('click', (e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length));
+        inputVES.addEventListener('click', (e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length));
+    }
+
+    function manejarTeclado(e, tipo) {
+        if (e.key >= '0' && e.key <= '9') {
+            e.preventDefault();
+            const digito = parseInt(e.key, 10);
+            if (tipo === 'USD') {
+                if (centavosUsd < 999999999) centavosUsd = centavosUsd * 10 + digito;
+                calcularDesdeUsd();
+            } else {
+                if (centavosVes < 999999999) centavosVes = centavosVes * 10 + digito;
+                calcularDesdeVes();
+            }
+        } else if (e.key === 'Backspace') {
+            e.preventDefault();
+            if (tipo === 'USD') {
+                centavosUsd = Math.floor(centavosUsd / 10);
+                calcularDesdeUsd();
+            } else {
+                centavosVes = Math.floor(centavosVes / 10);
+                calcularDesdeVes();
+            }
+        } else if (e.key === 'Tab') {
+            // Permitir navegación mediante tecla tab
+        } else {
+            e.preventDefault();
+        }
+    }
+
+    function calcularDesdeUsd() {
+        let valorUsd = centavosUsd / 100;
+        let valorVes = valorUsd * tasaActual;
+        centavosVes = Math.round(valorVes * 100);
+        actualizarDisplays();
+    }
+
+    function calcularDesdeVes() {
+        let valorVes = centavosVes / 100;
+        let valorUsd = tasaActual > 0 ? valorVes / tasaActual : 0;
+        centavosUsd = Math.round(valorUsd * 100);
+        actualizarDisplays();
+    }
+
+    function actualizarDisplays() {
+        const inputUSD = document.getElementById('inputUSD');
+        const inputVES = document.getElementById('inputVES');
+        
+        inputUSD.value = formatearNumero(centavosUsd);
+        inputVES.value = formatearNumero(centavosVes);
+    }
+
+    // Inicializar listeners
+    window.onload = function() {
+        vincularEventos();
+    };
+</script>
+
 </body>
 </html>
