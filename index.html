@@ -509,11 +509,8 @@ let currentModalKey = null;
         };
 
         window.closeModal = function() {
-            document.getElementById('image
-Modal').style.display = 'none';
+            document.getElementById('imageModal').style.display = 'none';
         };
-        
-        
 
         document.getElementById('searchInput').addEventListener('input', renderProducts);
         document.getElementById('filterSelect').addEventListener('change', renderProducts);
