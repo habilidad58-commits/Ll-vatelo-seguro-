@@ -350,24 +350,28 @@
                     idImage: imageUrl
                 };
 
-                const res = await fetch('https://llevatelo-seguro.vercel.app/api/index', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'handleRegistrationSubmit', payload })
-                });
+                const res = await fetch('https://llevatelo-seguro.vercel.app/api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'handleRegistrationSubmit', payload })
+            });
 
-                const data = await res.json();
+            const textResponse = await res.text();
+            let data;
+            try {
+                data = JSON.parse(textResponse);
+            } catch (e) {
+                throw new Error("Error del servidor (" + res.status + "): Vercel no encontró la ruta. Asegúrate de que el archivo backend sea '.js' y esté en una carpeta 'api'.");
+            }
 
-                if (res.ok && data.success) {
-                    alert('🎉 ' + data.message);
-                    closeRegModal();
-                    document.getElementById('registrationForm').reset();
-                } else {
-                    alert('❌ Error de Validación: ' + (data.error || 'No coinciden los datos'));
-                }
-            } catch (err) {
-                alert('❌ Error: ' + err.message);
-            } finally {
+            if (res.ok && data.success) {
+                alert('🎉 ' + data.message);
+                closeRegModal();
+                document.getElementById('registrationForm').reset();
+            } else {
+                alert('❌ Error de Validación: ' + (data.error || 'No coinciden los datos'));
+            }
+                finally {
                 btn.disabled = false;
                 btn.innerText = '🛡️ Validar y Guardar Registro';
             }
