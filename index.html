@@ -371,12 +371,13 @@
             } else {
                 alert('❌ Error de Validación: ' + (data.error || 'No coinciden los datos'));
             }
-                finally {
+            } catch (err) {
+                alert('❌ Error: ' + err.message);
+            } finally {
                 btn.disabled = false;
                 btn.innerText = '🛡️ Validar y Guardar Registro';
             }
         });
-
         onValue(ref(db, 'productos'), (snapshot) => {
             todosLosProductos = snapshot.val() || {};
             renderProducts();
