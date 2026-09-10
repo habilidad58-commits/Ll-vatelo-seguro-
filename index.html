@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Llévatelo Seguro - Compra Directa y Segura</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -328,21 +329,37 @@
                 throw new Error('No se pudo subir la foto de la cédula.');
             }
         }
-
-        // Envío de Formulario al Backend (Vercel UVI 1)
+// Envío de Formulario al Backend (Vercel UVI 1)
         document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSubmitForm');
             btn.disabled = true;
-            btn.innerText = '⏳ Verificando datos...';
+            btn.innerText = '⏳ Iniciando validación...';
 
             try {
                 const fileInput = document.getElementById('regIdImage');
                 if (!fileInput.files[0]) throw new Error('Debes adjuntar la foto de la cédula.');
+                
+                const cedulaIngresada = document.getElementById('regCedula').value.trim().replace(/[^0-9]/g, '');
 
+                btn.innerText = '🤖 Analizando foto con IA...';
+                
+                const workerResult = await Tesseract.recognize(
+                    fileInput.files[0],
+                    'spa'
+                );
+                
+                const textoExtraido = workerResult.data.text.replace(/\s+/g, ''); 
+
+                if (!textoExtraido.includes(cedulaIngresada)) {
+                    throw new Error('Rechazado: La IA no detectó la cédula ingresada en la foto. Asegúrate de que la foto sea clara.');
+                }
+
+                btn.innerText = '⏳ Subiendo foto segura...';
                 const imageUrl = await uploadImageToImgBB(fileInput.files[0]);
 
                 const payload = {
+        
                     firstname: document.getElementById('regFirstName').value.trim(),
                     lastname: document.getElementById('regLastName').value.trim(),
                     dob: document.getElementById('regDob').value,
@@ -364,7 +381,7 @@
                 throw new Error("Error del servidor (" + res.status + "): Vercel no encontró la ruta. Asegúrate de que el archivo backend sea '.js' y esté en una carpeta 'api'.");
             }
 
-            if (res.ok && data.success) {
+     if (res.ok && data.success) {
                 alert('🎉 ' + data.message);
                 closeRegModal();
                 document.getElementById('registrationForm').reset();
@@ -378,6 +395,7 @@
                 btn.innerText = '🛡️ Validar y Guardar Registro';
             }
         });
+
         onValue(ref(db, 'productos'), (snapshot) => {
             todosLosProductos = snapshot.val() || {};
             renderProducts();
@@ -491,7 +509,8 @@ let currentModalKey = null;
         };
 
         window.closeModal = function() {
-            document.getElementById('imageModal').style.display = 'none';
+            document.getElementById('image
+Modal').style.display = 'none';
         };
         
         
