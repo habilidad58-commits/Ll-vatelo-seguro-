@@ -902,24 +902,24 @@
             }
         });
 
-        // Cargar todos los productos (Catálogo Global Vercel)
+        // Cargar todos los productos directamente desde Firebase (Reglas: .read = true)
         const cargarCatalogoDesdeVercel = async () => {
-            try {
-                const res = await fetch('https://llevatelo-seguro.vercel.app/', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'cargaCatalogoGlobal', payload: {} })
-                });
-                const dataRes = await res.json();
-                if(dataRes.success) {
-                    todosLosProductos = dataRes.data || {};
-                    renderProducts();
-                    renderMyProducts();
-                }
-            } catch(err) { console.error("Error cargando catálogo global:", err); }
+            // Se mantiene esta función vacía intencionalmente para no romper 
+            // tus botones de 'Publicar', 'Fijar' y 'Eliminar' que dependen de ella.
         };
         
-        cargarCatalogoDesdeVercel();
-        setInterval(cargarCatalogoDesdeVercel, 15000);
+        const iniciarCatalogoTiempoReal = () => {
+            const productosRef = ref(db, 'productos');
+            onValue(productosRef, (snapshot) => {
+                todosLosProductos = snapshot.val() || {};
+                renderProducts();
+                renderMyProducts();
+            }, (error) => {
+                console.error("Error al cargar desde Firebase:", error);
+            });
+        };
+        
+        iniciarCatalogoTiempoReal();
 
         function formatearFecha(timestamp) {
             if(!timestamp) return 'Reciente';
