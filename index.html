@@ -677,25 +677,25 @@
             
             showLoading("Verificando datos y aprobando registro...");
             try {
-                    const reqObj = {
-                        action: 'registroUsuario',
-                        payload: {
-                            email: document.getElementById('regEmail').value,
-                            password: pass1,
-                            nombres: document.getElementById('regFirstName').value,
-                            apellidos: document.getElementById('regLastName').value,
-                            edad: document.getElementById('regEdad').value,
-                            cedula: document.getElementById('regCedula').value
-                        }
-                    };
-                    const res = await fetch('https://llevatelo-seguro.vercel.app/', {
-                        method: 'POST', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(reqObj)
+                    const email = document.getElementById('regEmail').value;
+                    const nombres = document.getElementById('regFirstName').value;
+                    const apellidos = document.getElementById('regLastName').value;
+                    const edad = document.getElementById('regEdad').value;
+                    const cedula = document.getElementById('regCedula').value;
+
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, pass1);
+                    const uid = userCredential.user.uid;
+
+                    await set(ref(db, 'usuarios/' + uid), {
+                        email: email,
+                        nombres: nombres,
+                        apellidos: apellidos,
+                        edad: edad,
+                        cedula: cedula,
+                        plan: 'basico',
+                        kyc: 'sin_verificar',
+                        fechaRegistro: serverTimestamp()
                     });
-                    const dataRes = await res.json();
-                    if (!dataRes.success) throw new Error(dataRes.error || "Error en el registro de Vercel");
-                    
-                    await signInWithEmailAndPassword(auth, document.getElementById('regEmail').value, pass1);
                     
                     hideLoading();
                     alert("✅ ¡Aprobado OK! Registro exitoso.");
@@ -1049,16 +1049,11 @@ window.fijarProd = async (key) => {
             document.getElementById('customConfirmModal').style.display = 'none';
             if(keyAEliminar) {
                 showLoading("Eliminando...");
-                const res = await fetch('https://llevatelo-seguro.vercel.app/', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'confirmarEliminar', payload: { key: keyAEliminar } })
-                });
-                const data = await res.json();
-                if(data.success) {
-                    await cargarCatalogoDesdeVercel();
+                try {
+                    await remove(ref(db, 'productos/' + keyAEliminar));
                     alert("✅ Publicación eliminada correctamente.");
-                } else {
-                    alert("❌ Error al eliminar.");
+                } catch(error) {
+                    alert("❌ Error al eliminar: " + error.message);
                 }
                 hideLoading();
                 keyAEliminar = null;
