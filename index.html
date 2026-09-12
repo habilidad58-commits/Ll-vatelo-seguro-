@@ -609,62 +609,53 @@
                 if(barraBusqueda) barraBusqueda.style.display = 'flex';
                 showSection('productos');
                 
-                fetch('https://llevatelo-seguro.vercel.app/', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'cargaDatosUsuario', payload: { uid: user.uid } })
-                })
-                .then(res => res.json())
-                .then(dataRes => {
-                    if(dataRes.success) {
-                        userData = dataRes.data || {};
-                        if(!userData.plan) userData.plan = 'basico';
-                        if(!userData.kyc) userData.kyc = 'sin_verificar';
-                        
-                        document.getElementById('perfilNombres').value = userData.nombres || '';
-                        document.getElementById('perfilApellidos').value = userData.apellidos || '';
-                        document.getElementById('perfilCedula').value = userData.cedula || '';
-                        document.getElementById('perfilTelefono').value = userData.telefono || '';
-                        
-                        // Lógica UI Perfil
-                        document.getElementById('badgePlan').innerText = "Plan: " + (userData.plan === 'pro' ? 'PRO ⭐' : 'Básico');
-                        document.getElementById('badgePlan').style.background = userData.plan === 'pro' ? '#d97706' : '#1e293b';
-                        
-                        let kycTexto = "Sin Verificación", kycColor = "#64748b";
-                        if(userData.kyc === 'pendiente') { kycTexto = "En Revisión ⏳"; kycColor = "#eab308"; }
-                        if(userData.kyc === 'verificado') { kycTexto = "Verificado ✅"; kycColor = "#10b981"; }
-                        if(userData.kyc === 'rechazado') { kycTexto = "Rechazado ❌"; kycColor = "#ef4444"; }
-                        
-                        document.getElementById('badgeKYC').innerText = kycTexto;
-                        document.getElementById('badgeKYC').style.background = kycColor;
+              // Usamos Firebase directamente sin depender de Vercel
+const userRef = ref(db, 'usuarios/' + user.uid);
+onValue(userRef, (snapshot) => {
+    if (snapshot.exists()) {
+        userData = snapshot.val() || {};
+        if(!userData.plan) userData.plan = 'basico';
+        if(!userData.kyc) userData.kyc = 'sin_verificar';
+        
+        document.getElementById('perfilNombres').value = userData.nombres || '';
+        document.getElementById('perfilApellidos').value = userData.apellidos || '';
+        document.getElementById('perfilCedula').value = userData.cedula || '';
+        document.getElementById('perfilTelefono').value = userData.telefono || '';
+        
+        // Lógica UI Perfil
+        document.getElementById('badgePlan').innerText = "Plan: " + (userData.plan === 'pro' ? 'PRO ⭐' : 'Básico');
+        document.getElementById('badgePlan').style.background = userData.plan === 'pro' ? '#d97706' : '#1e293b';
+        
+        let kycTexto = "Sin Verificación", kycColor = "#64748b";
+        if(userData.kyc === 'pendiente') { kycTexto = "En Revisión ⏳"; kycColor = "#eab308"; }
+        if(userData.kyc === 'verificado') { kycTexto = "Verificado ✅"; kycColor = "#10b981"; }
+        if(userData.kyc === 'rechazado') { kycTexto = "Rechazado ❌"; kycColor = "#ef4444"; }
+        
+        document.getElementById('badgeKYC').innerText = kycTexto;
+        document.getElementById('badgeKYC').style.background = kycColor;
 
-                        if(userData.kyc === 'rechazado') {
-                            document.getElementById('alertaRechazo').style.display = 'block';
-                            document.getElementById('motivoRechazo').innerText = userData.motivoRechazo || 'Datos incorrectos';
-                        } else {
-                            document.getElementById('alertaRechazo').style.display = 'none';
-                        }
+        if(userData.kyc === 'rechazado') {
+            document.getElementById('alertaRechazo').style.display = 'block';
+            document.getElementById('motivoRechazo').innerText = userData.motivoRechazo || 'Datos incorrectos';
+        } else {
+            document.getElementById('alertaRechazo').style.display = 'none';
+        }
 
-                        const mostrarKYC = (userData.kyc === 'sin_verificar' || userData.kyc === 'rechazado');
-                        document.getElementById('btnVerificarKYC').style.display = mostrarKYC ? 'block' : 'none';
-                        const btnInfoK = document.getElementById('btnInfoKYC');
-                        if(btnInfoK) btnInfoK.style.display = mostrarKYC ? 'inline-flex' : 'none';
-                        
-                        const mostrarPro = (userData.plan === 'basico' && userData.kyc === 'verificado');
-                        document.getElementById('btnSubirPro').style.display = mostrarPro ? 'block' : 'none';
-                        const btnInfoP = document.getElementById('btnInfoPro');
-                        if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
-                        document.getElementById('seccionTelefono').style.display = (userData.plan === 'pro') ? 'block' : 'none';
-                    }
-                }).catch(err => console.error("Error cargando perfil desde Vercel:", err));
-            } else {
-                currentUser = null;
-                document.getElementById('btnAuthHeader').style.display = 'block';
-                document.getElementById('btnLogout').style.display = 'none';
-                document.getElementById('userTabs').style.display = 'none';
-                if(barraBusqueda) barraBusqueda.style.display = 'none';
-                showSection('infoPublica');
-            }
-        });
+        const mostrarKYC = (userData.kyc === 'sin_verificar' || userData.kyc === 'rechazado');
+        document.getElementById('btnVerificarKYC').style.display = mostrarKYC ? 'block' : 'none';
+        const btnInfoK = document.getElementById('btnInfoKYC');
+        if(btnInfoK) btnInfoK.style.display = mostrarKYC ? 'inline-flex' : 'none';
+        
+        const mostrarPro = (userData.plan === 'basico' && userData.kyc === 'verificado');
+        document.getElementById('btnSubirPro').style.display = mostrarPro ? 'block' : 'none';
+        const btnInfoP = document.getElementById('btnInfoPro');
+        if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
+        document.getElementById('seccionTelefono').style.display = (userData.plan === 'pro') ? 'block' : 'none';
+    }
+}, (error) => {
+    console.error("Error cargando perfil desde Firebase:", error);
+});
+
 
         // Registro de Usuario Nuevo
         document.getElementById('registrationForm').addEventListener('submit', async (e) => {
