@@ -203,7 +203,7 @@
 
             <!-- Banner de usuarios eliminado -->
 
-            <div class="search-wrapper">
+              <div class="search-wrapper" id="filtrosBusqueda">
                 <input type="text" id="searchInput" placeholder="¿Qué buscas? Ej: Samsung...">
                 <input type="text" id="filterUbicacion" placeholder="Ubicación. Ej: Cúa" style="flex:1;">
                 <input type="number" id="filterPrecioMin" placeholder="Precio Min ($)" style="width: 110px;">
@@ -214,8 +214,11 @@
                     <option value="Usado">Usados</option>
                 </select>
             </div>
+            <div style="text-align: center; margin-top: 5px;">
+                <button type="button" onclick="toggleFiltros()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));" id="btnToggleFiltros" title="Ocultar Filtros">🔼</button>
+            </div>
         </div>
-    </header> 
+    </header>
 
     
 <div class="tabs" id="userTabs">
@@ -266,6 +269,10 @@
                         <input type="file" id="prodFoto3" accept="image/*" style="margin-bottom: 8px; padding: 0.4rem; border: 1px dashed #cbd5e1;">
                         <input type="file" id="prodFoto4" accept="image/*" style="margin-bottom: 8px; padding: 0.4rem; border: 1px dashed #cbd5e1;">
                         <input type="file" id="prodFoto5" accept="image/*" style="padding: 0.4rem; border: 1px dashed #cbd5e1;">
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
+                        <input type="checkbox" id="chkAhorroDatos" style="width: 20px; height: 20px; cursor: pointer;" checked>
+                        <label for="chkAhorroDatos" style="margin: 0; cursor: pointer; font-size: 0.9rem; color: #0f172a; font-weight: bold;">Ahorro de Datos (Imágenes de carga rápida y ligera)</label>
                     </div>
                     <button type="submit" class="btn-submit-reg" style="margin-top: 10px;">Publicar Producto 🚀</button>
                 </form>
@@ -500,6 +507,42 @@
         };
         const hideLoading = () => document.getElementById('loadingOverlay').style.display = 'none';
 
+        window.toggleFiltros = () => {
+            const filtros = document.getElementById('filtrosBusqueda');
+            const btn = document.getElementById('btnToggleFiltros');
+            if (filtros.style.display === 'none') {
+                filtros.style.display = 'flex';
+                btn.innerText = '🔼';
+            } else {
+                filtros.style.display = 'none';
+                btn.innerText = '🔽';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        };
+
+        const comprimirImagen = (file, maxRes) => {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width; let height = img.height;
+                        if (width > maxRes || height > maxRes) {
+                            if (width > height) { height = Math.round((height *= maxRes / width)); width = maxRes; } 
+                            else { width = Math.round((width *= maxRes / height)); height = maxRes; }
+                        }
+                        canvas.width = width; canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', 0.6);
+                    };
+                };
+            });
+        };
+
         // Sistema de Autenticación
         onAuthStateChanged(auth, (user) => {
             const barraBusqueda = document.querySelector('.search-wrapper');
@@ -693,11 +736,14 @@
 
             if(files.length === 0) return alert("⚠️ Selecciona al menos la primera foto.");
 
-            showLoading("Subiendo fotos de forma instantánea...");
+            showLoading("Procesando y subiendo fotos...");
             try {
+                const usarAhorro = document.getElementById('chkAhorroDatos').checked;
                 const uploadPromises = files.map(async (file) => {
+                    let finalFile = file;
+                    if (usarAhorro) { finalFile = await comprimirImagen(file, 600); }
                     const fd = new FormData();
-                    fd.append('image', file);
+                    fd.append('image', finalFile);
                     const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
                     const data = await res.json();
                     return data.success ? data.data.url : null;
@@ -762,7 +808,9 @@
                 if (a.fijado && !b.fijado) return -1;
                 if (!a.fijado && b.fijado) return 1;
                 if (a.fijado && b.fijado) return (b.fijadoTime || 0) - (a.fijadoTime || 0);
-                return 0; 
+                const timeA = a.fechaPublicacion || 0;
+                const timeB = b.fechaPublicacion || 0;
+                return timeB - timeA; 
             });
 
             let contador = 0;
@@ -811,29 +859,33 @@
             grid.innerHTML = '';
             let count = 0;
             
-            Object.keys(todosLosProductos).forEach(key => {
-                const prod = todosLosProductos[key];
-                if(prod.uid === currentUser.uid) {
-                    count++;
-                    const foto = (Array.isArray(prod.fotos) ? prod.fotos[0] : Object.values(prod.fotos)[0]);
-                    const div = document.createElement('div');
-                    div.className = 'card';
-                    div.style.padding = '15px';
-                    div.innerHTML = `
-                        <div style="display:flex; gap:15px; align-items:center;">
-                            <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
-                            <div style="flex:1;">
-                                <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
-                                <strong style="color:var(--primary); font-size:1.2rem;">$${prod.precio}</strong>
-                            </div>
+            let misProdsArr = Object.keys(todosLosProductos)
+                .map(key => ({ key, ...todosLosProductos[key] }))
+                .filter(prod => prod.uid === currentUser.uid);
+
+            misProdsArr.sort((a, b) => (b.fechaPublicacion || 0) - (a.fechaPublicacion || 0));
+
+            misProdsArr.forEach(prod => {
+                const key = prod.key;
+                count++;
+                const foto = (Array.isArray(prod.fotos) ? prod.fotos[0] : Object.values(prod.fotos)[0]);
+                const div = document.createElement('div');
+                div.className = 'card';
+                div.style.padding = '15px';
+                div.innerHTML = `
+                    <div style="display:flex; gap:15px; align-items:center;">
+                        <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
+                        <div style="flex:1;">
+                            <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
+                            <strong style="color:var(--primary); font-size:1.2rem;">$${prod.precio}</strong>
                         </div>
-                        <div style="display:flex; gap:10px; margin-top:15px;">
-                            ${userData.plan === 'pro' ? `<button onclick="fijarProd('${key}')" style="flex:1; padding:8px; background:#f59e0b; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">⭐ Fijar</button>` : ''}
-                            <button onclick="eliminarProdPropio('${key}')" style="flex:1; padding:8px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">🗑️ Eliminar</button>
-                        </div>
-                    `;
-                    grid.appendChild(div);
-                }
+                    </div>
+                    <div style="display:flex; gap:10px; margin-top:15px;">
+                        ${userData.plan === 'pro' ? `<button onclick="fijarProd('${key}')" style="flex:1; padding:8px; background:#f59e0b; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">⭐ Fijar</button>` : ''}
+                        <button onclick="eliminarProdPropio('${key}')" style="flex:1; padding:8px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">🗑️ Eliminar</button>
+                    </div>
+                `;
+                grid.appendChild(div);
             });
             if(count === 0) grid.innerHTML = '<div class="empty-state" style="grid-column: span 3;">Aún no tienes productos publicados.</div>';
         }
