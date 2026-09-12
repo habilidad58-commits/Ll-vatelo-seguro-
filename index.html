@@ -3,584 +3,905 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculadora de Divisas</title>
+    <title>Llévatelo Ya - Compra Directa y Segura</title>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <style>
-        /* Variables de Tema Claro (Por Defecto) */
         :root {
-            --bg-body: #f4f5f9;
-            --bg-container: #ffffff;
-            --text-primary: #111827;
-            --text-secondary: #6b7280;
-            --border-color: #e5e7eb;
-            --accent-color: #d97706; /* Dorado/Naranja de los bolívares */
-            --bg-subtab-active: #ffffff;
-            --btn-theme-bg: #ffffff;
-            --btn-theme-border: #e5e7eb;
-            --shadow: 0 4px 20px rgba(0,0,0,0.05);
-            --history-badge-bg: rgba(217, 119, 6, 0.1);
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #0f172a;
+            --text-muted: #64748b;
+            --success: #10b981;
+            --border: #e2e8f0;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding-bottom: 3rem; }
+
+        /* Banner Psicológico Superior */
+        .psy-top-bar {
+            background: #dc2626; color: white; text-align: center; padding: 6px 12px; font-size: 0.82rem; font-weight: 700;
+            letter-spacing: 0.5px; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 8px;
+            animation: pulseBanner 2s infinite;
+        }
+        @keyframes pulseBanner { 0%, 100% { background: #dc2626; } 50% { background: #b91c1c; } }
+
+        /* Header & Banner */
+        header {
+            background: linear-gradient(135deg, #10b981 30%, #ffffff 100%);
+            color: #0f172a; padding: 1.2rem 1rem; position: sticky; top: 0; z-index: 100;
+            box-shadow: 0 4px 25px rgba(0,0,0,0.1); border-bottom: 2px solid #10b981;
+        }
+        .header-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
+        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; }
+        .logo-title { font-size: 1.7rem; font-weight: 900; display: flex; align-items: center; gap: 8px; color: #0f172a; letter-spacing: -0.5px; }
+        
+        .trust-badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .trust-badge { font-size: 0.78rem; background: rgba(16,185,129,0.15); color: #34d399; padding: 5px 12px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(16,185,129,0.4); }
+        .urgency-badge { font-size: 0.78rem; background: rgba(234,179,8,0.15); color: #facc15; padding: 5px 12px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(234,179,8,0.4); }
+
+        .btn-auth-header {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white; border: none; padding: 0.65rem 1.3rem; border-radius: 50px;
+            font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.4);
+            transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
+        }
+        .btn-auth-header:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.6); }
+
+        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; }
+        .search-wrapper input {
+            flex: 1; min-width: 200px; padding: 0.8rem 1rem; border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2); outline: none; font-size: 0.95rem; background: #ffffff;
+        }
+        .search-wrapper select {
+            padding: 0.8rem 1rem; border-radius: 10px; border: none; outline: none; font-size: 0.95rem; background: #ffffff; cursor: pointer; font-weight: 600;
         }
 
-        /* Variables de Tema Oscuro */
-        [data-theme="dark"] {
-            --bg-body: #050505;
-            --bg-container: #0a0a0a;
-            --text-primary: #ffffff;
-            --text-secondary: #9ca3af;
-            --border-color: #1f2937;
-            --accent-color: #d97706;
-            --bg-subtab-active: #0a0a0a;
-            --btn-theme-bg: #111827;
-            --btn-theme-border: #374151;
-            --shadow: 0 4px 20px rgba(0,0,0,0.5);
-            --history-badge-bg: rgba(217, 119, 6, 0.2);
+        /* Modal de Registro */
+        .reg-modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 2000;
+            justify-content: center; align-items: center; padding: 1rem;
+        }
+        .reg-modal-card {
+            background: #ffffff; width: 100%; max-width: 480px; border-radius: 20px;
+            padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); position: relative; max-height: 90vh; overflow-y: auto;
+        }
+        .reg-modal-header { text-align: center; margin-bottom: 1.5rem; }
+        .reg-modal-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem; }
+        .reg-modal-sub { font-size: 0.85rem; color: #64748b; }
+        
+        .btn-google {
+            width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 10px;
+            background: #ffffff; color: #334155; font-weight: 700; font-size: 0.9rem;
+            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+            transition: background 0.2s; margin-bottom: 1.2rem;
+        }
+        .btn-google:hover { background: #f8fafc; }
+
+        .divider-text { display: flex; align-items: center; text-align: center; color: #94a3b8; font-size: 0.8rem; margin: 1rem 0; }
+        .divider-text::before, .divider-text::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+        .divider-text:not(:empty)::before { margin-right: .5em; }
+        .divider-text:not(:empty)::after { margin-left: .5em; }
+
+        .form-group { margin-bottom: 1rem; text-align: left; }
+        .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; }
+        .form-group input {
+            width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1;
+            font-size: 0.9rem; outline: none; transition: border 0.2s;
+        }
+        .form-group input:focus { border-color: #2563eb; }
+
+        .btn-submit-reg {
+            width: 100%; padding: 0.9rem; border-radius: 10px; border: none;
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white;
+            font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); transition: transform 0.2s;
+        }
+        .btn-submit-reg:hover { transform: translateY(-2px); }
+
+        /* Container principal */
+        main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .grid-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.5rem; }
+
+        /* Tarjeta */
+        .card {
+            background: var(--card-bg); border-radius: 16px; overflow: hidden;
+            border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.12); }
+
+      /* Galería Tarjeta */
+        .card-gallery { position: relative; height: 220px; background: #f1f5f9; overflow: hidden; }
+        .scroll-gallery {
+            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+            width: 100%; height: 100%; scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .scroll-gallery::-webkit-scrollbar { display: none; }
+        .scroll-gallery img {
+            flex: 0 0 100%; height: 100%; object-fit: cover;
+            scroll-snap-align: start; cursor: pointer;
+        }
+        .badge-verificado {
+            position: absolute; top: 12px; right: 12px; background: var(--success);
+            color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2); pointer-events: none;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex: 1; }
+        .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text); }
+        .card-desc { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4; flex: 1; }
+
+        .card-info { font-size: 0.82rem; background: #f8fafc; padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f1f5f9; }
+        .card-info div { margin-bottom: 3px; }
+
+        .card-price { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; }
+
+        .btn-buy {
+            background-color: var(--primary); color: white; text-align: center;
+            padding: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 700;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;
+        }
+        .btn-buy:hover { background-color: var(--primary-dark); }
+
+        /* Modal Imagen Completa / Lightbox */
+        .modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;
+        }
+        .modal-content { max-width: 90%; max-height: 85vh; border-radius: 8px; object-fit: contain; }
+        .modal-close { position: absolute; top: 20px; right: 25px; color: white; font-size: 2rem; cursor: pointer; font-weight: bold; z-index: 1002; }
+        .modal-btn {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.2); color: white; border: none; padding: 12px 18px;
+            cursor: pointer; border-radius: 50%; font-size: 1.5rem; backdrop-filter: blur(4px); z-index: 1001;
+        }
+        .modal-btn.prev { left: 15px; }
+        .modal-btn.next { right: 15px; }
+        .modal-counter {
+            position: absolute; bottom: 20px; color: white; font-size: 0.9rem;
+            background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 12px;
         }
 
-        body {
-            background-color: var(--bg-body);
-            color: var(--text-primary);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
-            padding: 16px;
-        }
+        .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+        
+        /* Botones de Tutorial (i) */
+        .btn-info { background: #38bdf8; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; font-size: 0.8rem; margin-left: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s; }
+        .btn-info:hover { transform: scale(1.1); background: #0284c7; }
 
-        .app-container {
-            width: 100%;
-            max-width: 400px;
-            margin-top: 20px;
-        }
-
-        /* Header y Botón de Tema */
-        .top-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .logo-placeholder {
-            width: 32px;
-            height: 32px;
-            /* Simulación del logo de la app */
-            background: conic-gradient(from 90deg, #ef4444, #3b82f6, #f59e0b);
-            border-radius: 50%;
-            mask: radial-gradient(transparent 40%, black 41%);
-            -webkit-mask: radial-gradient(transparent 40%, black 41%);
-        }
-
-        .theme-btn {
-            background-color: var(--btn-theme-bg);
-            border: 1px solid var(--btn-theme-border);
-            color: var(--text-primary);
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            box-shadow: var(--shadow);
-            outline: none;
-        }
-
-        .theme-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        /* Tabs de navegación superior */
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 24px;
-        }
-
-        .tab {
-            flex: 1;
-            text-align: center;
-            padding: 12px 0;
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            border-bottom: 2px solid transparent;
-        }
-
-        .tab.active {
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--accent-color);
-        }
-
-        /* Tarjeta Principal (Mercado) */
-        .main-card {
-            background-color: var(--bg-container);
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            margin-bottom: 24px;
-            overflow: hidden;
-        }
-
-        /* Sub-tabs de tasas */
-        .sub-tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sub-tab {
-            flex: 1;
-            text-align: center;
-            padding: 16px 0;
-            font-size: 13px;
-            font-weight: 700;
-            color: var(--text-secondary);
-            cursor: pointer;
-            background-color: transparent;
-        }
-
-        .sub-tab.active {
-            color: var(--text-primary);
-            border-bottom: 2px solid var(--accent-color);
-        }
-
-        /* Área de conversión y campos de entrada */
-        .input-area {
-            padding: 24px;
-        }
-
-        .input-row {
-            display: flex;
-            align-items: baseline;
-            gap: 8px;
-        }
-
-        .currency-symbol {
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .amount-input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            outline: none;
-            font-size: 36px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        .input-label-small {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            margin-top: 24px;
-            font-weight: 700;
-        }
-
-        .divider {
-            height: 1px;
-            background-color: var(--border-color);
-            margin: 20px 0;
-        }
-
-        .ves-text {
-            color: var(--accent-color) !important;
-        }
-
-        /* Lista de Tasas Actuales */
-        .rates-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            padding: 0 8px;
-        }
-
-        .rates-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .rates-ref {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .rates-card {
-            background-color: var(--bg-container);
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            padding: 8px 20px;
-            box-shadow: var(--shadow);
-        }
-
-        .rate-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .rate-row:last-child {
-            border-bottom: none;
-        }
-
-        .rate-name {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .rate-sub {
-            font-size: 12px;
-            color: var(--text-secondary);
-            margin-top: 4px;
-        }
-
-        .rate-value {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
-
-        /* Pestaña de Historial */
-        .history-title {
-            font-size: 16px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 16px;
-            padding: 0 8px;
-        }
-
-        .history-card {
-            background-color: var(--bg-container);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow);
-        }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .history-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            font-weight: 500;
-        }
-
-        .history-badge {
-            background-color: var(--history-badge-bg);
-            color: var(--accent-color);
-            font-size: 10px;
-            font-weight: 800;
-            padding: 4px 8px;
-            border-radius: 6px;
-        }
-
-        .history-body {
-            display: flex;
-            align-items: center;
-        }
-
-        .history-col {
-            flex: 1;
-        }
-
-        .history-divider {
-            width: 1px;
-            height: 35px;
-            background-color: var(--border-color);
-            margin: 0 16px;
-        }
-
-        .history-label {
-            font-size: 10px;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            font-weight: 700;
-        }
-
-        .history-val {
-            font-size: 15px;
-            font-weight: 800;
-            color: var(--text-primary);
-        }
+        /* Nuevas secciones y tabs */
+        .tabs { display: none; justify-content: center; gap: 10px; margin: 1rem auto; max-width: 1200px; padding: 0 1rem; }
+        .tab-btn { padding: 0.8rem 1.5rem; border: none; background: #e2e8f0; color: #334155; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; }
+        .tab-btn.active { background: var(--primary); color: white; }
+        .section-content { display: none; }
+        .section-content.active { display: block; }
+        .dashboard-panel { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 2rem; }
+        .dashboard-panel h2 { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+        /* Pantalla de Carga */
+        .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-<div class="app-container">
+    <!-- Franja roja eliminada -->
+
+    <header>
+        <div class="header-container">
+            <div class="header-top">
+                <div class="logo-title">🛡️ Llévatelo Ya</div>
+                
+                <div class="trust-badge-group">
+                    <span class="trust-badge">✔️ 100% Verificado</span>
+                    <button class="btn-auth-header" id="btnAuthHeader" onclick="openRegModal()">👤 Iniciar Sesión / Registro</button>
+                    <button class="btn-auth-header" id="btnLogout" style="display:none; background: #dc2626;" onclick="cerrarSesion()">Salir de la Cuenta</button>
+                </div>
+            </div>
+
+            <!-- Banner de usuarios eliminado -->
+
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" placeholder="¿Qué buscas? Ej: Samsung...">
+                <input type="text" id="filterUbicacion" placeholder="Ubicación. Ej: Cúa" style="flex:1;">
+                <input type="number" id="filterPrecioMin" placeholder="Precio Min ($)" style="width: 110px;">
+                <input type="number" id="filterPrecioMax" placeholder="Precio Max ($)" style="width: 110px;">
+                <select id="filterSelect">
+                    <option value="todos">Todos los Estados</option>
+                    <option value="Nuevo">Nuevos</option>
+                    <option value="Usado">Usados</option>
+                </select>
+            </div>
+        </div>
+    </header> 
+
     
-    <!-- Encabezado y Botón de Tema -->
-    <div class="top-header">
-        <div class="logo-placeholder"></div>
-        <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
-            <!-- Icono Luna (Modo Claro) -->
-            <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-            <!-- Icono Sol (Modo Oscuro) -->
-            <svg id="sun-icon" style="display:none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
-        </button>
+<div class="tabs" id="userTabs">
+        <button class="tab-btn active" onclick="showSection('productos')">Tienda</button>
+        <button class="tab-btn" onclick="showSection('misproductos')">Mis Productos</button>
+        <button class="tab-btn" onclick="showSection('perfil')">Mi Perfil</button>
     </div>
 
-    <!-- Pestañas Principales -->
-    <div class="tabs">
-        <div class="tab active" onclick="switchMainTab('mercado', this)">MERCADO</div>
-        <div class="tab" onclick="switchMainTab('historial', this)">HISTORIAL</div>
-    </div>
-
-    <!-- VISTA: MERCADO -->
-    <div id="view-mercado">
-        <div class="main-card">
-            <!-- Selección de Tasa Fuente -->
-            <div class="sub-tabs">
-                <div class="sub-tab active" onclick="setTasa(832.49, this)">BCV $</div>
-                <div class="sub-tab" onclick="setTasa(968.07, this)">BCV €</div>
-                <div class="sub-tab" onclick="setTasa(962.00, this)">USDT</div>
-            </div>
-
-            <!-- Campos de Conversión (Diseño idéntico a la imagen) -->
-            <div class="input-area">
-                <div class="input-row">
-                    <span class="currency-symbol">$</span>
-                    <input type="text" id="inputUSD" class="amount-input" inputmode="numeric" placeholder="1,00">
-                </div>
-
-                <div class="divider"></div>
-
-                <div class="input-label-small">BOLÍVARES (VES)</div>
-                <div class="input-row">
-                    <span class="currency-symbol ves-text">Bs.</span>
-                    <input type="text" id="inputVES" class="amount-input ves-text" inputmode="numeric" placeholder="832,49">
-                </div>
+    <main>
+        <!-- Sección Info para No Registrados -->
+        <div id="infoPublica" class="section-content active">
+            <div class="dashboard-panel" style="text-align: center; padding: 4rem 2rem;">
+                <h1 style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;">Bienvenido a Llévatelo Ya 🛡️</h1>
+                <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
+                    La plataforma más segura para comprar y vender. <br>
+                    Inicia sesión o regístrate gratis para ver el catálogo disponible y contactar vendedores verificados de forma directa.
+                </p>
+                <button class="btn-submit-reg" style="max-width: 300px; margin: 0 auto;" onclick="openRegModal()">Acceder a la Plataforma</button>
             </div>
         </div>
 
-        <!-- Listado de Tasas -->
-        <div class="rates-header">
-            <span class="rates-title">Tasas Actuales</span>
-            <span class="rates-ref">Ref. Oficiales</span>
-        </div>
-        <div class="rates-card">
-            <div class="rate-row">
-                <div>
-                    <div class="rate-name">Dólar Oficial</div>
-                    <div class="rate-sub">BCV / VES</div>
-                </div>
-                <div class="rate-value">832,49 Bs.</div>
-            </div>
-            <div class="rate-row">
-                <div>
-                    <div class="rate-name">USDT P2P</div>
-                    <div class="rate-sub">Binance / VES</div>
-                </div>
-                <div class="rate-value">961,55 Bs.</div>
-            </div>
-            <div class="rate-row">
-                <div>
-                    <div class="rate-name">Euro Oficial</div>
-                    <div class="rate-sub">BCV / VES</div>
-                </div>
-                <div class="rate-value">968,07 Bs.</div>
+        <!-- Sección 1: Productos Públicos -->
+        <div id="productos" class="section-content">
+            <div class="grid-products" id="productGrid">
+                <div class="empty-state">Cargando catálogo en tiempo real...</div>
             </div>
         </div>
-    </div>
 
-    <!-- VISTA: HISTORIAL -->
-    <div id="view-historial" style="display: none;">
-        <h3 class="history-title">Historial de Variaciones</h3>
-        <div id="history-list">
-            <!-- El contenido se inyecta dinámicamente mediante JS -->
-        </div>
-    </div>
-
-</div>
-
-<script>
-    // --- LÓGICA DEL TEMA ---
-    function toggleTheme() {
-        const html = document.documentElement;
-        const moon = document.getElementById('moon-icon');
-        const sun = document.getElementById('sun-icon');
-        
-        if (html.getAttribute('data-theme') === 'dark') {
-            html.removeAttribute('data-theme');
-            moon.style.display = 'block';
-            sun.style.display = 'none';
-        } else {
-            html.setAttribute('data-theme', 'dark');
-            moon.style.display = 'none';
-            sun.style.display = 'block';
-        }
-    }
-
-    // --- LÓGICA DE PESTAÑAS (MERCADO / HISTORIAL) ---
-    function switchMainTab(tabName, element) {
-        document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
-        element.classList.add('active');
-
-        if (tabName === 'mercado') {
-            document.getElementById('view-mercado').style.display = 'block';
-            document.getElementById('view-historial').style.display = 'none';
-        } else {
-            document.getElementById('view-mercado').style.display = 'none';
-            document.getElementById('view-historial').style.display = 'block';
-            renderizarHistorial();
-        }
-    }
-
-    // --- LÓGICA DEL HISTORIAL DE TRANSACCIONES ---
-    // Datos simulados exactamente como en tu captura de pantalla
-    const historialDatos = [
-        { fecha: '10/9/2026', hora: '7:00 p. m.', bcv: '832.4883', binance: '961.55' },
-        { fecha: '10/9/2026', hora: '6:55 p. m.', bcv: '832.4883', binance: '961.89' },
-        { fecha: '10/9/2026', hora: '6:40 p. m.', bcv: '832.4883', binance: '962.02' },
-        { fecha: '10/9/2026', hora: '6:36 p. m.', bcv: '832.4883', binance: '962.58' },
-        { fecha: '10/9/2026', hora: '6:25 p. m.', bcv: '832.4883', binance: '962.04' }
-    ];
-
-    function renderizarHistorial() {
-        const list = document.getElementById('history-list');
-        list.innerHTML = ''; // Limpiar antes de renderizar
-        
-        historialDatos.forEach(item => {
-            list.innerHTML += `
-                <div class="history-card">
-                    <div class="history-header">
-                        <div class="history-time">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
-                            ${item.fecha} • ${item.hora}
-                        </div>
-                        <div class="history-badge">REF</div>
+        <!-- Sección 2: Mis Productos -->
+        <div id="misproductos" class="section-content">
+            <div class="dashboard-panel">
+                <h2 style="display:flex; align-items:center;">➕ Agregar Nuevo Producto <button class="btn-info" type="button" onclick="abrirInfo('Publicar Artículo', 'Aquí puedes poner en venta tu producto.<br><br><b>Recuerda:</b> Sube fotos claras y pon un precio competitivo. Si no tienes KYC verificado, solo podrás publicar un máximo de 3 artículos.')">i</button></h2>
+                <form id="addProductForm">
+                    <div class="form-group"><label>Nombre del Producto *</label><input type="text" id="prodNombre" required placeholder="Ej: PS5 Nuevo"></div>
+                    <div class="form-group"><label>Descripción Detallada *</label><input type="text" id="prodDesc" required placeholder="Accesorios, tiempo de uso..."></div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;"><label>Estado *</label><select id="prodEstado" required><option value="Nuevo">Nuevo</option><option value="Usado">Usado</option></select></div>
+                        <div class="form-group" style="flex: 1;"><label>Ubicación *</label><input type="text" id="prodUbicacion" required placeholder="Ej: Cúa"></div>
                     </div>
-                    <div class="history-body">
-                        <div class="history-col">
-                            <div class="history-label">BCV USD</div>
-                            <div class="history-val">Bs. ${item.bcv}</div>
-                        </div>
-                        <div class="history-divider"></div>
-                        <div class="history-col">
-                            <div class="history-label">BINANCE P2P</div>
-                            <div class="history-val">Bs. ${item.binance}</div>
-                        </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;"><label>Métodos de Pago *</label><input type="text" id="prodPagos" required placeholder="Ej: Pago Móvil, Zelle"></div>
+                        <div class="form-group" style="flex: 1;"><label>Precio en Dólares ($) *</label><input type="number" step="0.01" id="prodPrecio" required placeholder="Ej: 150"></div>
+                    </div>
+                    <div class="form-group">
+                        <label>Fotos (Sube de 1 a 5 fotos, la primera es obligatoria) *</label>
+                        <input type="file" id="prodFoto1" accept="image/*" required style="margin-bottom: 8px; padding: 0.4rem; border: 1px dashed #cbd5e1;">
+                        <input type="file" id="prodFoto2" accept="image/*" style="margin-bottom: 8px; padding: 0.4rem; border: 1px dashed #cbd5e1;">
+                        <input type="file" id="prodFoto3" accept="image/*" style="margin-bottom: 8px; padding: 0.4rem; border: 1px dashed #cbd5e1;">
+                        <input type="file" id="prodFoto4" accept="image/*" style="margin-bottom: 8px; padding: 0.4rem; border: 1px dashed #cbd5e1;">
+                        <input type="file" id="prodFoto5" accept="image/*" style="padding: 0.4rem; border: 1px dashed #cbd5e1;">
+                    </div>
+                    <button type="submit" class="btn-submit-reg" style="margin-top: 10px;">Publicar Producto 🚀</button>
+                </form>
+            </div>
+            <div class="dashboard-panel">
+                <h2>📦 Mis Publicaciones Activas</h2>
+                <div class="grid-products" id="myProductGrid"></div>
+            </div>
+        </div>
+
+        <!-- Sección 3: Perfil -->
+        <div id="perfil" class="section-content">
+            <div class="dashboard-panel">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
+                    <h2 style="border:none; margin:0; display:flex; align-items:center;">👤 Datos de tu Perfil <button class="btn-info" type="button" onclick="abrirInfo('Mi Perfil', 'Aquí verás el estado oficial de tu cuenta.<br><br>Tus datos principales no se pueden editar manualmente por seguridad y políticas de anti-estafa.')">i</button></h2>
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <span id="badgePlan" style="background: #1e293b; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">Plan: Básico</span>
+                        <span id="badgeKYC" style="background: #64748b; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">Sin Verificación</span>
                     </div>
                 </div>
-            `;
-        });
-    }
+                
+                <div id="alertaRechazo" style="display: none; background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; font-weight: bold;">
+                    ❌ Tu verificación fue rechazada: <span id="motivoRechazo"></span>. <button onclick="abrirKYCModal()" style="background:#dc2626; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-left: 10px; font-weight:bold;">Vuelve a intentarlo</button>
+                </div>
 
-    // --- LÓGICA DE LA CALCULADORA (Adaptada al nuevo diseño fijo) ---
-    let tasaActual = 832.49;
-    let centavosUsd = 0;
-    let centavosVes = 0;
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;"><label>Nombres 🔒</label><input type="text" id="perfilNombres" readonly style="background:#e2e8f0; color:#475569; cursor:not-allowed;" title="Dato bloqueado por seguridad"></div>
+                    <div class="form-group" style="flex: 1;"><label>Apellidos 🔒</label><input type="text" id="perfilApellidos" readonly style="background:#e2e8f0; color:#475569; cursor:not-allowed;" title="Dato bloqueado por seguridad"></div>
+                </div>
+                <div class="form-group"><label>Cédula 🔒</label><input type="text" id="perfilCedula" readonly style="background:#e2e8f0; color:#475569; cursor:not-allowed;" title="Dato bloqueado por seguridad"></div>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-submit-reg" id="btnVerificarKYC" style="background: #0ea5e9; display:none; margin: 0; flex: 1;" onclick="abrirKYCModal()">📸 Verificar Identidad (KYC)</button>
+                        <button class="btn-info" id="btnInfoKYC" style="display:none; width:35px; height:35px; font-size:1.1rem;" onclick="abrirInfo('Verificación KYC', '<b>¿Para qué sirve?</b><br>Al subir tu cédula, obtendrás un sello de VERIFICADO ✅ en tus anuncios.<br><br><b>Beneficios:</b><br>- Da extrema confianza a compradores.<br>- Te permite subir productos sin restricciones.')">i</button>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <button class="btn-submit-reg" id="btnSubirPro" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display:none; margin: 0; flex: 1;" onclick="abrirProModal()">⭐ Subir a Plan PRO ($0.30)</button>
+                        <button class="btn-info" id="btnInfoPro" style="display:none; width:35px; height:35px; font-size:1.1rem; background:#f59e0b;" onclick="abrirInfo('Beneficios del Plan PRO ⭐', 'Desbloquea el nivel máximo de ventas:<br><br>1️⃣ <b>Botón de WhatsApp:</b> Los clientes te escriben directo a tu chat.<br>2️⃣ <b>Fijar Productos:</b> Pon tus artículos en el tope de la página para que se vendan rápido.')">i</button>
+                    </div>
+                </div>
 
-    function setTasa(nuevaTasa, elemento) {
-        tasaActual = nuevaTasa;
-        document.querySelectorAll('.sub-tab').forEach(tab => tab.classList.remove('active'));
-        elemento.classList.add('active');
-        calcularDesdeUsd();
-    }
+                <div id="seccionTelefono" style="display: none; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+                    <h2 style="border:none; margin:0; color:#d97706; display:flex; align-items:center;">📱 WhatsApp (Plan PRO) <button class="btn-info" type="button" onclick="abrirInfo('Configurar Número', 'Guarda aquí tu número de teléfono (Ejemplo: 4121234567).<br><br>Esto enlazará el botón de tus anuncios directamente con tu WhatsApp para que te escriban de inmediato.')">i</button></h2>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Tu plan te permite guardar tu número. Tus clientes te contactarán directo por WhatsApp.</p>
+                    <div class="form-group">
+                        <div style="display:flex; gap:5px;">
+                            <input type="text" value="+58" readonly style="width: 60px; background:#f1f5f9; text-align:center; font-weight:bold;">
+                            <input type="number" id="perfilTelefono" placeholder="Ej: 4121234567" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);">
+                        </div>
+                    </div>
+                    <button class="btn-submit-reg" style="margin-bottom:10px;" onclick="guardarTelefono()">💾 Guardar Número</button>
+                </div>
 
-    function formatearNumero(centavos) {
-        let valor = centavos / 100;
-        // Si el valor es cero, no mostrar para simular el placeholder, o mostrar 0,00
-        if (centavos === 0) return ""; 
-        return valor.toLocaleString('de-DE', {
-            minimumFractionDigits: 2,
-            maximumFractionDigits: 4 // Permitido hasta 4 decimales como en tu captura (.4883)
-        });
-    }
+                <button class="btn-submit-reg" style="background: #eab308; color: #451a03; margin-top: 20px;" onclick="restablecerClave()">🔑 Solicitar Cambio de Contraseña</button>
+            </div>
+        </div>
+    </main>
 
-    function vincularEventos() {
-        const inputUSD = document.getElementById('inputUSD');
-        const inputVES = document.getElementById('inputVES');
+    <!-- Sistema de Alertas Profesionales -->
+    <div class="reg-modal-overlay" id="customAlertModal" style="z-index: 99999;">
+        <div class="reg-modal-card" style="text-align: center; max-width: 350px;">
+            <div class="reg-modal-title" style="color: var(--primary); font-size: 1.3rem;">Notificación</div>
+            <p id="customAlertText" style="margin: 15px 0; font-size: 1rem; color: #334155; font-weight: 500;"></p>
+            <button class="btn-submit-reg" onclick="closeCustomAlert()">Entendido</button>
+        </div>
+    </div>
 
-        inputUSD.addEventListener('keydown', (e) => manejarTeclado(e, 'USD'));
-        inputVES.addEventListener('keydown', (e) => manejarTeclado(e, 'VES'));
+    <!-- Sistema de Confirmación Profesional -->
+    <div class="reg-modal-overlay" id="customConfirmModal" style="z-index: 99999;">
+        <div class="reg-modal-card" style="text-align: center; max-width: 350px;">
+            <div class="reg-modal-title" style="color: #dc2626; font-size: 1.3rem;">⚠️ Atención</div>
+            <p id="customConfirmText" style="margin: 15px 0; font-size: 1rem; color: #334155; font-weight: 500;"></p>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn-submit-reg" style="background: #ef4444;" onclick="confirmarEliminar()">Sí, borrar</button>
+                <button class="btn-submit-reg" style="background: #64748b;" onclick="cerrarConfirmar()">Cancelar</button>
+            </div>
+        </div>
+    </div>
 
-        // Prevenir ingreso de cursor libre en campos numéricos
-        inputUSD.addEventListener('click', (e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length));
-        inputVES.addEventListener('click', (e) => e.target.setSelectionRange(e.target.value.length, e.target.value.length));
-    }
+    <!-- Sistema de Tutoriales / Info (Botón i) -->
+    <div class="reg-modal-overlay" id="infoModal" style="z-index: 99999;">
+        <div class="reg-modal-card" style="text-align: center; max-width: 400px;">
+            <span class="modal-close" style="color: #0f172a;" onclick="closeInfoModal()">&times;</span>
+            <div class="reg-modal-title" id="infoModalTitle" style="color: var(--primary); font-size: 1.3rem;">Ayuda</div>
+            <p id="infoModalText" style="margin: 15px 0; font-size: 0.95rem; color: #475569; line-height: 1.6; text-align: left;"></p>
+            <button class="btn-submit-reg" onclick="closeInfoModal()">¡Entendido!</button>
+        </div>
+    </div>
 
-    function manejarTeclado(e, tipo) {
-        if (e.key >= '0' && e.key <= '9') {
-            e.preventDefault();
-            const digito = parseInt(e.key, 10);
-            if (tipo === 'USD') {
-                if (centavosUsd < 999999999) centavosUsd = centavosUsd * 10 + digito;
-                calcularDesdeUsd();
-            } else {
-                if (centavosVes < 999999999) centavosVes = centavosVes * 10 + digito;
-                calcularDesdeVes();
-            }
-        } else if (e.key === 'Backspace') {
-            e.preventDefault();
-            if (tipo === 'USD') {
-                centavosUsd = Math.floor(centavosUsd / 10);
-                calcularDesdeUsd();
-            } else {
-                centavosVes = Math.floor(centavosVes / 10);
-                calcularDesdeVes();
-            }
-        } else if (e.key === 'Tab') {
-            // Permitir navegación mediante tecla tab
-        } else {
-            e.preventDefault();
-        }
-    }
+    <!-- Pantalla de Carga Interactiva -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <h3 style="margin-top: 15px; color: var(--primary); font-weight: 800;" id="loadingText">Procesando...</h3>
+    </div>
 
-    function calcularDesdeUsd() {
-        let valorUsd = centavosUsd / 100;
-        let valorVes = valorUsd * tasaActual;
-        centavosVes = Math.round(valorVes * 100);
-        actualizarDisplays();
-    }
+    <!-- Modal Multi-Uso Auth -->
+    <div class="reg-modal-overlay" id="regModal">
+        <div class="reg-modal-card">
+            <span class="modal-close" style="color: #0f172a;" onclick="closeRegModal()">&times;</span>
+            
+            <!-- Iniciar Sesión -->
+            <div id="loginSection">
+                <div class="reg-modal-header"><div class="reg-modal-title">🔐 Iniciar Sesión</div></div>
+                <form id="loginForm">
+                    <div class="form-group"><label>Correo Electrónico</label><input type="email" id="loginEmail" required></div>
+                    <div class="form-group"><label>Contraseña</label><input type="password" id="loginPass" required></div>
+                    <button type="submit" class="btn-submit-reg">Ingresar a mi Cuenta</button>
+                </form>
+                <div class="divider-text">¿Eres nuevo? <a href="#" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:bold;">Crea tu cuenta gratis</a></div>
+            </div>
 
-    function calcularDesdeVes() {
-        let valorVes = centavosVes / 100;
-        let valorUsd = tasaActual > 0 ? valorVes / tasaActual : 0;
-        centavosUsd = Math.round(valorUsd * 100);
-        actualizarDisplays();
-    }
+            <!-- Registro -->
+            <div id="registerSection" style="display: none;">
+                <div class="reg-modal-header"><div class="reg-modal-title">📝 Registro Rápido</div><div class="reg-modal-sub">Solo tomará 30 segundos</div></div>
+                <form id="registrationForm">
+                    <div class="form-group"><label>Correo Electrónico <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="email" id="regEmail" required></div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;"><label>Nombres <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="text" id="regFirstName" required></div>
+                        <div class="form-group" style="flex: 1;"><label>Apellidos <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="text" id="regLastName" required></div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;"><label>Edad <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="number" id="regEdad" required></div>
+                        <div class="form-group" style="flex: 1;"><label>Cédula de Identidad <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="text" id="regCedula" required placeholder="V-12345678"></div>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;"><label>Contraseña</label><input type="password" id="regPass" required></div>
+                        <div class="form-group" style="flex: 1;"><label>Confirmar</label><input type="password" id="regPassConfirm" required></div>
+                    </div>
+                    <button type="submit" class="btn-submit-reg">🚀 Aprobar y Registrar</button>
+                </form>
+                <div class="divider-text">¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:bold;">Inicia Sesión</a></div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Subir a PRO -->
+    <div class="reg-modal-overlay" id="proModal">
+        <div class="reg-modal-card" style="text-align: center;">
+            <span class="modal-close" style="color: #0f172a;" onclick="document.getElementById('proModal').style.display='none'">&times;</span>
+            <div class="reg-modal-title" style="color: #d97706;">⭐ Plan PRO</div>
+            <p style="margin: 15px 0; font-size: 0.95rem; color: #475569;">Sube a Pro por solo <b>$0.30</b>.<br>Obtén el botón de WhatsApp directo en tus publicaciones y el poder de <b>Fijar</b> tus productos de primeros.</p>
+            <button class="btn-submit-reg" onclick="irAWhatsAppPro()">📲 Pagar y Confirmar por WhatsApp</button>
+        </div>
+    </div>
 
-    function actualizarDisplays() {
-        const inputUSD = document.getElementById('inputUSD');
-        const inputVES = document.getElementById('inputVES');
+    <!-- Modal KYC -->
+    <div class="reg-modal-overlay" id="kycModal">
+        <div class="reg-modal-card">
+            <span class="modal-close" style="color: #0f172a;" onclick="document.getElementById('kycModal').style.display='none'">&times;</span>
+            <div class="reg-modal-title">📸 Verificación de Identidad</div>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Sube una foto de tu cédula y una selfie clara.</p>
+            <div class="form-group">
+                <label>Foto de la Cédula (Frontal)</label>
+                <input type="file" id="kycCedula" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label>Foto de tu Cara (Selfie)</label>
+                <input type="file" id="kycCara" accept="image/*">
+            </div>
+            <button class="btn-submit-reg" onclick="enviarKYC()">📤 Enviar para Revisión</button>
+        </div>
+    </div>
+
+    <!-- Modal para ver foto en grande -->
+    <div class="modal" id="imageModal">
+        <span class="modal-close" onclick="closeModal()">&times;</span>
+        <button class="modal-btn prev" id="modalPrevBtn" onclick="cambiarFotoModal(-1)">❮</button>
+        <img class="modal-content" id="modalImage" alt="Foto Ampliada">
+        <button class="modal-btn next" id="modalNextBtn" onclick="cambiarFotoModal(1)">❯</button>
+        <div class="modal-counter" id="modalCounter"></div>
+    </div>
+
+<script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyDFCJfaYGgcgQuRia1qc4hmZkEWmiBuX2k",
+          authDomain: "llevatelo-seguro.firebaseapp.com",
+          databaseURL: "https://llevatelo-seguro-default-rtdb.firebaseio.com",
+          projectId: "llevatelo-seguro",
+          storageBucket: "llevatelo-seguro.firebasestorage.app",
+          messagingSenderId: "1010159796781",
+          appId: "1:1010159796781:web:42706c5108a2fc08ceaea4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const auth = getAuth(app);
+
+        let currentUser = null;
+        let todosLosProductos = {};
+        let userData = {};
+
+        // --- SISTEMA DE ALERTAS Y TUTORIALES (Elimina el 'localhost dice') ---
+        window.alert = function(msg) {
+            document.getElementById('customAlertText').innerText = msg;
+            document.getElementById('customAlertModal').style.display = 'flex';
+        };
+        window.closeCustomAlert = () => document.getElementById('customAlertModal').style.display = 'none';
         
-        inputUSD.value = formatearNumero(centavosUsd);
-        inputVES.value = formatearNumero(centavosVes);
-    }
+        window.abrirInfo = (titulo, mensaje) => {
+            document.getElementById('infoModalTitle').innerText = titulo;
+            document.getElementById('infoModalText').innerHTML = mensaje;
+            document.getElementById('infoModal').style.display = 'flex';
+        };
+        window.closeInfoModal = () => document.getElementById('infoModal').style.display = 'none';
 
-    // Inicializar listeners
-    window.onload = function() {
-        vincularEventos();
-    };
-</script>
+        // Controles de Interfaz
+        window.openRegModal = () => document.getElementById('regModal').style.display = 'flex';
+        window.closeRegModal = () => document.getElementById('regModal').style.display = 'none';
+        window.toggleAuthMode = () => {
+            const login = document.getElementById('loginSection');
+            const reg = document.getElementById('registerSection');
+            if(login.style.display === 'none') { login.style.display = 'block'; reg.style.display = 'none'; }
+            else { login.style.display = 'none'; reg.style.display = 'block'; }
+        };
+        window.showSection = (sec) => {
+            document.querySelectorAll('.section-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            const seccion = document.getElementById(sec);
+            if(seccion) seccion.classList.add('active');
+            if(window.event && window.event.currentTarget && window.event.currentTarget.classList) {
+                window.event.currentTarget.classList.add('active');
+            }
+            if(sec === 'misproductos' || sec === 'productos') renderMyProducts(); 
+        };
+        const showLoading = (msg) => {
+            document.getElementById('loadingText').innerText = msg;
+            document.getElementById('loadingOverlay').style.display = 'flex';
+        };
+        const hideLoading = () => document.getElementById('loadingOverlay').style.display = 'none';
 
+        // Sistema de Autenticación
+        onAuthStateChanged(auth, (user) => {
+            const barraBusqueda = document.querySelector('.search-wrapper');
+            if (user) {
+                currentUser = user;
+                document.getElementById('btnAuthHeader').style.display = 'none';
+                document.getElementById('btnLogout').style.display = 'block';
+                document.getElementById('userTabs').style.display = 'flex';
+                if(barraBusqueda) barraBusqueda.style.display = 'flex';
+                showSection('productos');
+                
+                onValue(ref(db, 'usuarios/' + user.uid), (snap) => {
+                    userData = snap.val() || {};
+                    if(!userData.plan) userData.plan = 'basico';
+                    if(!userData.kyc) userData.kyc = 'sin_verificar';
+                    
+                    document.getElementById('perfilNombres').value = userData.nombres || '';
+                    document.getElementById('perfilApellidos').value = userData.apellidos || '';
+                    document.getElementById('perfilCedula').value = userData.cedula || '';
+                    document.getElementById('perfilTelefono').value = userData.telefono || '';
+                    
+                    // Lógica UI Perfil
+                    document.getElementById('badgePlan').innerText = "Plan: " + (userData.plan === 'pro' ? 'PRO ⭐' : 'Básico');
+                    document.getElementById('badgePlan').style.background = userData.plan === 'pro' ? '#d97706' : '#1e293b';
+                    
+                    let kycTexto = "Sin Verificación", kycColor = "#64748b";
+                    if(userData.kyc === 'pendiente') { kycTexto = "En Revisión ⏳"; kycColor = "#eab308"; }
+                    if(userData.kyc === 'verificado') { kycTexto = "Verificado ✅"; kycColor = "#10b981"; }
+                    if(userData.kyc === 'rechazado') { kycTexto = "Rechazado ❌"; kycColor = "#ef4444"; }
+                    
+                    document.getElementById('badgeKYC').innerText = kycTexto;
+                    document.getElementById('badgeKYC').style.background = kycColor;
+
+                    if(userData.kyc === 'rechazado') {
+                        document.getElementById('alertaRechazo').style.display = 'block';
+                        document.getElementById('motivoRechazo').innerText = userData.motivoRechazo || 'Datos incorrectos';
+                    } else {
+                        document.getElementById('alertaRechazo').style.display = 'none';
+                    }
+
+                    const mostrarKYC = (userData.kyc === 'sin_verificar' || userData.kyc === 'rechazado');
+                    document.getElementById('btnVerificarKYC').style.display = mostrarKYC ? 'block' : 'none';
+                    const btnInfoK = document.getElementById('btnInfoKYC');
+                    if(btnInfoK) btnInfoK.style.display = mostrarKYC ? 'inline-flex' : 'none';
+                    
+                    const mostrarPro = (userData.plan === 'basico');
+                    document.getElementById('btnSubirPro').style.display = mostrarPro ? 'block' : 'none';
+                    const btnInfoP = document.getElementById('btnInfoPro');
+                    if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
+                    document.getElementById('seccionTelefono').style.display = (userData.plan === 'pro') ? 'block' : 'none';
+                });
+            } else {
+                currentUser = null;
+                document.getElementById('btnAuthHeader').style.display = 'block';
+                document.getElementById('btnLogout').style.display = 'none';
+                document.getElementById('userTabs').style.display = 'none';
+                if(barraBusqueda) barraBusqueda.style.display = 'none';
+                showSection('infoPublica');
+            }
+        });
+
+        // Registro de Usuario Nuevo
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const edadIngresada = parseInt(document.getElementById('regEdad').value);
+            if(edadIngresada < 18) return alert("❌ Acceso Denegado. Debes ser mayor de edad para registrarte.");
+            const pass1 = document.getElementById('regPass').value;
+            const pass2 = document.getElementById('regPassConfirm').value;
+            if(pass1 !== pass2) return alert("❌ Las contraseñas no coinciden. Verifícalas.");
+            
+            showLoading("Verificando datos y aprobando registro...");
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, pass1);
+                await set(ref(db, 'usuarios/' + cred.user.uid), {
+                    nombres: document.getElementById('regFirstName').value,
+                    apellidos: document.getElementById('regLastName').value,
+                    edad: document.getElementById('regEdad').value,
+                    cedula: document.getElementById('regCedula').value,
+                    email: document.getElementById('regEmail').value,
+                    telefono: "",
+                    plan: "basico",
+                    kyc: "sin_verificar"
+                });
+                hideLoading();
+                alert("✅ ¡Aprobado OK! Registro exitoso.");
+                closeRegModal();
+                document.getElementById('registrationForm').reset();
+            } catch(err) {
+                hideLoading();
+                alert("❌ Error: " + err.message);
+            }
+        });
+
+        // Inicio de Sesión
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading("Iniciando sesión...");
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
+                hideLoading();
+                closeRegModal();
+                document.getElementById('loginForm').reset();
+            } catch(err) {
+                hideLoading();
+                alert("❌ Error de acceso. Verifica tu correo o contraseña.");
+            }
+        });
+
+        window.cerrarSesion = () => signOut(auth);
+
+        window.abrirProModal = () => document.getElementById('proModal').style.display = 'flex';
+        window.irAWhatsAppPro = () => {
+            const msj = encodeURIComponent(`Hola, quiero subir al Plan PRO. Mi número de identificación (Cédula) es: ${userData.cedula}`);
+            window.open(`https://wa.me/584241959869?text=${msj}`, '_blank');
+            document.getElementById('proModal').style.display = 'none';
+        };
+
+        window.abrirKYCModal = () => document.getElementById('kycModal').style.display = 'flex';
+        window.enviarKYC = async () => {
+            const f1 = document.getElementById('kycCedula').files[0];
+            const f2 = document.getElementById('kycCara').files[0];
+            if(!f1 || !f2) return alert("⚠️ Debes adjuntar ambas fotos.");
+            showLoading("Subiendo imágenes de forma instantánea...");
+            try {
+                const uploadPromises = [f1, f2].map(async (f) => {
+                    const fd = new FormData(); fd.append('image', f);
+                    const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    return data.success ? data.data.url : null;
+                });
+                
+                let urls = (await Promise.all(uploadPromises)).filter(url => url !== null);
+                
+                if (urls.length < 2) {
+                    hideLoading();
+                    return alert("❌ Error al subir fotos (Posiblemente bloqueado por tu internet o navegador). Por favor intenta de nuevo.");
+                }
+
+                await update(ref(db, 'usuarios/' + currentUser.uid), { kyc: 'pendiente', fotosKyc: urls });
+                hideLoading();
+                alert("✅ Fotos enviadas correctamente. Espera aprobación.");
+                document.getElementById('kycModal').style.display = 'none';
+            } catch(e) {
+                hideLoading(); alert("❌ Error: " + e.message);
+            }
+        };
+
+        // Guardar Teléfono y Clave
+        window.guardarTelefono = async () => {
+            if(!currentUser) return;
+            const tel = document.getElementById('perfilTelefono').value;
+            if(tel.length < 10) return alert("⚠️ Ingresa un número válido, sin el 0 inicial (Ej: 4121234567)");
+            await update(ref(db, 'usuarios/' + currentUser.uid), { telefono: tel });
+            alert("✅ ¡Teléfono guardado! Ahora tus productos tendrán un botón directo a tu WhatsApp.");
+        };
+
+        window.restablecerClave = async () => {
+            if(!currentUser) return;
+            try {
+                await sendPasswordResetEmail(auth, currentUser.email);
+                alert("✅ Hemos enviado un enlace a tu correo para restablecer tu contraseña.");
+            } catch(err) { alert("❌ Error: " + err.message); }
+        };
+
+        // Agregar Producto a la Base de Datos
+        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if(!currentUser) return alert("Debes iniciar sesión.");
+            if(userData.plan === 'pro' && !userData.telefono) return alert("⚠️ Alto: Debes guardar tu número de WhatsApp en 'Mi Perfil' antes de publicar.");
+            
+            if(userData.kyc !== 'verificado') {
+                let misPubs = 0;
+                Object.values(todosLosProductos).forEach(p => { if(p.uid === currentUser.uid) misPubs++; });
+                if(misPubs >= 3) return alert("❌ Límite alcanzado. Ve a tu Perfil y haz la verificación KYC para publicar sin límite.");
+            }
+            
+            const inputsFotos = [
+                document.getElementById('prodFoto1'),
+                document.getElementById('prodFoto2'),
+                document.getElementById('prodFoto3'),
+                document.getElementById('prodFoto4'),
+                document.getElementById('prodFoto5')
+            ];
+            
+            const files = [];
+            inputsFotos.forEach(input => {
+                if(input.files.length > 0) {
+                    files.push(input.files[0]);
+                }
+            });
+
+            if(files.length === 0) return alert("⚠️ Selecciona al menos la primera foto.");
+
+            showLoading("Subiendo fotos de forma instantánea...");
+            try {
+                const uploadPromises = files.map(async (file) => {
+                    const fd = new FormData();
+                    fd.append('image', file);
+                    const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
+                    const data = await res.json();
+                    return data.success ? data.data.url : null;
+                });
+                
+                let fotosUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
+
+                if(fotosUrls.length === 0) throw new Error("No se pudo subir ninguna imagen.");
+
+                showLoading("Publicando en la tienda...");
+                await push(ref(db, 'productos'), {
+                    uid: currentUser.uid,
+                    nombre: document.getElementById('prodNombre').value,
+                    descripcion: document.getElementById('prodDesc').value,
+                    estado: document.getElementById('prodEstado').value,
+                    ubicacion: document.getElementById('prodUbicacion').value,
+                    metodosPago: document.getElementById('prodPagos').value,
+                    precio: document.getElementById('prodPrecio').value,
+                    fotos: fotosUrls,
+                    telefonoVendedor: userData.plan === 'pro' ? userData.telefono : "",
+                    verificado: userData.kyc === 'verificado',
+                    fijado: false,
+                    fechaPublicacion: serverTimestamp() // Fecha real del servidor
+                });
+                
+                hideLoading();
+                alert("✅ ¡Producto guardado públicamente!");
+                document.getElementById('addProductForm').reset();
+                showSection('misproductos'); // Redirige directamente para verificar
+            } catch(err) {
+                hideLoading();
+                alert("❌ Ocurrió un error publicando: " + err.message);
+            }
+        });
+
+        // Cargar todos los productos
+        onValue(ref(db, 'productos'), (snapshot) => {
+            todosLosProductos = snapshot.val() || {};
+            renderProducts();
+            renderMyProducts();
+        });
+
+        function formatearFecha(timestamp) {
+            if(!timestamp) return 'Reciente';
+            const d = new Date(timestamp);
+            return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            grid.innerHTML = '';
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const filterLoc = document.getElementById('filterUbicacion').value.toLowerCase();
+            const filterMin = parseFloat(document.getElementById('filterPrecioMin').value) || 0;
+            const filterMax = parseFloat(document.getElementById('filterPrecioMax').value) || Infinity;
+            const filter = document.getElementById('filterSelect').value;
+            
+            let arrProds = Object.keys(todosLosProductos).map(key => ({ key, ...todosLosProductos[key] }));
+            if(arrProds.length === 0) return grid.innerHTML = '<div class="empty-state">El catálogo está vacío por ahora.</div>';
+
+            arrProds.sort((a, b) => {
+                if (a.fijado && !b.fijado) return -1;
+                if (!a.fijado && b.fijado) return 1;
+                if (a.fijado && b.fijado) return (b.fijadoTime || 0) - (a.fijadoTime || 0);
+                return 0; 
+            });
+
+            let contador = 0;
+            arrProds.forEach(prod => {
+                const textCheck = prod.nombre.toLowerCase().includes(search) || prod.descripcion.toLowerCase().includes(search);
+                const locCheck = prod.ubicacion.toLowerCase().includes(filterLoc);
+                const statCheck = filter === 'todos' || prod.estado === filter;
+                const priceCheck = parseFloat(prod.precio) >= filterMin && parseFloat(prod.precio) <= filterMax;
+
+                if(textCheck && locCheck && statCheck && priceCheck) {
+                    contador++;
+                    const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
+                    const imageTags = fotos.map((f, i) => `<img src="${f}" onclick="openModal('${prod.key}', ${i})" loading="lazy">`).join('');
+                    const linkWa = prod.telefonoVendedor ? `https://wa.me/58${prod.telefonoVendedor}?text=Hola,%20vengo%20de%20Llévatelo%20Seguro.%20Me%20interesa%20comprar:%20*${encodeURIComponent(prod.nombre)}*` : '#';
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-gallery">
+                            ${prod.fijado ? '<div class="badge-verificado" style="background:#f59e0b; left:12px; right:auto;">⭐ FIJADO</div>' : ''}
+                            ${prod.verificado ? '<div class="badge-verificado" style="background:#10b981;">✔️ VERIFICADO</div>' : '<div class="badge-verificado" style="background:#64748b;">SIN VERIFICACIÓN</div>'}
+                            <div class="scroll-gallery">${imageTags}</div>
+                        </div>
+                        <div class="card-body">
+                            <h2 class="card-title">${prod.nombre}</h2>
+                            <p class="card-desc">${prod.descripcion}</p>
+                            <div class="card-info">
+                                <div>📍 <strong>Ubicación:</strong> ${prod.ubicacion}</div>
+                                <div>📦 <strong>Estado:</strong> ${prod.estado}</div>
+                                <div>💳 <strong>Pago:</strong> ${prod.metodosPago}</div>
+                                <div style="color:var(--primary); font-weight:bold; margin-top:5px;">📅 Publicado: ${formatearFecha(prod.fechaPublicacion)}</div>
+                            </div>
+                            <div class="card-price">$${prod.precio}</div>
+                            ${prod.telefonoVendedor ? `<a href="${linkWa}" target="_blank" class="btn-buy" style="background:#25D366; color:white; border:none;">💬 Contactar por WhatsApp</a>` : `<button class="btn-buy" style="background:#ccc; cursor:not-allowed;">Vendedor sin contacto</button>`}
+                        </div>`;
+                    grid.appendChild(card);
+                }
+            });
+            if(contador === 0) grid.innerHTML = '<div class="empty-state">No se encontró nada con esa búsqueda.</div>';
+        }
+
+        // Cargar Lista "Mis Productos"
+        function renderMyProducts() {
+            if(!currentUser) return;
+            const grid = document.getElementById('myProductGrid');
+            grid.innerHTML = '';
+            let count = 0;
+            
+            Object.keys(todosLosProductos).forEach(key => {
+                const prod = todosLosProductos[key];
+                if(prod.uid === currentUser.uid) {
+                    count++;
+                    const foto = (Array.isArray(prod.fotos) ? prod.fotos[0] : Object.values(prod.fotos)[0]);
+                    const div = document.createElement('div');
+                    div.className = 'card';
+                    div.style.padding = '15px';
+                    div.innerHTML = `
+                        <div style="display:flex; gap:15px; align-items:center;">
+                            <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
+                            <div style="flex:1;">
+                                <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
+                                <strong style="color:var(--primary); font-size:1.2rem;">$${prod.precio}</strong>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:10px; margin-top:15px;">
+                            ${userData.plan === 'pro' ? `<button onclick="fijarProd('${key}')" style="flex:1; padding:8px; background:#f59e0b; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">⭐ Fijar</button>` : ''}
+                            <button onclick="eliminarProdPropio('${key}')" style="flex:1; padding:8px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">🗑️ Eliminar</button>
+                        </div>
+                    `;
+                    grid.appendChild(div);
+                }
+            });
+            if(count === 0) grid.innerHTML = '<div class="empty-state" style="grid-column: span 3;">Aún no tienes productos publicados.</div>';
+        }
+
+        window.fijarProd = async (key) => {
+            showLoading("Fijando producto de primero...");
+            await update(ref(db, 'productos/' + key), { fijado: true, fijadoTime: Date.now() });
+            hideLoading();
+            alert("✅ Producto fijado en el tope.");
+        };
+
+        let keyAEliminar = null;
+        window.eliminarProdPropio = (key) => {
+            keyAEliminar = key;
+            document.getElementById('customConfirmText').innerText = "¿Estás 100% seguro de que deseas borrar esta publicación de tu tienda?";
+            document.getElementById('customConfirmModal').style.display = 'flex';
+        };
+        window.confirmarEliminar = async () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            if(keyAEliminar) {
+                showLoading("Eliminando...");
+                await remove(ref(db, 'productos/' + keyAEliminar));
+                hideLoading();
+            }
+        };
+        window.cerrarConfirmar = () => {
+            document.getElementById('customConfirmModal').style.display = 'none';
+            keyAEliminar = null;
+        };
+
+        // Modal de Fotos (Reutilizado)
+        let currentModalKey = null, currentModalIndex = 0;
+        window.openModal = (key, index = 0) => {
+            currentModalKey = key; currentModalIndex = index;
+            actualizarModal();
+            document.getElementById('imageModal').style.display = 'flex';
+        };
+        window.closeModal = () => document.getElementById('imageModal').style.display = 'none';
+        
+        function actualizarModal() {
+            const prod = todosLosProductos[currentModalKey];
+            if(!prod) return;
+            const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
+            document.getElementById('modalImage').src = fotos[currentModalIndex];
+            const counter = document.getElementById('modalCounter');
+            
+            if(fotos.length > 1){
+                document.getElementById('modalPrevBtn').style.display = 'block';
+                document.getElementById('modalNextBtn').style.display = 'block';
+                counter.style.display = 'block';
+                counter.innerText = (currentModalIndex + 1) + ' / ' + fotos.length;
+            } else {
+                document.getElementById('modalPrevBtn').style.display = 'none';
+                document.getElementById('modalNextBtn').style.display = 'none';
+                counter.style.display = 'none';
+            }
+        }
+        window.cambiarFotoModal = (dir) => {
+            const fotos = Array.isArray(todosLosProductos[currentModalKey].fotos) ? todosLosProductos[currentModalKey].fotos : Object.values(todosLosProductos[currentModalKey].fotos);
+            currentModalIndex = (currentModalIndex + dir + fotos.length) % fotos.length;
+            actualizarModal();
+        };
+
+        document.getElementById('searchInput').addEventListener('input', renderProducts);
+        document.getElementById('filterUbicacion').addEventListener('input', renderProducts);
+        document.getElementById('filterPrecioMin').addEventListener('input', renderProducts);
+        document.getElementById('filterPrecioMax').addEventListener('input', renderProducts);
+        document.getElementById('filterSelect').addEventListener('change', renderProducts);
+    </script>
 </body>
 </html>
