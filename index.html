@@ -651,14 +651,26 @@ onValue(userRef, (snapshot) => {
         const btnInfoP = document.getElementById('btnInfoPro');
         if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
         document.getElementById('seccionTelefono').style.display = (userData.plan === 'pro') ? 'block' : 'none';
-    }
-}, (error) => {
-    console.error("Error cargando perfil desde Firebase:", error);
-});
+            }
+        }, (error) => {
+            console.error("Error cargando perfil desde Firebase:", error);
+        });
+            } else {
+                currentUser = null;
+                userData = {};
+                document.getElementById('btnAuthHeader').style.display = 'flex';
+                document.getElementById('btnLogout').style.display = 'none';
+                document.getElementById('userTabs').style.display = 'none';
+                const barraBusqueda = document.querySelector('.search-wrapper');
+                if(barraBusqueda) barraBusqueda.style.display = 'none';
+                showSection('infoPublica');
+            }
+        });
 
 
         // Registro de Usuario Nuevo
-        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+
+     document.getElementById('registrationForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const edadIngresada = parseInt(document.getElementById('regEdad').value);
             if(edadIngresada < 18) return alert("❌ Acceso Denegado. Debes ser mayor de edad para registrarte.");
