@@ -609,46 +609,53 @@
                 if(barraBusqueda) barraBusqueda.style.display = 'flex';
                 showSection('productos');
                 
-                onValue(ref(db, 'usuarios/' + user.uid), (snap) => {
-                    userData = snap.val() || {};
-                    if(!userData.plan) userData.plan = 'basico';
-                    if(!userData.kyc) userData.kyc = 'sin_verificar';
-                    
-                    document.getElementById('perfilNombres').value = userData.nombres || '';
-                    document.getElementById('perfilApellidos').value = userData.apellidos || '';
-                    document.getElementById('perfilCedula').value = userData.cedula || '';
-                    document.getElementById('perfilTelefono').value = userData.telefono || '';
-                    
-                    // Lógica UI Perfil
-                    document.getElementById('badgePlan').innerText = "Plan: " + (userData.plan === 'pro' ? 'PRO ⭐' : 'Básico');
-                    document.getElementById('badgePlan').style.background = userData.plan === 'pro' ? '#d97706' : '#1e293b';
-                    
-                    let kycTexto = "Sin Verificación", kycColor = "#64748b";
-                    if(userData.kyc === 'pendiente') { kycTexto = "En Revisión ⏳"; kycColor = "#eab308"; }
-                    if(userData.kyc === 'verificado') { kycTexto = "Verificado ✅"; kycColor = "#10b981"; }
-                    if(userData.kyc === 'rechazado') { kycTexto = "Rechazado ❌"; kycColor = "#ef4444"; }
-                    
-                    document.getElementById('badgeKYC').innerText = kycTexto;
-                    document.getElementById('badgeKYC').style.background = kycColor;
+                fetch('https://llevatelo-seguro.vercel.app/', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'cargaDatosUsuario', payload: { uid: user.uid } })
+                })
+                .then(res => res.json())
+                .then(dataRes => {
+                    if(dataRes.success) {
+                        userData = dataRes.data || {};
+                        if(!userData.plan) userData.plan = 'basico';
+                        if(!userData.kyc) userData.kyc = 'sin_verificar';
+                        
+                        document.getElementById('perfilNombres').value = userData.nombres || '';
+                        document.getElementById('perfilApellidos').value = userData.apellidos || '';
+                        document.getElementById('perfilCedula').value = userData.cedula || '';
+                        document.getElementById('perfilTelefono').value = userData.telefono || '';
+                        
+                        // Lógica UI Perfil
+                        document.getElementById('badgePlan').innerText = "Plan: " + (userData.plan === 'pro' ? 'PRO ⭐' : 'Básico');
+                        document.getElementById('badgePlan').style.background = userData.plan === 'pro' ? '#d97706' : '#1e293b';
+                        
+                        let kycTexto = "Sin Verificación", kycColor = "#64748b";
+                        if(userData.kyc === 'pendiente') { kycTexto = "En Revisión ⏳"; kycColor = "#eab308"; }
+                        if(userData.kyc === 'verificado') { kycTexto = "Verificado ✅"; kycColor = "#10b981"; }
+                        if(userData.kyc === 'rechazado') { kycTexto = "Rechazado ❌"; kycColor = "#ef4444"; }
+                        
+                        document.getElementById('badgeKYC').innerText = kycTexto;
+                        document.getElementById('badgeKYC').style.background = kycColor;
 
-                    if(userData.kyc === 'rechazado') {
-                        document.getElementById('alertaRechazo').style.display = 'block';
-                        document.getElementById('motivoRechazo').innerText = userData.motivoRechazo || 'Datos incorrectos';
-                    } else {
-                        document.getElementById('alertaRechazo').style.display = 'none';
+                        if(userData.kyc === 'rechazado') {
+                            document.getElementById('alertaRechazo').style.display = 'block';
+                            document.getElementById('motivoRechazo').innerText = userData.motivoRechazo || 'Datos incorrectos';
+                        } else {
+                            document.getElementById('alertaRechazo').style.display = 'none';
+                        }
+
+                        const mostrarKYC = (userData.kyc === 'sin_verificar' || userData.kyc === 'rechazado');
+                        document.getElementById('btnVerificarKYC').style.display = mostrarKYC ? 'block' : 'none';
+                        const btnInfoK = document.getElementById('btnInfoKYC');
+                        if(btnInfoK) btnInfoK.style.display = mostrarKYC ? 'inline-flex' : 'none';
+                        
+                        const mostrarPro = (userData.plan === 'basico' && userData.kyc === 'verificado');
+                        document.getElementById('btnSubirPro').style.display = mostrarPro ? 'block' : 'none';
+                        const btnInfoP = document.getElementById('btnInfoPro');
+                        if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
+                        document.getElementById('seccionTelefono').style.display = (userData.plan === 'pro') ? 'block' : 'none';
                     }
-
-                    const mostrarKYC = (userData.kyc === 'sin_verificar' || userData.kyc === 'rechazado');
-                    document.getElementById('btnVerificarKYC').style.display = mostrarKYC ? 'block' : 'none';
-                    const btnInfoK = document.getElementById('btnInfoKYC');
-                    if(btnInfoK) btnInfoK.style.display = mostrarKYC ? 'inline-flex' : 'none';
-                    
-                    const mostrarPro = (userData.plan === 'basico' && userData.kyc === 'verificado');
-                    document.getElementById('btnSubirPro').style.display = mostrarPro ? 'block' : 'none';
-                    const btnInfoP = document.getElementById('btnInfoPro');
-                    if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
-                    document.getElementById('seccionTelefono').style.display = (userData.plan === 'pro') ? 'block' : 'none';
-                });
+                }).catch(err => console.error("Error cargando perfil desde Vercel:", err));
             } else {
                 currentUser = null;
                 document.getElementById('btnAuthHeader').style.display = 'block';
@@ -670,22 +677,31 @@
             
             showLoading("Verificando datos y aprobando registro...");
             try {
-                const cred = await createUserWithEmailAndPassword(auth, document.getElementById('regEmail').value, pass1);
-                await set(ref(db, 'usuarios/' + cred.user.uid), {
-                    nombres: document.getElementById('regFirstName').value,
-                    apellidos: document.getElementById('regLastName').value,
-                    edad: document.getElementById('regEdad').value,
-                    cedula: document.getElementById('regCedula').value,
-                    email: document.getElementById('regEmail').value,
-                    telefono: "",
-                    plan: "basico",
-                    kyc: "sin_verificar"
-                });
-                hideLoading();
-                alert("✅ ¡Aprobado OK! Registro exitoso.");
-                closeRegModal();
-                document.getElementById('registrationForm').reset();
-            } catch(err) {
+                    const reqObj = {
+                        action: 'registroUsuario',
+                        payload: {
+                            email: document.getElementById('regEmail').value,
+                            password: pass1,
+                            nombres: document.getElementById('regFirstName').value,
+                            apellidos: document.getElementById('regLastName').value,
+                            edad: document.getElementById('regEdad').value,
+                            cedula: document.getElementById('regCedula').value
+                        }
+                    };
+                    const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(reqObj)
+                    });
+                    const dataRes = await res.json();
+                    if (!dataRes.success) throw new Error(dataRes.error || "Error en el registro de Vercel");
+                    
+                    await signInWithEmailAndPassword(auth, document.getElementById('regEmail').value, pass1);
+                    
+                    hideLoading();
+                    alert("✅ ¡Aprobado OK! Registro exitoso.");
+                    closeRegModal();
+                    document.getElementById('registrationForm').reset();
+                } catch(err) {
                 hideLoading();
                 alert("❌ Error: " + err.message);
             }
@@ -696,8 +712,12 @@
             e.preventDefault();
             showLoading("Iniciando sesión...");
             try {
-                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
-                hideLoading();
+                    const cred = await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
+                    await fetch('https://llevatelo-seguro.vercel.app/', {
+                        method: 'POST', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'inicioSesion', payload: { uid: cred.user.uid } })
+                    });
+                    hideLoading();
                 closeRegModal();
                 document.getElementById('loginForm').reset();
             } catch(err) {
@@ -723,10 +743,19 @@
             showLoading("Subiendo imágenes de forma instantánea...");
             try {
                 const uploadPromises = [f1, f2].map(async (f) => {
-                    const fd = new FormData(); fd.append('image', f);
-                    const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
-                    const data = await res.json();
-                    return data.success ? data.data.url : null;
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(f);
+                        reader.onload = async () => {
+                            const base64 = reader.result.split(',')[1];
+                            const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'subirFotosImgBB', payload: { imageBase64: base64 } })
+                            });
+                            const data = await res.json();
+                            resolve(data.success ? data.data.url : null);
+                        };
+                    });
                 });
                 
                 let urls = (await Promise.all(uploadPromises)).filter(url => url !== null);
@@ -736,7 +765,13 @@
                     return alert("❌ Error al subir fotos (Posiblemente bloqueado por tu internet o navegador). Por favor intenta de nuevo.");
                 }
 
-                await update(ref(db, 'usuarios/' + currentUser.uid), { kyc: 'pendiente', fotosKyc: urls });
+                const resVercel = await fetch('https://llevatelo-seguro.vercel.app/', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'enviarKYC', payload: { uid: currentUser.uid, fotosKyc: urls } })
+                });
+                const dataVercel = await resVercel.json();
+                if(!dataVercel.success) throw new Error(dataVercel.error);
+
                 hideLoading();
                 alert("✅ Fotos enviadas correctamente. Espera aprobación.");
                 document.getElementById('kycModal').style.display = 'none';
@@ -750,15 +785,30 @@
             if(!currentUser) return;
             const tel = document.getElementById('perfilTelefono').value;
             if(tel.length < 10) return alert("⚠️ Ingresa un número válido, sin el 0 inicial (Ej: 4121234567)");
-            await update(ref(db, 'usuarios/' + currentUser.uid), { telefono: tel });
-            alert("✅ ¡Teléfono guardado! Ahora tus productos tendrán un botón directo a tu WhatsApp.");
+            
+            const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'guardarTelefono', payload: { uid: currentUser.uid, telefono: tel } })
+            });
+            const data = await res.json();
+            if(data.success) {
+                userData.telefono = tel;
+                alert("✅ ¡Teléfono guardado! Ahora tus productos tendrán un botón directo a tu WhatsApp.");
+            } else {
+                alert("❌ Error al guardar el teléfono.");
+            }
         };
 
         window.restablecerClave = async () => {
             if(!currentUser) return;
             try {
-                await sendPasswordResetEmail(auth, currentUser.email);
-                alert("✅ Hemos enviado un enlace a tu correo para restablecer tu contraseña.");
+                const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'restablecerClave', payload: { email: currentUser.email } })
+                });
+                const data = await res.json();
+                if(data.success) alert("✅ Hemos enviado un enlace a tu correo para restablecer tu contraseña.");
+                else throw new Error(data.error);
             } catch(err) { alert("❌ Error: " + err.message); }
         };
 
@@ -792,12 +842,26 @@
                 const usarAhorro = document.getElementById('chkAhorroDatos').checked;
                 const uploadPromises = files.map(async (file) => {
                     let finalFile = file;
-                    if (usarAhorro) { finalFile = await comprimirImagen(file, 600); }
-                    const fd = new FormData();
-                    fd.append('image', finalFile);
-                    const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
-                    const data = await res.json();
-                    return data.success ? data.data.url : null;
+                    if (usarAhorro) { 
+                        finalFile = await comprimirImagen(file, 600);
+                        await fetch('https://llevatelo-seguro.vercel.app/', {
+                            method: 'POST', headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ action: 'comprimirImagen', payload: {} })
+                        });
+                    }
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(finalFile);
+                        reader.onload = async () => {
+                            const base64 = reader.result.split(',')[1];
+                            const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'subirFotosImgBB', payload: { imageBase64: base64 } })
+                            });
+                            const data = await res.json();
+                            resolve(data.success ? data.data.url : null);
+                        };
+                    });
                 });
                 
                 let fotosUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
@@ -805,20 +869,28 @@
                 if(fotosUrls.length === 0) throw new Error("No se pudo subir ninguna imagen.");
 
                 showLoading("Publicando en la tienda...");
-                await push(ref(db, 'productos'), {
-                    uid: currentUser.uid,
-                    nombre: document.getElementById('prodNombre').value,
-                    descripcion: document.getElementById('prodDesc').value,
-                    estado: document.getElementById('prodEstado').value,
-                    ubicacion: document.getElementById('prodUbicacion').value,
-                    metodosPago: document.getElementById('prodPagos').value,
-                    precio: document.getElementById('prodPrecio').value,
-                    fotos: fotosUrls,
-                    telefonoVendedor: userData.plan === 'pro' ? userData.telefono : "",
-                    verificado: userData.kyc === 'verificado',
-                    fijado: false,
-                    fechaPublicacion: serverTimestamp() // Fecha real del servidor
+                const resPub = await fetch('https://llevatelo-seguro.vercel.app/', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'publicarProducto',
+                        payload: {
+                            uid: currentUser.uid,
+                            nombre: document.getElementById('prodNombre').value,
+                            descripcion: document.getElementById('prodDesc').value,
+                            estado: document.getElementById('prodEstado').value,
+                            ubicacion: document.getElementById('prodUbicacion').value,
+                            metodosPago: document.getElementById('prodPagos').value,
+                            precio: document.getElementById('prodPrecio').value,
+                            fotos: fotosUrls,
+                            telefonoVendedor: userData.plan === 'pro' ? userData.telefono : "",
+                            verificado: userData.kyc === 'verificado'
+                        }
+                    })
                 });
+                const dataPub = await resPub.json();
+                if(!dataPub.success) throw new Error(dataPub.error);
+                
+                await cargarCatalogoDesdeVercel();
                 
                 hideLoading();
                 alert("✅ ¡Producto guardado públicamente!");
@@ -830,12 +902,24 @@
             }
         });
 
-        // Cargar todos los productos
-        onValue(ref(db, 'productos'), (snapshot) => {
-            todosLosProductos = snapshot.val() || {};
-            renderProducts();
-            renderMyProducts();
-        });
+        // Cargar todos los productos (Catálogo Global Vercel)
+        const cargarCatalogoDesdeVercel = async () => {
+            try {
+                const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'cargaCatalogoGlobal', payload: {} })
+                });
+                const dataRes = await res.json();
+                if(dataRes.success) {
+                    todosLosProductos = dataRes.data || {};
+                    renderProducts();
+                    renderMyProducts();
+                }
+            } catch(err) { console.error("Error cargando catálogo global:", err); }
+        };
+        
+        cargarCatalogoDesdeVercel();
+        setInterval(cargarCatalogoDesdeVercel, 15000);
 
         function formatearFecha(timestamp) {
             if(!timestamp) return 'Reciente';
@@ -941,13 +1025,20 @@
             if(count === 0) grid.innerHTML = '<div class="empty-state" style="grid-column: span 3;">Aún no tienes productos publicados.</div>';
         }
 
-        window.fijarProd = async (key) => {
+        
+window.fijarProd = async (key) => {
             showLoading("Fijando producto de primero...");
-            await update(ref(db, 'productos/' + key), { fijado: true, fijadoTime: Date.now() });
+            const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'fijarProducto', payload: { key } })
+            });
+            const data = await res.json();
+            if(data.success) {
+                await cargarCatalogoDesdeVercel();
+                alert("✅ Producto fijado en el tope.");
+            }
             hideLoading();
-            alert("✅ Producto fijado en el tope.");
         };
-
         let keyAEliminar = null;
         window.eliminarProdPropio = (key) => {
             keyAEliminar = key;
@@ -958,8 +1049,19 @@
             document.getElementById('customConfirmModal').style.display = 'none';
             if(keyAEliminar) {
                 showLoading("Eliminando...");
-                await remove(ref(db, 'productos/' + keyAEliminar));
+                const res = await fetch('https://llevatelo-seguro.vercel.app/', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'confirmarEliminar', payload: { key: keyAEliminar } })
+                });
+                const data = await res.json();
+                if(data.success) {
+                    await cargarCatalogoDesdeVercel();
+                    alert("✅ Publicación eliminada correctamente.");
+                } else {
+                    alert("❌ Error al eliminar.");
+                }
                 hideLoading();
+                keyAEliminar = null;
             }
         };
         window.cerrarConfirmar = () => {
