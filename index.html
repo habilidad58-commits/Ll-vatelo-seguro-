@@ -179,10 +179,30 @@
         .section-content.active { display: block; }
         .dashboard-panel { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 2rem; }
         .dashboard-panel h2 { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        /* Pantalla de Carga */
-        .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
+    /* Pantalla de Carga y Animaciones 3D */
+        .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.95); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(5px); }
+        .spinner { border: 4px solid #e2e8f0; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* Logo 3D Animación */
+        .logo-img { height: 45px; mix-blend-mode: multiply; animation: logo3DLoad 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-style: preserve-3d; }
+        @keyframes logo3DLoad {
+            0% { transform: scale(0.5) rotateY(90deg) rotateX(20deg); opacity: 0; }
+            50% { transform: scale(1.1) rotateY(-10deg); opacity: 0.8; }
+            100% { transform: scale(1) rotateY(0deg) rotateX(0deg); opacity: 1; }
+        }
+        
+        /* Transición de Pestañas */
+        .section-content { display: none; opacity: 0; transform: translateY(15px); transition: opacity 0.4s ease, transform 0.4s ease; }
+        .section-content.active { display: block; opacity: 1; transform: translateY(0); }
+        
+        /* Caja de Términos */
+        .terms-box { background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 15px; height: 150px; overflow-y: auto; font-size: 0.75rem; color: #475569; margin-bottom: 10px; line-height: 1.5; text-align: justify; }
+        .terms-box h4 { color: #0f172a; margin-bottom: 8px; font-size: 0.85rem; }
+        .terms-check-group { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 15px; }
+        .terms-check-group input { width: 18px; height: 18px; margin-top: 2px; cursor: pointer; }
+        .terms-check-group label { font-size: 0.85rem; color: #334155; cursor: pointer; font-weight: 600; margin: 0; line-height: 1.4; }
+        .btn-submit-reg:disabled { background: #94a3b8; cursor: not-allowed; box-shadow: none; transform: none; }
     </style>
 </head>
 <body>
@@ -192,7 +212,9 @@
     <header>
         <div class="header-container">
             <div class="header-top">
-                <div class="logo-title">🛡️ Llévatelo Ya</div>
+                <div class="logo-title">
+                    <img src="https://i.ibb.co/LzwXm1YN/Gemini-Generated-Image-34jrtt34jrtt34jr.jpg" alt="Logo Llévatelo Ya" class="logo-img">
+                </div>
                 
                 <div class="trust-badge-group">
                     <span class="trust-badge">✔️ 100% Verificado</span>
@@ -250,7 +272,7 @@
         <!-- Sección 2: Mis Productos -->
         <div id="misproductos" class="section-content">
             <div class="dashboard-panel">
-                <h2 style="display:flex; align-items:center;">➕ Agregar Nuevo Producto <button class="btn-info" type="button" onclick="abrirInfo('Publicar Artículo', 'Aquí puedes poner en venta tu producto.<br><br><b>Recuerda:</b> Sube fotos claras y pon un precio competitivo. Si no tienes KYC verificado, solo podrás publicar un máximo de 3 artículos.')">i</button></h2>
+                <h2 style="display:flex; align-items:center;">➕ Agregar Nuevo Producto <button class="btn-info" type="button" onclick="abrirInfo('Publicar Artículo', 'Aquí puedes poner en venta tu producto.<br><br><b>Recuerda:</b> Sube fotos claras y pon un precio competitivo. ¡Puedes publicar la cantidad de productos que desees de forma ilimitada!')">i</button></h2>
                 <form id="addProductForm">
                     <div class="form-group"><label>Nombre del Producto *</label><input type="text" id="prodNombre" required placeholder="Ej: PS5 Nuevo"></div>
                     <div class="form-group"><label>Descripción Detallada *</label><input type="text" id="prodDesc" required placeholder="Accesorios, tiempo de uso..."></div>
@@ -290,6 +312,7 @@
                     <h2 style="border:none; margin:0; display:flex; align-items:center;">👤 Datos de tu Perfil <button class="btn-info" type="button" onclick="abrirInfo('Mi Perfil', 'Aquí verás el estado oficial de tu cuenta.<br><br>Tus datos principales no se pueden editar manualmente por seguridad y políticas de anti-estafa.')">i</button></h2>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <span id="badgePlan" style="background: #1e293b; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">Plan: Básico</span>
+                        <button class="btn-info" type="button" onclick="abrirInfo('Desbloquea tu Potencial de Ventas 🚀', '¿Sabías que los vendedores PRO cierran sus ventas <b>3 veces más rápido</b>?<br><br>Al subir a PRO, habilitas el <b>botón directo a tu WhatsApp</b>. Los compradores odian esperar; si ven tu WhatsApp, te compran a ti primero.<br><br>No dejes que tu competencia se lleve a tus clientes. <b>Verifícate primero y luego da el salto a PRO.</b>')">i</button>
                         <span id="badgeKYC" style="background: #64748b; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">Sin Verificación</span>
                     </div>
                 </div>
@@ -402,7 +425,23 @@
                         <div class="form-group" style="flex: 1;"><label>Contraseña</label><input type="password" id="regPass" required></div>
                         <div class="form-group" style="flex: 1;"><label>Confirmar</label><input type="password" id="regPassConfirm" required></div>
                     </div>
-                    <button type="submit" class="btn-submit-reg">🚀 Aprobar y Registrar</button>
+                    
+                    <div class="terms-box">
+                        <h4>Políticas de Privacidad y Términos de Uso de Llévatelo Ya</h4>
+                        <b>1. Aceptación de los Términos:</b> Al registrarse, el usuario acepta de manera plena y sin reservas todas las disposiciones estipuladas en este documento. El uso de la plataforma constituye un acuerdo vinculante.<br><br>
+                        <b>2. Funcionamiento de la Plataforma:</b> "Llévatelo Ya" actúa exclusivamente como un intermediario digital que conecta a compradores y vendedores. No somos propietarios de los artículos en venta y no garantizamos su estado, calidad ni legalidad. Toda transacción es responsabilidad exclusiva de las partes involucradas.<br><br>
+                        <b>3. Política Anti-Estafas y Verificación (KYC):</b> Para garantizar la seguridad de la comunidad, implementamos el sistema de Verificación de Identidad (KYC). Todo usuario que desee destacar sus anuncios o ser considerado "Vendedor Verificado" debe proporcionar una imagen clara de su documento de identidad y una fotografía facial. Estos datos serán almacenados con estricta confidencialidad bajo estándares de encriptación y solo se utilizarán con fines de seguridad y prevención de fraudes. En caso de detectar estafa o actividad ilícita comprobada, la plataforma cooperará y compartirá esta información con las autoridades competentes correspondientes.<br><br>
+                        <b>4. Uso de Datos Personales (Privacidad):</b> Sus datos personales (correo, nombres, cédula, edad) serán resguardados en nuestra base de datos. El número de teléfono (WhatsApp) proporcionado por los usuarios del "Plan PRO" se hará público única y exclusivamente en sus publicaciones para facilitar el contacto directo por ventas. No venderemos, alquilaremos ni distribuiremos su información personal a terceros para fines publicitarios externos.<br><br>
+                        <b>5. Cuentas y Planes:</b> El registro en la plataforma es totalmente gratuito (Plan Básico). Los usuarios pueden optar por mejoras (Plan PRO) mediante pagos administrativos. Estas cuentas son intransferibles. La administración de "Llévatelo Ya" se reserva el derecho absoluto de suspender, bloquear o eliminar permanentemente cualquier cuenta que incumpla estas normativas, publique artículos prohibidos o acumule reportes de comportamiento sospechoso o fraudulento.<br><br>
+                        <b>6. Limitación de Responsabilidad:</b> "Llévatelo Ya" no será responsable bajo ninguna circunstancia por daños, pérdidas económicas, robos o disputas generadas durante las transacciones físicas o digitales. Recomendamos encarecidamente realizar los intercambios en lugares públicos, concurridos y seguros, así como verificar exhaustivamente el estado y funcionamiento de los productos antes de realizar o concretar cualquier transferencia de pago.
+                    </div>
+                    
+                    <div class="terms-check-group">
+                        <input type="checkbox" id="chkTerms" onchange="toggleRegButton()">
+                        <label for="chkTerms">He leído y acepto estrictamente todas las Políticas de Privacidad y Términos de Uso detallados arriba.</label>
+                    </div>
+
+                    <button type="submit" class="btn-submit-reg" id="btnRegisterSubmit" disabled>🚀 Aprobar y Registrar</button>
                 </form>
                 <div class="divider-text">¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:bold;">Inicia Sesión</a></div>
             </div>
@@ -481,8 +520,12 @@
             document.getElementById('infoModal').style.display = 'flex';
         };
         window.closeInfoModal = () => document.getElementById('infoModal').style.display = 'none';
-
-        // Controles de Interfaz
+// Controles de Interfaz
+        window.toggleRegButton = () => {
+            const chk = document.getElementById('chkTerms');
+            const btn = document.getElementById('btnRegisterSubmit');
+            if(chk && btn) btn.disabled = !chk.checked;
+        };
         window.openRegModal = () => document.getElementById('regModal').style.display = 'flex';
         window.closeRegModal = () => document.getElementById('regModal').style.display = 'none';
         window.toggleAuthMode = () => {
@@ -492,15 +535,26 @@
             else { login.style.display = 'none'; reg.style.display = 'block'; }
         };
         window.showSection = (sec) => {
-            document.querySelectorAll('.section-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            const seccion = document.getElementById(sec);
-            if(seccion) seccion.classList.add('active');
-            if(window.event && window.event.currentTarget && window.event.currentTarget.classList) {
-                window.event.currentTarget.classList.add('active');
-            }
-            if(sec === 'misproductos' || sec === 'productos') renderMyProducts(); 
+            showLoading("Cargando información...");
+            setTimeout(() => {
+                document.querySelectorAll('.section-content').forEach(el => {
+                    el.classList.remove('active');
+                    el.style.display = 'none';
+                });
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                const seccion = document.getElementById(sec);
+                if(seccion) {
+                    seccion.style.display = 'block';
+                    setTimeout(() => seccion.classList.add('active'), 20);
+                }
+                if(window.event && window.event.currentTarget && window.event.currentTarget.classList) {
+                    window.event.currentTarget.classList.add('active');
+                }
+                if(sec === 'misproductos' || sec === 'productos') renderMyProducts(); 
+                hideLoading();
+            }, 400); 
         };
+        
         const showLoading = (msg) => {
             document.getElementById('loadingText').innerText = msg;
             document.getElementById('loadingOverlay').style.display = 'flex';
@@ -588,7 +642,7 @@
                     const btnInfoK = document.getElementById('btnInfoKYC');
                     if(btnInfoK) btnInfoK.style.display = mostrarKYC ? 'inline-flex' : 'none';
                     
-                    const mostrarPro = (userData.plan === 'basico');
+                    const mostrarPro = (userData.plan === 'basico' && userData.kyc === 'verificado');
                     document.getElementById('btnSubirPro').style.display = mostrarPro ? 'block' : 'none';
                     const btnInfoP = document.getElementById('btnInfoPro');
                     if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
@@ -713,11 +767,7 @@
             if(!currentUser) return alert("Debes iniciar sesión.");
             if(userData.plan === 'pro' && !userData.telefono) return alert("⚠️ Alto: Debes guardar tu número de WhatsApp en 'Mi Perfil' antes de publicar.");
             
-            if(userData.kyc !== 'verificado') {
-                let misPubs = 0;
-                Object.values(todosLosProductos).forEach(p => { if(p.uid === currentUser.uid) misPubs++; });
-                if(misPubs >= 3) return alert("❌ Límite alcanzado. Ve a tu Perfil y haz la verificación KYC para publicar sin límite.");
-            }
+            // Límite de publicaciones eliminado: ahora todos publican ilimitadamente.
             
             const inputsFotos = [
                 document.getElementById('prodFoto1'),
