@@ -589,11 +589,18 @@
                         ctx.fillStyle = '#FFFFFF';
                         ctx.fillRect(0, 0, width, height);
                         ctx.drawImage(img, 0, 0, width, height);
-                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', 0.85);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                        resolve(dataUrl.split(',')[1]);
                     };
                 };
             });
         };
+
+        const fileToBase64 = (file) => new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result.split(',')[1]);
+        });
 
         // Sistema de Autenticación
         onAuthStateChanged(auth, (user) => {
@@ -730,10 +737,11 @@
             showLoading("Subiendo imágenes de forma instantánea...");
             try {
                 const uploadPromises = [f1, f2].map(async (f) => {
-                    const fd = new FormData(); fd.append('image', f);
+                    const base64Data = await fileToBase64(f);
+                    const fd = new FormData(); fd.append('image', base64Data);
                     const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
                     const data = await res.json();
-                    return data.success ? data.data.display_url : null;
+                    return data.success ? data.data.url : null;
                 });
                 
                 let urls = (await Promise.all(uploadPromises)).filter(url => url !== null);
@@ -767,6 +775,8 @@
             }
         };
 
+                
+
         // Guardar Teléfono y Clave
         window.guardarTelefono = async () => {
             if(!currentUser) return;
@@ -785,6 +795,8 @@
         };
 
         // Agregar Producto a la Base de Datos
+        
+       // Agregar Producto a la Base de Datos
         document.getElementById('addProductForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if(!currentUser) return alert("Debes iniciar sesión.");
@@ -813,19 +825,20 @@
             try {
                 const usarAhorro = document.getElementById('chkAhorroDatos').checked;
                 const uploadPromises = files.map(async (file) => {
-                    let finalFile = file;
-                    if (usarAhorro) { finalFile = await comprimirImagen(file, 600); }
+                    let base64Data;
+                    if (usarAhorro) { 
+                        base64Data = await comprimirImagen(file, 600); 
+                    } else {
+                        base64Data = await fileToBase64(file);
+                    }
                     const fd = new FormData();
-                    fd.append('image', finalFile);
+                    fd.append('image', base64Data);
                     const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
                     const data = await res.json();
-                    return data.success ? data.data.display_url : null;
+                    return data.success ? data.data.url : null;
                 });
                 
                 let fotosUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
-
-                if(fotosUrls.length === 0) throw new Error("No se pudo subir ninguna imagen.");
-
                 showLoading("Publicando en la tienda...");
                 
                 const payload = {
