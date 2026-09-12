@@ -570,7 +570,7 @@
             }
         };
 
-        const comprimirImagen = (file, maxRes, quality) => {
+        const comprimirImagen = (file, maxRes) => {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -583,13 +583,13 @@
                         if (width > maxRes || height > maxRes) {
                             if (width > height) { height = Math.round((height *= maxRes / width)); width = maxRes; } 
                             else { width = Math.round((width *= maxRes / height)); height = maxRes; }
-                        }
+                        } 
                         canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.fillStyle = '#FFFFFF';
                         ctx.fillRect(0, 0, width, height);
                         ctx.drawImage(img, 0, 0, width, height);
-                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', quality);
+                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', 0.85);
                     };
                 };
             });
@@ -730,11 +730,10 @@
             showLoading("Subiendo imágenes de forma instantánea...");
             try {
                 const uploadPromises = [f1, f2].map(async (f) => {
-                    let finalFile = await comprimirImagen(f, 600, 0.7);
-                    const fd = new FormData(); fd.append('image', finalFile);
+                    const fd = new FormData(); fd.append('image', f);
                     const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
                     const data = await res.json();
-                    return data.success ? data.data.url : null;
+                    return data.success ? data.data.display_url : null;
                 });
                 
                 let urls = (await Promise.all(uploadPromises)).filter(url => url !== null);
@@ -815,16 +814,12 @@
                 const usarAhorro = document.getElementById('chkAhorroDatos').checked;
                 const uploadPromises = files.map(async (file) => {
                     let finalFile = file;
-                    if (usarAhorro) { 
-                        finalFile = await comprimirImagen(file, 400, 0.6); 
-                    } else {
-                        finalFile = await comprimirImagen(file, 800, 0.8);
-                    }
+                    if (usarAhorro) { finalFile = await comprimirImagen(file, 600); }
                     const fd = new FormData();
                     fd.append('image', finalFile);
                     const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
                     const data = await res.json();
-                    return data.success ? data.data.url : null;
+                    return data.success ? data.data.display_url : null;
                 });
                 
                 let fotosUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
