@@ -197,6 +197,10 @@ async function handleRegistrationSubmit(body, res) {
     return res.status(400).json({ error: 'Por favor complete todos los campos obligatorios.' });
   }
 
+  if (String(cedula).includes('@')) {
+    return res.status(400).json({ error: 'La cédula no puede ser un correo electrónico.' });
+  }
+
   const edadNum = parseInt(edad);
   if (isNaN(edadNum) || edadNum < 18) {
     return res.status(400).json({ error: 'Debes ser mayor de edad para registrarte.' });
