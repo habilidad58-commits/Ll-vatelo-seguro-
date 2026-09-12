@@ -185,12 +185,6 @@
         .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
-        /* Círculo de carga para fotos */
-        .img-loading-wrapper { position: relative; flex: 0 0 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #f1f5f9; scroll-snap-align: start; }
-        .img-spinner { position: absolute; width: 30px; height: 30px; border: 3px solid #cbd5e1; border-top: 3px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; z-index: 1; }
-        .img-loading-wrapper img { position: relative; z-index: 2; opacity: 0; transition: opacity 0.3s; width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
-        .img-loading-wrapper img.loaded { opacity: 1; }
     </style>
 </head>
 <body>
@@ -576,7 +570,7 @@
             }
         };
 
-        const comprimirImagen = (file, maxRes) => {
+        const comprimirImagen = (file, maxRes, quality) => {
             return new Promise((resolve) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -595,7 +589,7 @@
                         ctx.fillStyle = '#FFFFFF';
                         ctx.fillRect(0, 0, width, height);
                         ctx.drawImage(img, 0, 0, width, height);
-                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', 0.85);
+                        canvas.toBlob((blob) => { resolve(new File([blob], file.name, { type: 'image/jpeg', lastModified: Date.now() })); }, 'image/jpeg', quality);
                     };
                 };
             });
@@ -736,7 +730,8 @@
             showLoading("Subiendo imágenes de forma instantánea...");
             try {
                 const uploadPromises = [f1, f2].map(async (f) => {
-                    const fd = new FormData(); fd.append('image', f);
+                    let finalFile = await comprimirImagen(f, 600, 0.7);
+                    const fd = new FormData(); fd.append('image', finalFile);
                     const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
                     const data = await res.json();
                     return data.success ? data.data.url : null;
@@ -820,7 +815,11 @@
                 const usarAhorro = document.getElementById('chkAhorroDatos').checked;
                 const uploadPromises = files.map(async (file) => {
                     let finalFile = file;
-                    if (usarAhorro) { finalFile = await comprimirImagen(file, 600); }
+                    if (usarAhorro) { 
+                        finalFile = await comprimirImagen(file, 400, 0.6); 
+                    } else {
+                        finalFile = await comprimirImagen(file, 800, 0.8);
+                    }
                     const fd = new FormData();
                     fd.append('image', finalFile);
                     const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
@@ -910,12 +909,7 @@
                 if(textCheck && locCheck && statCheck && priceCheck) {
                     contador++;
                     const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
-                    const imageTags = fotos.map((f, i) => `
-                        <div class="img-loading-wrapper">
-                            <div class="img-spinner"></div>
-                            <img src="${f}" onclick="openModal('${prod.key}', ${i})" loading="lazy" onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none';">
-                        </div>
-                    `).join('');
+                    const imageTags = fotos.map((f, i) => `<img src="${f}" onclick="openModal('${prod.key}', ${i})" loading="lazy">`).join('');
                     const linkWa = prod.telefonoVendedor ? `https://wa.me/58${prod.telefonoVendedor}?text=Hola,%20vengo%20de%20Llévatelo%20Seguro.%20Me%20interesa%20comprar:%20*${encodeURIComponent(prod.nombre)}*` : '#';
 
                     const card = document.createElement('div');
@@ -966,10 +960,7 @@
                 div.style.padding = '15px';
                 div.innerHTML = `
                     <div style="display:flex; gap:15px; align-items:center;">
-                        <div class="img-loading-wrapper" style="width:70px; height:70px; border-radius:8px; overflow:hidden; flex: none;">
-                            <div class="img-spinner" style="width:20px; height:20px; border-width:2px;"></div>
-                            <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;" onload="this.classList.add('loaded'); this.previousElementSibling.style.display='none';">
-                        </div>
+                        <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
                         <div style="flex:1;">
                             <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
                             <strong style="color:var(--primary); font-size:1.2rem;">$${prod.precio}</strong>
