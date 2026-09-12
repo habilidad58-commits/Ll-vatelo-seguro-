@@ -739,50 +739,42 @@ onValue(userRef, (snapshot) => {
         };
 
         window.abrirKYCModal = () => document.getElementById('kycModal').style.display = 'flex';
-        window.enviarKYC = async () => {
-            const f1 = document.getElementById('kycCedula').files[0];
-            const f2 = document.getElementById('kycCara').files[0];
-            if(!f1 || !f2) return alert("⚠️ Debes adjuntar ambas fotos.");
-            showLoading("Subiendo imágenes de forma instantánea...");
-            try {
-                const uploadPromises = [f1, f2].map(async (f) => {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(f);
-                        reader.onload = async () => {
-                            const base64 = reader.result.split(',')[1];
-                            const res = await fetch('https://llevatelo-seguro.vercel.app/', {
-                                method: 'POST', headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ action: 'subirFotosImgBB', payload: { imageBase64: base64 } })
-                            });
-                            const data = await res.json();
-                            resolve(data.success ? data.data.url : null);
-                        };
-                    });
+      window.enviarKYC = async () => {
+        const f1 = document.getElementById('kycCedula').files[0];
+        const f2 = document.getElementById('kycCara').files[0];
+        if(!f1 || !f2) return alert("⚠️ Debes adjuntar ambas fotos.");
+        showLoading("Procesando y guardando verificación...");
+        try {
+            const uploadPromises = [f1, f2].map(async (file) => {
+                const finalFile = await comprimirImagen(file, 800); // Comprimimos la imagen localmente
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(finalFile);
+                    reader.onload = () => resolve(reader.result); // Guardamos el Base64 directamente
+                    reader.onerror = () => resolve(null);
                 });
-                
-                let urls = (await Promise.all(uploadPromises)).filter(url => url !== null);
-                
-                if (urls.length < 2) {
-                    hideLoading();
-                    return alert("❌ Error al subir fotos (Posiblemente bloqueado por tu internet o navegador). Por favor intenta de nuevo.");
-                }
-
-                const resVercel = await fetch('https://llevatelo-seguro.vercel.app/', {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'enviarKYC', payload: { uid: currentUser.uid, fotosKyc: urls } })
-                });
-                const dataVercel = await resVercel.json();
-                if(!dataVercel.success) throw new Error(dataVercel.error);
-
+            });
+            
+            let urls = (await Promise.all(uploadPromises)).filter(url => url !== null);
+            
+            if (urls.length < 2) {
                 hideLoading();
-                alert("✅ Fotos enviadas correctamente. Espera aprobación.");
-                document.getElementById('kycModal').style.display = 'none';
-            } catch(e) {
-                hideLoading(); alert("❌ Error: " + e.message);
+                return alert("❌ Error al procesar las fotos. Por favor intenta de nuevo.");
             }
-        };
 
+            // Guardado directo en Firebase (evitando pasar por el servidor Vercel caído)
+            await update(ref(db, 'usuarios/' + currentUser.uid), { 
+                kyc: 'pendiente', 
+                fotosKyc: urls 
+            });
+
+            hideLoading();
+            alert("✅ Fotos enviadas correctamente. Espera aprobación.");
+            document.getElementById('kycModal').style.display = 'none';
+        } catch(e) {
+            hideLoading(); alert("❌ Error: " + e.message);
+        }
+    };
         // Guardar Teléfono y Clave
         window.guardarTelefono = async () => {
             if(!currentUser) return;
