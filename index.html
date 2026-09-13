@@ -660,18 +660,22 @@
             <div class="notif-item" id="notifVacia" style="color:#94a3b8; justify-content:center;">No hay notificaciones recientes.</div>
         </div>
     </div>
-
-    <!-- Panel de Administración de Mejoras (Oculto por defecto, solo para ti) -->
+<!-- Panel de Administración de Mejoras (Oculto por defecto, solo para ti) -->
     <div class="reg-modal-overlay" id="adminMejorasModal" style="z-index: 99999;">
         <div class="reg-modal-card" style="max-width: 500px;">
             <span class="modal-close" style="color: #0f172a;" onclick="document.getElementById('adminMejorasModal').style.display='none'">&times;</span>
-            <div class="reg-modal-title" style="color: var(--primary);">🛠️ Panel de Mejoras (Admin)</div>
+            <div class="reg-modal-title" style="color: var(--primary);">🛠️ Panel de Administración</div>
+            <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-weight: bold; color: #0369a1;">👁️ Visitas Únicas (Dispositivos):</span>
+                <span id="contadorVisitasAdmin" style="font-size: 1.3rem; font-weight: 900; color: #0284c7;">0</span>
+            </div>
             <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Aquí ves los comentarios de los usuarios.</p>
             <div id="listaComentariosAdmin" style="max-height: 300px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc;">
                 <!-- Comentarios se inyectan aquí -->
             </div>
         </div>
     </div>
+    
 
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -691,6 +695,17 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const auth = getAuth(app);
+
+        // --- SISTEMA SILENCIOSO DE REGISTRO DE DISPOSITIVOS ÚNICOS ---
+        try {
+            if (!localStorage.getItem('dispositivo_llevatelo_registrado')) {
+                push(ref(db, 'historial_visitas_unicas'), {
+                    fecha: serverTimestamp(),
+                    agente: navigator.userAgent
+                });
+                localStorage.setItem('dispositivo_llevatelo_registrado', 'true');
+            }
+        } catch (e) {} // Totalmente silencioso para el usuario
 
         let currentUser = null;
         let todosLosProductos = {};
@@ -1191,6 +1206,14 @@
             });
         });
         window.eliminarComentario = async (key) => await remove(ref(db, 'mejoras/' + key));
+
+        // Leer contador de visitas únicas en el Admin Panel
+        onValue(ref(db, 'historial_visitas_unicas'), (snap) => {
+            const contadorEl = document.getElementById('contadorVisitasAdmin');
+            if(contadorEl) {
+                contadorEl.innerText = snap.exists() ? Object.keys(snap.val()).length : "0";
+            }
+        });
 
         // Cambiar Contraseña Directo (Configuración)
         window.cambiarPasswordDirecto = async () => {
