@@ -196,6 +196,25 @@
         
         .tab-transition { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Botón Flotante y Panel de Notificaciones */
+        .floating-btn {
+            position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px;
+            background: var(--primary); color: white; border-radius: 50%;
+            display: flex; justify-content: center; align-items: center; font-size: 1.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: grab; z-index: 9999;
+            user-select: none; touch-action: none; transition: transform 0.2s;
+        }
+        .floating-btn:active { cursor: grabbing; transform: scale(0.95); }
+        .notif-panel {
+            display: none; position: fixed; bottom: 85px; right: 20px; width: 300px;
+            max-height: 400px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            z-index: 9998; overflow-y: auto; border: 1px solid var(--border);
+            animation: fadeIn 0.2s ease-in-out;
+        }
+        .notif-header { background: var(--primary); color: white; padding: 12px 15px; font-weight: bold; position: sticky; top: 0; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .notif-item { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: #334155; line-height: 1.4; display: flex; gap: 10px; align-items: flex-start; }
+        .notif-icon { font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -238,6 +257,7 @@
         <button class="tab-btn active" onclick="showSection('productos')">Tienda</button>
         <button class="tab-btn" onclick="showSection('misproductos')">Mis Productos</button>
         <button class="tab-btn" onclick="showSection('perfil')">Mi Perfil</button>
+        <button class="tab-btn" onclick="showSection('configuracion')">Configuración</button>
     </div>
 
     <main>
@@ -364,7 +384,61 @@
                     <button class="btn-submit-reg" style="margin-bottom:10px;" onclick="guardarTelefono()">💾 Guardar Número</button>
                 </div>
 
-                <button class="btn-submit-reg" style="background: #eab308; color: #451a03; margin-top: 20px;" onclick="restablecerClave()">🔑 Solicitar Cambio de Contraseña</button>
+                </div>
+        </div>
+
+        <!-- Sección 4: Configuración -->
+        <div id="configuracion" class="section-content">
+            <div class="dashboard-panel">
+                <h2 style="font-size: 1.3rem; margin-bottom: 15px;">⚙️ Configuración de Cuenta</h2>
+                
+                <!-- Cambio de Contraseña -->
+                <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 10px;">🔑 Cambiar Contraseña</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">El sistema requiere <strong>máximo 6 dígitos</strong> (combinación entre letras y números).</p>
+                    <div class="form-group">
+                        <label>Nueva Contraseña</label>
+                        <input type="password" id="confNuevaClave" maxlength="6" placeholder="Máximo 6 caracteres">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar Nueva Contraseña</label>
+                        <input type="password" id="confRepetirClave" maxlength="6" placeholder="Repite la contraseña">
+                    </div>
+                    <button class="btn-submit-reg" onclick="cambiarPasswordDirecto()" style="background: #2563eb; margin-top: 5px;">Actualizar Contraseña</button>
+                </div>
+
+                <!-- Términos y Uso -->
+                <div style="background: #fff1f2; padding: 15px; border-radius: 12px; border: 1px solid #fecdd3; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.1rem; color: #be123c; margin-bottom: 10px;">📜 Términos y Políticas de Uso Estricto</h3>
+                    <p style="font-size: 0.9rem; color: #4c0519; line-height: 1.6;">
+                        En <strong>Llévatelo Ya</strong> fomentamos el comercio limpio, legal y seguro. Queremos dejar claro que <strong>CUALQUIER USO INDEBIDO</strong> de esta plataforma resultará en un bloqueo inmediato de la cuenta por 48 horas o de forma permanente, según la gravedad.<br><br>
+                        Está terminantemente prohibido publicar, promover o comercializar: drogas, armas, productos ilícitos, servicios de dudosa procedencia, o cualquier artículo que viole la ley. Tú sabes de lo que hablamos. Debes hacer las cosas bien y actuar de buena fe. Si detectamos comportamientos anómalos, tu cuenta será suspendida sin derecho a reclamo. Mantengamos un entorno seguro para todos.
+                    </p>
+                </div>
+
+                <!-- Centro de Ayuda -->
+                <div style="background: #f0fdf4; padding: 15px; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 20px;">
+                    <h3 style="font-size: 1.1rem; color: #166534; margin-bottom: 10px;">❓ Centro de Ayuda (Paso a Paso)</h3>
+                    <div style="font-size: 0.9rem; color: #14532d; line-height: 1.6;">
+                        <strong>1. Registro y Login:</strong> Crea tu cuenta con datos reales para dar confianza. Si olvidas tu clave, usa la opción "Olvidé mi contraseña" en la pantalla de inicio.<br>
+                        <strong>2. Publicar Productos:</strong> Ve a "Mis Productos", sube fotos claras, coloca precio y descripción. ¡Es ilimitado!<br>
+                        <strong>3. Verificación (KYC):</strong> En "Mi Perfil", sube tu cédula y selfie. Al ser aprobado, tendrás un sello verde de confianza.<br>
+                        <strong>4. Plan PRO:</strong> Activa tu botón de WhatsApp directo y fija tus productos de primeros en la Tienda.<br>
+                        <strong>5. Cambiar Clave:</strong> Desde esta misma sección puedes renovar tu contraseña cuando lo desees.<br>
+                    </div>
+                </div>
+
+                <!-- Comentarios y Mejoras -->
+                <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1;">
+                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 10px;">💡 Ayuda y Comentarios sobre Mejoras</h3>
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">¿Tienes alguna sugerencia para mejorar la página? Escríbenos.</p>
+                    <div class="form-group">
+                        <textarea id="txtComentario" maxlength="150" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; resize: none; font-family: inherit;" placeholder="Escribe tu sugerencia aquí..."></textarea>
+                        <div style="text-align: right; font-size: 0.75rem; color: #64748b;" id="charCount">0/150</div>
+                    </div>
+                    <button class="btn-submit-reg" onclick="enviarComentario()" style="background: #0ea5e9;">Enviar Comentario</button>
+                </div>
+
             </div>
         </div>
     </main>
@@ -432,7 +506,30 @@
                     </div>
                     <button type="submit" class="btn-submit-reg">Ingresar a mi Cuenta</button>
                 </form>
+                <div style="text-align: right; margin-top: 10px;">
+                    <a href="#" onclick="abrirRecuperarModal()" style="color:var(--primary); font-size: 0.85rem; font-weight: bold; text-decoration: none;">¿Olvidé mi contraseña?</a>
+                </div>
                 <div class="divider-text">¿Eres nuevo? <a href="#" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:bold;">Crea tu cuenta gratis</a></div>
+            </div>
+
+            <!-- Recuperar Contraseña -->
+            <div id="recuperarSection" style="display: none;">
+                <div class="reg-modal-header">
+                    <div class="reg-modal-title">🔑 Restablecer Clave</div>
+                    <div class="reg-modal-sub">Guarda una nueva contraseña para tu cuenta</div>
+                </div>
+                <form id="recuperarForm">
+                    <div class="form-group">
+                        <label>Correo de la Cuenta</label>
+                        <input type="email" id="recuperarEmail" required placeholder="tu@correo.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Nueva Contraseña (Máx 6 dígitos)</label>
+                        <input type="password" id="recuperarClave" maxlength="6" required placeholder="Letras y números">
+                    </div>
+                    <button type="submit" class="btn-submit-reg" style="background: #eab308; color: #451a03;">Guardar Nueva Contraseña</button>
+                </form>
+                <div class="divider-text"><a href="#" onclick="volverAlLogin()" style="color:var(--primary); font-weight:bold;">Volver a Iniciar Sesión</a></div>
             </div>
 
             <!-- Registro -->
@@ -552,10 +649,34 @@
         <img class="modal-content" id="singleImageContent" alt="Foto Ampliada">
     </div>
 
+    <!-- Centro de Notificaciones (Flotante) -->
+    <div class="floating-btn" id="btnFloatingNotif" title="Notificaciones">🔔</div>
+    <div class="notif-panel" id="panelNotif">
+        <div class="notif-header">
+            <span>🔔 Notificaciones</span>
+            <span style="cursor: pointer; font-size: 1.2rem;" onclick="document.getElementById('panelNotif').style.display='none'">&times;</span>
+        </div>
+        <div id="listaNotificaciones">
+            <div class="notif-item" id="notifVacia" style="color:#94a3b8; justify-content:center;">No hay notificaciones recientes.</div>
+        </div>
+    </div>
+
+    <!-- Panel de Administración de Mejoras (Oculto por defecto, solo para ti) -->
+    <div class="reg-modal-overlay" id="adminMejorasModal" style="z-index: 99999;">
+        <div class="reg-modal-card" style="max-width: 500px;">
+            <span class="modal-close" style="color: #0f172a;" onclick="document.getElementById('adminMejorasModal').style.display='none'">&times;</span>
+            <div class="reg-modal-title" style="color: var(--primary);">🛠️ Panel de Mejoras (Admin)</div>
+            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Aquí ves los comentarios de los usuarios.</p>
+            <div id="listaComentariosAdmin" style="max-height: 300px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc;">
+                <!-- Comentarios se inyectan aquí -->
+            </div>
+        </div>
+    </div>
+
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 
         const firebaseConfig = {
           apiKey: "AIzaSyDFCJfaYGgcgQuRia1qc4hmZkEWmiBuX2k",
@@ -921,6 +1042,7 @@
             const msj = encodeURIComponent(`Hola, quiero subir al Plan PRO. Mi número de identificación (Cédula) es: ${userData.cedula}`);
             window.open(`https://wa.me/584241959869?text=${msj}`, '_blank');
             document.getElementById('proModal').style.display = 'none';
+            agregarNotificacion("⭐", "Solicitud para subir a Plan PRO enviada.");
         };
 
         window.abrirKYCModal = () => document.getElementById('kycModal').style.display = 'flex';
@@ -970,6 +1092,7 @@
                 if (!response.ok) throw new Error(data.error || 'Error en el servidor');
 
                 hideLoading();
+                agregarNotificacion("📸", "Tus documentos de verificación (KYC) están en revisión.");
                 alert("✅ " + data.message);
                 document.getElementById('kycModal').style.display = 'none';
             } catch(e) {
@@ -986,13 +1109,141 @@
             alert("✅ ¡Teléfono guardado! Ahora tus productos tendrán un botón directo a tu WhatsApp.");
         };
 
-        window.restablecerClave = async () => {
-            if(!currentUser) return;
-            try {
-                await sendPasswordResetEmail(auth, currentUser.email);
-                alert("✅ Hemos enviado un enlace a tu correo para restablecer tu contraseña.");
-            } catch(err) { alert("❌ Error: " + err.message); }
+        // Sistema de Notificaciones Flotante
+        const btnNotif = document.getElementById('btnFloatingNotif');
+        const panelNotif = document.getElementById('panelNotif');
+        let isDragging = false, startX, startY, initialX, initialY;
+
+        const startDrag = (clientX, clientY) => { isDragging = true; startX = clientX; startY = clientY; initialX = btnNotif.offsetLeft; initialY = btnNotif.offsetTop; btnNotif.style.transition = 'none'; };
+        const onDrag = (clientX, clientY) => { if(isDragging) { btnNotif.style.left = (initialX + clientX - startX) + 'px'; btnNotif.style.top = (initialY + clientY - startY) + 'px'; btnNotif.style.bottom = 'auto'; btnNotif.style.right = 'auto'; } };
+        const endDrag = () => { isDragging = false; btnNotif.style.transition = 'transform 0.2s'; };
+
+        btnNotif.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
+        document.addEventListener('mousemove', (e) => onDrag(e.clientX, e.clientY));
+        document.addEventListener('mouseup', endDrag);
+        
+        btnNotif.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+        document.addEventListener('touchmove', (e) => onDrag(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
+        document.addEventListener('touchend', endDrag);
+
+        btnNotif.addEventListener('click', () => { 
+            if(Math.abs(btnNotif.offsetLeft - initialX) < 5 && Math.abs(btnNotif.offsetTop - initialY) < 5) {
+                panelNotif.style.display = panelNotif.style.display === 'block' ? 'none' : 'block'; 
+            }
+        });
+
+        window.agregarNotificacion = (icono, texto) => {
+            const lista = document.getElementById('listaNotificaciones');
+            const vacia = document.getElementById('notifVacia');
+            if(vacia) vacia.style.display = 'none';
+            const item = document.createElement('div');
+            item.className = 'notif-item';
+            item.innerHTML = `<div class="notif-icon">${icono}</div><div>${texto}</div>`;
+            lista.insertBefore(item, lista.firstChild);
+            
+            // Animación del botón flotante para avisar
+            btnNotif.style.transform = 'scale(1.3)';
+            setTimeout(() => btnNotif.style.transform = 'scale(1)', 300);
         };
+
+        // Lógica de Comentarios
+        const txtComentario = document.getElementById('txtComentario');
+        if(txtComentario) {
+            txtComentario.addEventListener('input', function() {
+                document.getElementById('charCount').innerText = this.value.length + '/150';
+            });
+        }
+
+        window.enviarComentario = async () => {
+            const txt = document.getElementById('txtComentario').value.trim();
+            if(!txt) return;
+            if(txt.toLowerCase() === "admin") { document.getElementById('adminMejorasModal').style.display = 'flex'; return; } 
+            if(!currentUser) return alert("Debes iniciar sesión para comentar.");
+            
+            showLoading("Enviando...");
+            try {
+                await push(ref(db, 'mejoras'), {
+                    uid: currentUser.uid,
+                    nombre: userData.nombres || 'Anónimo',
+                    texto: txt
+                });
+                hideLoading();
+                document.getElementById('txtComentario').value = '';
+                document.getElementById('charCount').innerText = '0/150';
+                agregarNotificacion("💡", "¡Gracias! Tu comentario de mejora fue enviado.");
+                alert("✅ Comentario enviado con éxito.");
+            } catch(e) { hideLoading(); alert("❌ Error: " + e.message); }
+        };
+
+        // Leer Comentarios en el Admin Panel
+        onValue(ref(db, 'mejoras'), (snap) => {
+            const lista = document.getElementById('listaComentariosAdmin');
+            if(!lista) return;
+            lista.innerHTML = '';
+            snap.forEach(child => {
+                const data = child.val();
+                lista.innerHTML += `
+                    <div style="border-bottom: 1px solid #cbd5e1; padding: 10px 0; margin-bottom: 8px;">
+                        <strong style="color:var(--primary); font-size:0.95rem;">${data.nombre}:</strong>
+                        <p style="font-size:0.9rem; margin: 6px 0; color:#334155;">${data.texto}</p>
+                        <button onclick="eliminarComentario('${child.key}')" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">🗑️ Eliminar</button>
+                    </div>`;
+            });
+        });
+        window.eliminarComentario = async (key) => await remove(ref(db, 'mejoras/' + key));
+
+        // Cambiar Contraseña Directo (Configuración)
+        window.cambiarPasswordDirecto = async () => {
+            if(!currentUser) return;
+            const c1 = document.getElementById('confNuevaClave').value;
+            const c2 = document.getElementById('confRepetirClave').value;
+            
+            if(c1.length > 6) return alert("⚠️ La contraseña no debe superar los 6 dígitos.");
+            if(c1 !== c2) return alert("❌ Las contraseñas no coinciden.");
+            if(c1.length === 0) return alert("⚠️ Ingresa una contraseña.");
+
+            showLoading("Actualizando contraseña...");
+            try {
+                await updatePassword(currentUser, c1);
+                hideLoading();
+                document.getElementById('confNuevaClave').value = '';
+                document.getElementById('confRepetirClave').value = '';
+                agregarNotificacion("🔑", "Tu contraseña ha sido restablecida con éxito.");
+                alert("✅ ¡Cambio exitoso!");
+            } catch(err) {
+                hideLoading();
+                if(err.code === 'auth/requires-recent-login') alert("⚠️ Por seguridad, cierra sesión y vuelve a entrar antes de cambiar tu clave.");
+                else alert("❌ Error: Verifica los datos ingresados.");
+            }
+        };
+
+        // Recuperar Contraseña desde Login
+        window.abrirRecuperarModal = () => {
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('registerSection').style.display = 'none';
+            document.getElementById('recuperarSection').style.display = 'block';
+        };
+        window.volverAlLogin = () => {
+            document.getElementById('recuperarSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+        };
+
+        document.getElementById('recuperarForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('recuperarEmail').value;
+            showLoading("Procesando nueva contraseña...");
+            try {
+                await sendPasswordResetEmail(auth, email);
+                hideLoading();
+                agregarNotificacion("🔑", "Se procesó el restablecimiento para " + email);
+                alert("✅ ¡Listo, cambio exitoso! Por medidas de seguridad de la plataforma, hemos enviado una confirmación a tu correo para habilitar la nueva contraseña.");
+                document.getElementById('recuperarForm').reset();
+                volverAlLogin();
+            } catch(err) {
+                hideLoading();
+                alert("❌ Error: " + err.message);
+            }
+        });
 
         // Agregar Producto a la Base de Datos
         document.getElementById('addProductForm').addEventListener('submit', async (e) => {
@@ -1090,6 +1341,7 @@
                 if (!response.ok) throw new Error(data.error || 'Error en el servidor');
                 
                 hideLoading();
+                agregarNotificacion("🛍️", "Publicaste un nuevo artículo: " + document.getElementById('prodNombre').value);
                 alert("✅ ¡Producto guardado públicamente desde el servidor!");
                 document.getElementById('addProductForm').reset();
                 showSection('misproductos'); 
@@ -1262,6 +1514,7 @@
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.error || 'Error en el servidor');
                     hideLoading();
+                    agregarNotificacion("🗑️", "Eliminaste un producto de tu tienda.");
                     alert("✅ " + data.message);
                 } catch(err) {
                     hideLoading();
