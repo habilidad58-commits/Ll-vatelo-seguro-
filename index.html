@@ -243,13 +243,31 @@
     <main>
         <!-- Sección Info para No Registrados -->
         <div id="infoPublica" class="section-content active">
-            <div class="dashboard-panel" style="text-align: center; padding: 4rem 2rem;">
-                <h1 style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;">Bienvenido a Llévatelo Ya 🛡️</h1>
-                <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6;">
-                    La plataforma más segura para comprar y vender. <br>
-                    Inicia sesión o regístrate gratis para ver el catálogo disponible y contactar vendedores verificados de forma directa.
+            <div class="dashboard-panel" style="text-align: center; padding: 3rem 1.5rem; background: linear-gradient(to bottom, #ffffff, #f8fafc); border: 1px solid #e2e8f0; border-top: 4px solid var(--primary);">
+                <h1 style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem; font-weight: 900; letter-spacing: -1px;">Vende Rápido. Compra Seguro. 🛡️</h1>
+                <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    Únete a <b>Llévatelo Ya</b>, el mercado digital líder donde compradores y vendedores reales hacen tratos sin intermediarios.
                 </p>
-                <button class="btn-submit-reg" style="max-width: 300px; margin: 0 auto;" onclick="openRegModal()">Acceder a la Plataforma</button>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; text-align: left;">
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #0f172a;">Publica Gratis</h3>
+                        <p style="font-size: 0.9rem; color: #64748b;">Sube tus productos con fotos en segundos y llega a miles de clientes activos.</p>
+                    </div>
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">💬</div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #0f172a;">Trato Directo</h3>
+                        <p style="font-size: 0.9rem; color: #64748b;">Los clientes te escriben directo a tu WhatsApp. Sin demoras ni comisiones.</p>
+                    </div>
+                    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+                        <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+                        <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #0f172a;">Red Segura</h3>
+                        <p style="font-size: 0.9rem; color: #64748b;">Comunidad protegida con sistema de verificación (KYC) para evitar fraudes.</p>
+                    </div>
+                </div>
+
+                <button class="btn-submit-reg" style="max-width: 350px; margin: 0 auto; font-size: 1.1rem; padding: 1rem; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.3);" onclick="openRegModal()">🚀 Crear mi Cuenta o Entrar</button>
             </div>
         </div>
 
@@ -296,8 +314,16 @@
         <!-- Sección 3: Perfil -->
         <div id="perfil" class="section-content">
             <div class="dashboard-panel">
+                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1;">
+                    <div style="position: relative; width: 95px; height: 95px; border-radius: 50%; background: #e2e8f0; display: flex; justify-content: center; align-items: center; overflow: hidden; border: 3px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <img id="perfilPortadaImg" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="abrirFotoGrande(this.src)" title="Toca para ver en grande">
+                    </div>
+                    <input type="file" id="inputPortada" accept="image/*" style="display: none;" onchange="subirPortadaPerfil(this)">
+                    <button onclick="document.getElementById('inputPortada').click()" style="margin-top: -12px; z-index: 2; background: var(--primary); color: white; border: none; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">✏️ Editar Portada</button>
+                    <h2 style="border:none; margin: 15px 0 0 0; display:flex; align-items:center; font-size: 1.3rem;">👤 Datos de tu Perfil <button class="btn-info" type="button" onclick="abrirInfo('Mi Perfil', 'Aquí verás el estado oficial de tu cuenta.<br><br>Tus datos principales no se pueden editar manualmente por seguridad.')">i</button></h2>
+                </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
-                    <h2 style="border:none; margin:0; display:flex; align-items:center;">👤 Datos de tu Perfil <button class="btn-info" type="button" onclick="abrirInfo('Mi Perfil', 'Aquí verás el estado oficial de tu cuenta.<br><br>Tus datos principales no se pueden editar manualmente por seguridad y políticas de anti-estafa.')">i</button></h2>
+                    <div></div>
                     <div style="display: flex; gap: 10px; align-items: center;">
                         <span id="badgePlan" style="background: #1e293b; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">Plan: Básico</span>
                         <button class="btn-info" type="button" onclick="abrirInfo('Desbloquea tu Potencial de Ventas 🚀', '¿Sabías que los vendedores PRO cierran sus ventas <b>3 veces más rápido</b>?<br><br>Al subir a PRO, habilitas el <b>botón directo a tu WhatsApp</b>. Los compradores odian esperar; si ven tu WhatsApp, te compran a ti primero.<br><br>No dejes que tu competencia se lleve a tus clientes. <b>Verifícate primero y luego da el salto a PRO.</b>')">i</button>
@@ -397,7 +423,13 @@
                 <div class="reg-modal-header"><div class="reg-modal-title">🔐 Iniciar Sesión</div></div>
                 <form id="loginForm">
                     <div class="form-group"><label>Correo Electrónico</label><input type="email" id="loginEmail" required></div>
-                    <div class="form-group"><label>Contraseña</label><input type="password" id="loginPass" required></div>
+                    <div class="form-group">
+                        <label>Contraseña</label>
+                        <div style="position: relative; display: flex; align-items: center;">
+                            <input type="password" id="loginPass" required style="padding-right: 40px;">
+                            <span onclick="togglePass('loginPass', this)" style="position: absolute; right: 12px; cursor: pointer; font-size: 1.1rem; user-select: none;">👁️</span>
+                        </div>
+                    </div>
                     <button type="submit" class="btn-submit-reg">Ingresar a mi Cuenta</button>
                 </form>
                 <div class="divider-text">¿Eres nuevo? <a href="#" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:bold;">Crea tu cuenta gratis</a></div>
@@ -417,8 +449,20 @@
                         <div class="form-group" style="flex: 1;"><label>Cédula de Identidad <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="text" id="regCedula" required placeholder="V-12345678" autocomplete="off"></div>
                     </div>
                     <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;"><label>Contraseña</label><input type="password" id="regPass" required></div>
-                        <div class="form-group" style="flex: 1;"><label>Confirmar</label><input type="password" id="regPassConfirm" required></div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Contraseña</label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="regPass" required style="padding-right: 35px;">
+                                <span onclick="togglePass('regPass', this)" style="position: absolute; right: 10px; cursor: pointer; font-size: 1rem; user-select: none;">👁️</span>
+                            </div>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Confirmar</label>
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="regPassConfirm" required style="padding-right: 35px;">
+                                <span onclick="togglePass('regPassConfirm', this)" style="position: absolute; right: 10px; cursor: pointer; font-size: 1rem; user-select: none;">👁️</span>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group" style="display: flex; align-items: flex-start; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 10px;">
                         <input type="checkbox" id="chkPoliticas" style="width: 20px; height: 20px; cursor: pointer; margin-top: 2px;" required>
@@ -502,6 +546,12 @@
         <div class="modal-counter" id="modalCounter"></div>
     </div>
 
+    <!-- Modal para foto única (Perfil / Portada) -->
+    <div class="modal" id="singleImageModal" style="z-index: 999999;">
+        <span class="modal-close" onclick="document.getElementById('singleImageModal').style.display='none'">&times;</span>
+        <img class="modal-content" id="singleImageContent" alt="Foto Ampliada">
+    </div>
+
 <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
         import { getDatabase, ref, onValue, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -538,6 +588,11 @@
             document.getElementById('infoModal').style.display = 'flex';
         };
         window.closeInfoModal = () => document.getElementById('infoModal').style.display = 'none';
+
+        window.abrirFotoGrande = (url) => {
+            document.getElementById('singleImageContent').src = url;
+            document.getElementById('singleImageModal').style.display = 'flex';
+        };
 
         // Controles de Interfaz
         
@@ -674,6 +729,63 @@
             });
         };
 
+        window.togglePass = (id, el) => {
+            const input = document.getElementById(id);
+            if (input.type === "password") { input.type = "text"; el.innerText = "🙈"; }
+            else { input.type = "password"; el.innerText = "👁️"; }
+        };
+
+        window.subirPortadaPerfil = async (input) => {
+            const file = input.files[0];
+            if(!file || !currentUser) return;
+            showLoading("Subiendo tu foto de portada...");
+            try {
+                const finalFile = await comprimirImagen(file, 800, 0.85);
+                const fd = new FormData(); fd.append('image', finalFile);
+                const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
+                const data = await res.json();
+                if (data.success) {
+                    await update(ref(db, 'usuarios/' + currentUser.uid), { portadaUrl: data.data.display_url });
+                    document.getElementById('perfilPortadaImg').src = data.data.display_url;
+                    hideLoading();
+                    alert("✅ Foto de portada actualizada con éxito.");
+                } else throw new Error("Fallo al subir a ImgBB");
+            } catch(err) {
+                hideLoading();
+                alert("❌ Error al subir portada: " + err.message);
+            }
+        };
+
+        window.verPortadaVendedor = async (vendedorUid) => {
+            showLoading("Cargando perfil del vendedor...");
+            try {
+                const res = await fetch(`https://llevatelo-seguro-default-rtdb.firebaseio.com/usuarios/${vendedorUid}.json`);
+                const vendedor = await res.json();
+                hideLoading();
+                
+                if(vendedor) {
+                    const foto = vendedor.portadaUrl || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
+                    const nombre = vendedor.nombres ? vendedor.nombres + ' ' + (vendedor.apellidos || '') : 'Vendedor';
+                    const kycBadge = vendedor.kyc === 'verificado' ? '✅ Verificado' : (vendedor.kyc === 'pendiente' ? '⏳ Revisión' : '⚠️ Sin Verificación');
+                    
+                    document.getElementById('infoModalTitle').innerHTML = `Perfil de Vendedor`;
+                    document.getElementById('infoModalText').innerHTML = `
+                        <div style="text-align: center;">
+                            <img src="${foto}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); margin-bottom:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;" onclick="abrirFotoGrande('${foto}')" title="Toca para ver en grande">
+                            <h3 style="color:#0f172a; margin-bottom:6px;">${nombre}</h3>
+                            <span style="background:#f1f5f9; padding:4px 12px; border-radius:20px; font-size:0.85rem; font-weight:bold; color:#475569; border: 1px solid #cbd5e1;">${kycBadge}</span>
+                        </div>
+                    `;
+                    document.getElementById('infoModal').style.display = 'flex';
+                } else {
+                    alert("⚠️ Perfil de vendedor no encontrado.");
+                }
+            } catch(e) {
+                hideLoading();
+                alert("❌ Error al cargar el perfil.");
+            }
+        };
+
         // Sistema de Autenticación
         onAuthStateChanged(auth, (user) => {
             const barraBusqueda = document.querySelector('.search-wrapper');
@@ -686,7 +798,17 @@
                 showSection('productos');
                 
                 onValue(ref(db, 'usuarios/' + user.uid), (snap) => {
+                    if (!snap.exists()) {
+                        signOut(auth);
+                        return;
+                    }
                     userData = snap.val() || {};
+                    
+                    if (userData.portadaUrl) {
+                        const img = document.getElementById('perfilPortadaImg');
+                        if (img) img.src = userData.portadaUrl;
+                    }
+
                     if(!userData.plan) userData.plan = 'basico';
                     if(!userData.kyc) userData.kyc = 'sin_verificar';
                     
@@ -1045,6 +1167,7 @@
                                 <div style="color:var(--primary); font-weight:bold; margin-top:5px;">📅 Publicado: ${formatearFecha(prod.fechaPublicacion)}</div>
                             </div>
                             <div class="card-price">$${prod.precio}</div>
+                            <button onclick="verPortadaVendedor('${prod.uid}')" class="btn-buy" style="background:#f1f5f9; color:#0f172a; border: 1px solid #cbd5e1; margin-bottom: 8px; font-size: 0.9rem;">👤 Ver Perfil del Vendedor</button>
                             ${prod.telefonoVendedor ? `<a href="${linkWa}" target="_blank" class="btn-buy" style="background:#25D366; color:white; border:none;">💬 Contactar por WhatsApp</a>` : `<button class="btn-buy" style="background:#ccc; cursor:not-allowed;">Vendedor sin contacto</button>`}
                         </div>`;
                     grid.appendChild(card);
