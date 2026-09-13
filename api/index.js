@@ -89,7 +89,7 @@ case 'fijarProd':
 async function addProduct(body, res) {
   const payloadData = body.payload || body;
   
-  const { uid, nombre, descripcion, estado, ubicacion, metodosPago, precio, fotos, telefonoVendedor, verificado, estadoProd } = payloadData;
+  const { uid, nombre, descripcion, estado, ubicacion, metodosPago, precio, fotos, telefonoVendedor, verificado } = payloadData;
 
   if (!uid || !nombre || !fotos || fotos.length === 0) {
     return res.status(400).json({ error: 'Faltan datos requeridos para publicar.' });
@@ -110,7 +110,6 @@ async function addProduct(body, res) {
       telefonoVendedor: telefonoVendedor || "",
       verificado: verificado || false,
       fijado: false,
-      estadoProd: estadoProd || 'publicado',
       fechaPublicacion: admin.database.ServerValue.TIMESTAMP
     });
 
