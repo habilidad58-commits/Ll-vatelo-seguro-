@@ -208,6 +208,15 @@ async function handleRegistrationSubmit(body, res) {
   }
 
   try {
+    // 1. VERIFICAR QUE LA CÉDULA NO EXISTA EN LA BASE DE DATOS
+    const usersRef = db.ref('usuarios');
+    const snapshot = await usersRef.orderByChild('cedula').equalTo(cedula).once('value');
+    
+    if (snapshot.exists()) {
+      return res.status(400).json({ error: '❌ Esta Cédula ya está registrada en otra cuenta. No se permiten multicuentas.' });
+    }
+
+    // 2. CREAR USUARIO EN AUTH (Firebase ya bloquea los correos duplicados por defecto)
     const userRecord = await admin.auth().createUser({
       email: email,
       password: password
