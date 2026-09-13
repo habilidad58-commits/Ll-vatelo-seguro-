@@ -125,7 +125,7 @@
         .scroll-gallery::-webkit-scrollbar { display: none; }
         .scroll-gallery img {
             flex-shrink: 0; min-width: 100%; width: 100%; height: 220px; object-fit: cover;
-            scroll-snap-align: start; cursor: pointer; display: block;
+            scroll-snap-align: start; cursor: pointer; display: block; background: #e2e8f0;
         }
 
       .badge-verificado {
@@ -183,10 +183,19 @@
         .section-content.active { display: block; }
         .dashboard-panel { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 2rem; }
         .dashboard-panel h2 { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        /* Pantalla de Carga */
+        /* Pantalla de Carga y Progreso Circular */
         .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
         .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        .progress-circle { position: relative; width: 100px; height: 100px; display: none; margin-bottom: 15px; }
+        .progress-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+        .progress-circle circle { fill: none; stroke-width: 8; stroke: #f3f3f3; }
+        .progress-circle .progress-value { stroke: var(--primary); stroke-dasharray: 283; stroke-dashoffset: 283; transition: stroke-dashoffset 0.1s linear; stroke-linecap: round; }
+        .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 1.2rem; color: var(--primary); }
+        
+        .tab-transition { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
@@ -370,7 +379,14 @@
 
     <!-- Pantalla de Carga Interactiva -->
     <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner"></div>
+        <div class="spinner" id="loadingSpinner"></div>
+        <div class="progress-circle" id="loadingProgress">
+            <svg>
+                <circle cx="50" cy="50" r="45"></circle>
+                <circle cx="50" cy="50" r="45" class="progress-value" id="progressCircleValue"></circle>
+            </svg>
+            <div class="progress-text" id="progressText">0%</div>
+        </div>
         <h3 style="margin-top: 15px; color: var(--primary); font-weight: 800;" id="loadingText">Procesando...</h3>
     </div>
 
@@ -544,20 +560,50 @@
             else { login.style.display = 'none'; reg.style.display = 'block'; }
         };
         window.showSection = (sec) => {
-            document.querySelectorAll('.section-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            const seccion = document.getElementById(sec);
-            if(seccion) seccion.classList.add('active');
-            if(window.event && window.event.currentTarget && window.event.currentTarget.classList) {
-                window.event.currentTarget.classList.add('active');
-            }
-            if(sec === 'misproductos' || sec === 'productos') renderMyProducts(); 
+            showLoading("Cargando sección...");
+            setTimeout(() => {
+                document.querySelectorAll('.section-content').forEach(el => {
+                    el.classList.remove('active');
+                    el.classList.remove('tab-transition');
+                });
+                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+                const seccion = document.getElementById(sec);
+                if(seccion) {
+                    seccion.classList.add('active');
+                    seccion.classList.add('tab-transition');
+                }
+                if(window.event && window.event.currentTarget && window.event.currentTarget.classList) {
+                    window.event.currentTarget.classList.add('active');
+                }
+                if(sec === 'misproductos' || sec === 'productos') renderMyProducts();
+                hideLoading();
+            }, 500);
         };
-        const showLoading = (msg) => {
+        
+        const showLoading = (msg, isProgress = false) => {
             document.getElementById('loadingText').innerText = msg;
             document.getElementById('loadingOverlay').style.display = 'flex';
+            if (isProgress) {
+                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('loadingProgress').style.display = 'block';
+                updateProgress(0);
+            } else {
+                document.getElementById('loadingSpinner').style.display = 'block';
+                document.getElementById('loadingProgress').style.display = 'none';
+            }
         };
+        
         const hideLoading = () => document.getElementById('loadingOverlay').style.display = 'none';
+        
+        const updateProgress = (percent) => {
+            const circle = document.getElementById('progressCircleValue');
+            const text = document.getElementById('progressText');
+            if(circle && text) {
+                const offset = 283 - (283 * percent) / 100;
+                circle.style.strokeDashoffset = offset;
+                text.innerText = Math.round(percent) + '%';
+            }
+        };
 
         window.toggleFiltros = () => {
             const filtros = document.getElementById('filtrosBusqueda');
@@ -854,35 +900,55 @@
 
             if(files.length === 0) return alert("⚠️ Selecciona al menos la primera foto.");
 
-            showLoading("Procesando, comprimiendo y subiendo fotos...");
+            showLoading("Procesando publicación (Estado: Pendiente)...", true);
             try {
                 const usarAhorro = document.getElementById('chkAhorroDatos').checked;
                 const maxRes = usarAhorro ? 600 : 1200;
                 const calidad = usarAhorro ? 0.80 : 0.90;
 
-                const uploadPromises = files.map(async (file, index) => {
-                    let finalFile = await comprimirImagen(file, maxRes, calidad);
+                let fotosUrls = [];
+                let totalFiles = files.length;
+
+                for (let i = 0; i < files.length; i++) {
+                    let finalFile = await comprimirImagen(files[i], maxRes, calidad);
                     const fd = new FormData();
                     fd.append('image', finalFile);
-                    try {
-                        const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
-                        const data = await res.json();
-                        if (!data.success) {
-                            alert(`⚠️ La foto #${index + 1} no se pudo subir al servidor.`);
-                            return null;
-                        }
-                        return data.data.display_url;
-                    } catch (err) {
-                        alert(`⚠️ Error de conexión al subir la foto #${index + 1}.`);
-                        return null;
-                    }
-                });
-                
-                let fotosUrls = (await Promise.all(uploadPromises)).filter(url => url !== null);
+                    
+                    const url = await new Promise((resolve, reject) => {
+                        const xhr = new XMLHttpRequest();
+                        xhr.open('POST', 'https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca');
+                        
+                        xhr.upload.onprogress = (event) => {
+                            if (event.lengthComputable) {
+                                const fileProgress = (event.loaded / event.total) * 100;
+                                const globalProgress = ((i * 100) + fileProgress) / totalFiles;
+                                updateProgress(globalProgress);
+                                if (globalProgress < 100) {
+                                    document.getElementById('loadingText').innerText = `Subiendo fotos... Estado: Pendiente (${Math.round(globalProgress)}%)`;
+                                }
+                            }
+                        };
+                        
+                        xhr.onload = () => {
+                            if (xhr.status === 200) {
+                                const data = JSON.parse(xhr.responseText);
+                                if (data.success) resolve(data.data.display_url);
+                                else reject(new Error("Fallo en ImgBB"));
+                            } else {
+                                reject(new Error("Error de red"));
+                            }
+                        };
+                        xhr.onerror = () => reject(new Error("Error de red"));
+                        xhr.send(fd);
+                    });
+                    
+                    if(url) fotosUrls.push(url);
+                }
+
+                updateProgress(100);
+                document.getElementById('loadingText').innerText = "100% ¡Listo! Pasando a estado Publicado ✅";
 
                 if(fotosUrls.length === 0) throw new Error("No se pudo subir ninguna imagen.");
-
-                showLoading("Publicando en la tienda...");
                 
                 const payload = {
                     uid: currentUser.uid,
@@ -894,7 +960,8 @@
                     precio: document.getElementById('prodPrecio').value,
                     fotos: fotosUrls,
                     telefonoVendedor: userData.plan === 'pro' ? userData.telefono : "",
-                    verificado: userData.kyc === 'verificado'
+                    verificado: userData.kyc === 'verificado',
+                    visibilidad: 'publicado'
                 };
 
                 const response = await fetch('https://llevatelo-seguro.vercel.app/api', {
@@ -952,6 +1019,8 @@
 
             let contador = 0;
             arrProds.forEach(prod => {
+                if (prod.visibilidad === 'pendiente') return; // Ocultar si está pendiente
+
                 const textCheck = prod.nombre.toLowerCase().includes(search) || prod.descripcion.toLowerCase().includes(search);
                 const locCheck = prod.ubicacion.toLowerCase().includes(filterLoc);
                 const statCheck = filter === 'todos' || prod.estado === filter;
@@ -960,8 +1029,9 @@
                 if(textCheck && locCheck && statCheck && priceCheck) {
                     contador++;
                     const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
-                    const imageTags = fotos.map((f, i) => `<img src="${f}" onclick="openModal('${prod.key}', ${i})">`).join('');
-                    const linkWa = prod.telefonoVendedor ? `https://wa.me/58${prod.telefonoVendedor}?text=Hola,%20vengo%20de%20Llévatelo%20Seguro.%20Me%20interesa%20comprar:%20*${encodeURIComponent(prod.nombre)}*` : '#';
+                        const imageTags = fotos.map((f, i) => `<img src="${f}" decoding="async" loading="lazy" onclick="openModal('${prod.key}', ${i})">`).join('');
+
+                const linkWa = prod.telefonoVendedor ? `https://wa.me/58${prod.telefonoVendedor}?text=Hola,%20vengo%20de%20Llévatelo%20Seguro.%20Me%20interesa%20comprar:%20*${encodeURIComponent(prod.nombre)}*` : '#';
 
                     const card = document.createElement('div');
                     card.className = 'card';
@@ -1006,11 +1076,22 @@
                 const key = prod.key;
                 count++;
                 const foto = (Array.isArray(prod.fotos) ? prod.fotos[0] : Object.values(prod.fotos)[0]);
+                const estadoVisual = prod.visibilidad === 'pendiente' ? '<span style="color:#f59e0b; font-size:0.8rem; font-weight:bold;">⏳ Pendiente</span>' : '<span style="color:#10b981; font-size:0.8rem; font-weight:bold;">✅ Publicado al 100%</span>';
+                
                 const div = document.createElement('div');
                 div.className = 'card';
                 div.style.padding = '15px';
                 div.innerHTML = `
                     <div style="display:flex; gap:15px; align-items:center;">
+                        <div style="position:relative;">
+                            <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
+                        </div>
+                        <div style="flex:1;">
+                            <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
+                            <strong style="color:var(--primary); font-size:1.2rem;">$${prod.precio}</strong>
+                            <div style="margin-top: 4px;">${estadoVisual}</div>
+                        </div>
+                    </div>
                         <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
                         <div style="flex:1;">
                             <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
