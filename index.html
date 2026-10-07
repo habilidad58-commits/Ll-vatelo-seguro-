@@ -1,1595 +1,910 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Llévatelo Ya - Compra Directa y Segura</title>
-  <!-- Creador: Luis José Rojas Ayala | 22 años | Cúa, Valles del Tuy | FB: https://www.facebook.com/profile.php?id=61576422852995 | Tel: 04241959869 -->
- 
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <title>Simulador de IA - Domino</title>
     <style>
-        :root {
-            --primary: #2563eb;
-            --primary-dark: #1d4ed8;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --success: #10b981;
-            --border: #e2e8f0;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, sans-serif; }
-        body { background-color: var(--bg); color: var(--text); padding-bottom: 3rem; }
-
-        /* Banner Psicológico Superior */
-        .psy-top-bar {
-            background: #dc2626; color: white; text-align: center; padding: 6px 12px; font-size: 0.82rem; font-weight: 700;
-            letter-spacing: 0.5px; text-transform: uppercase; display: flex; justify-content: center; align-items: center; gap: 8px;
-            animation: pulseBanner 2s infinite;
-        }
-        @keyframes pulseBanner { 0%, 100% { background: #dc2626; } 50% { background: #b91c1c; } }
-
-        /* Header & Banner */
-        header {
-            background: linear-gradient(135deg, #10b981 30%, #ffffff 100%);
-            color: #0f172a; padding: 1.2rem 1rem; position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 4px 25px rgba(0,0,0,0.1); border-bottom: 2px solid #10b981;
-        }
-        .header-container { max-width: 1200px; margin: 0 auto; display: flex; flex-direction: column; gap: 1rem; }
-        .header-top { display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap; gap: 10px; }
-        .logo-title { font-size: 1.7rem; font-weight: 900; display: flex; align-items: center; gap: 8px; color: #0f172a; letter-spacing: -0.5px; }
+        body { background: #121212; color: white; font-family: sans-serif; text-align: center; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 95vh;}
         
-        .trust-badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-        .trust-badge { font-size: 0.78rem; background: rgba(16,185,129,0.15); color: #34d399; padding: 5px 12px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(16,185,129,0.4); }
-        .urgency-badge { font-size: 0.78rem; background: rgba(234,179,8,0.15); color: #facc15; padding: 5px 12px; border-radius: 20px; font-weight: 700; border: 1px solid rgba(234,179,8,0.4); }
+        .top-bar { display: flex; justify-content: center; gap: 10px; padding: 10px; border-bottom: 2px solid #333; margin-bottom: 10px; flex-wrap: wrap; }
+        .btn-top { background: #1e88e5; color: white; border: none; padding: 12px 15px; font-size: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.2s;}
+        .btn-top:hover { background: #1565c0; transform: scale(1.05);}
+        .btn-modo { background: #ff9800; }
+        .btn-ajuste { background: #4caf50; }
 
-        .btn-auth-header {
-            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-            color: white; border: none; padding: 0.65rem 1.3rem; border-radius: 50px;
-            font-weight: 800; font-size: 0.88rem; cursor: pointer; box-shadow: 0 4px 14px rgba(37,99,235,0.4);
-            transition: all 0.2s ease; display: flex; align-items: center; gap: 6px;
-        }
-        .btn-auth-header:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,99,235,0.6); }
-
-        .search-wrapper { display: flex; gap: 10px; flex-wrap: wrap; }
-        .search-wrapper input {
-            flex: 1; min-width: 200px; padding: 0.8rem 1rem; border-radius: 10px;
-            border: 1px solid rgba(255,255,255,0.2); outline: none; font-size: 0.95rem; background: #ffffff;
-        }
-        .search-wrapper select {
-            padding: 0.8rem 1rem; border-radius: 10px; border: none; outline: none; font-size: 0.95rem; background: #ffffff; cursor: pointer; font-weight: 600;
-        }
-
-        /* Modal de Registro */
-        .reg-modal-overlay {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); z-index: 2000;
-            justify-content: center; align-items: center; padding: 1rem;
-        }
-        .reg-modal-card {
-            background: #ffffff; width: 100%; max-width: 480px; border-radius: 20px;
-            padding: 2rem; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35); position: relative; max-height: 90vh; overflow-y: auto;
-        }
-        .reg-modal-header { text-align: center; margin-bottom: 1.5rem; }
-        .reg-modal-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; margin-bottom: 0.3rem; }
-        .reg-modal-sub { font-size: 0.85rem; color: #64748b; }
+        .tablero { padding: 15px; border-radius: 8px; margin-bottom: 10px; overflow-y: auto; max-height: 200px; display: flex; align-items: center; justify-content: space-between; position: relative; background: #4a148c; }
+        .mano-box { background: #311b92; padding: 10px; border-radius: 8px; min-height: 80px; margin-bottom: 10px; border: 2px solid #b388ff;}
         
-        .btn-google {
-            width: 100%; padding: 0.8rem; border: 1px solid #cbd5e1; border-radius: 10px;
-            background: #ffffff; color: #334155; font-weight: 700; font-size: 0.9rem;
-            display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
-            transition: background 0.2s; margin-bottom: 1.2rem;
-        }
-        .btn-google:hover { background: #f8fafc; }
-
-        .divider-text { display: flex; align-items: center; text-align: center; color: #94a3b8; font-size: 0.8rem; margin: 1rem 0; }
-        .divider-text::before, .divider-text::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
-        .divider-text:not(:empty)::before { margin-right: .5em; }
-        .divider-text:not(:empty)::after { margin-left: .5em; }
-
-        .form-group { margin-bottom: 1rem; text-align: left; }
-        .form-group label { display: block; font-size: 0.82rem; font-weight: 700; color: #334155; margin-bottom: 0.4rem; }
-        .form-group input {
-            width: 100%; padding: 0.75rem; border-radius: 8px; border: 1px solid #cbd5e1;
-            font-size: 0.9rem; outline: none; transition: border 0.2s;
-        }
-        .form-group input:focus { border-color: #2563eb; }
-
-        .btn-submit-reg {
-            width: 100%; padding: 0.9rem; border-radius: 10px; border: none;
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%); color: white;
-            font-weight: 800; font-size: 1rem; cursor: pointer; margin-top: 1rem;
-            box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); transition: transform 0.2s;
-        }
-        .btn-submit-reg:hover { transform: translateY(-2px); }
-
-        /* Container principal */
-        main { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
-        .grid-products { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 1.5rem; }
-
-        /* Tarjeta */
-        .card {
-            background: var(--card-bg); border-radius: 16px; overflow: hidden;
-            border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
-            display: flex; flex-direction: column; transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px -8px rgba(0,0,0,0.12); }
-
-        /* Galería Tarjeta */
-        .card-gallery { position: relative; height: 220px; background: #f1f5f9; overflow: hidden; width: 100%; }
-        .scroll-gallery {
-            display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
-            width: 100%; height: 100%; scrollbar-width: none; -ms-overflow-style: none;
-            -webkit-overflow-scrolling: touch;
-        }
-        .scroll-gallery::-webkit-scrollbar { display: none; }
-        .scroll-gallery img {
-            flex-shrink: 0; min-width: 100%; width: 100%; height: 220px; object-fit: cover;
-            scroll-snap-align: start; cursor: pointer; display: block; background: #e2e8f0;
-        }
-
-      .badge-verificado {
-            position: absolute; top: 12px; right: 12px; background: var(--success);
-            color: white; padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2); pointer-events: none;
-        }
-
-        .card-body { padding: 1.25rem; display: flex; flex-direction: column; flex: 1; }
-        .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.4rem; color: var(--text); }
-        .card-desc { font-size: 0.88rem; color: var(--text-muted); margin-bottom: 1rem; line-height: 1.4; flex: 1; }
-
-        .card-info { font-size: 0.82rem; background: #f8fafc; padding: 0.6rem 0.8rem; border-radius: 8px; margin-bottom: 1rem; border: 1px solid #f1f5f9; }
-        .card-info div { margin-bottom: 3px; }
-
-        .card-price { font-size: 1.6rem; font-weight: 800; color: var(--primary); margin-bottom: 1rem; }
-
-        .btn-buy {
-            background-color: var(--primary); color: white; text-align: center;
-            padding: 0.8rem; border-radius: 10px; text-decoration: none; font-weight: 700;
-            display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;
-        }
-        .btn-buy:hover { background-color: var(--primary-dark); }
-
-        /* Modal Imagen Completa / Lightbox */
-        .modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;
-        }
-        .modal-content { max-width: 90%; max-height: 85vh; border-radius: 8px; object-fit: contain; }
-        .modal-close { position: absolute; top: 20px; right: 25px; color: white; font-size: 2rem; cursor: pointer; font-weight: bold; z-index: 1002; }
-        .modal-btn {
-            position: absolute; top: 50%; transform: translateY(-50%);
-            background: rgba(255,255,255,0.2); color: white; border: none; padding: 12px 18px;
-            cursor: pointer; border-radius: 50%; font-size: 1.5rem; backdrop-filter: blur(4px); z-index: 1001;
-        }
-        .modal-btn.prev { left: 15px; }
-        .modal-btn.next { right: 15px; }
-        .modal-counter {
-            position: absolute; bottom: 20px; color: white; font-size: 0.9rem;
-            background: rgba(0,0,0,0.6); padding: 4px 12px; border-radius: 12px;
-        }
-
-        .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); }
+        .ficha { background: white; color: black; padding: 5px 10px; border-radius: 4px; display: inline-block; margin: 3px; font-weight: bold; cursor: pointer;}
+        .ficha-mesa { font-size: 14px; }
+        .ficha-mano { font-size: 18px; border: 2px solid #ffeb3b; }
+        .ficha-mano.seleccionada { transform: scale(1.15); box-shadow: 0 0 15px #00e676; border-color: #00e676; }
+        .ficha-historia { box-shadow: 0 0 10px #ff9800; border-color: #ff9800; }
         
-        /* Botones de Tutorial (i) */
-        .btn-info { background: #38bdf8; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-weight: bold; cursor: pointer; display: inline-flex; justify-content: center; align-items: center; font-size: 0.8rem; margin-left: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.2); transition: 0.2s; }
-        .btn-info:hover { transform: scale(1.1); background: #0284c7; }
+        .puntas-display { color: #ff9800; font-size: 20px; font-weight: bold; margin-bottom: 10px;}
+        
+        .btn-accion { background: #333; color: white; border: none; padding: 15px 20px; font-size: 14px; border-radius: 8px; margin: 5px; font-weight: bold; cursor: pointer; }
+        .btn-jugar { background: #ff9800; }
 
-        /* Nuevas secciones y tabs */
-        .tabs { display: none; justify-content: center; gap: 10px; margin: 1rem auto; max-width: 1200px; padding: 0 1rem; }
-        .tab-btn { padding: 0.8rem 1.5rem; border: none; background: #e2e8f0; color: #334155; border-radius: 8px; font-weight: 700; cursor: pointer; transition: 0.3s; }
-        .tab-btn.active { background: var(--primary); color: white; }
-        .section-content { display: none; }
-        .section-content.active { display: block; }
-        .dashboard-panel { background: white; padding: 2rem; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); margin-bottom: 2rem; }
-        .dashboard-panel h2 { margin-bottom: 1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-        /* Pantalla de Carga y Progreso Circular */
-        .loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
-        .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); align-items: center; justify-content: center; z-index: 10; flex-direction: column;}
+        .modal-content { background: #1e1e1e; padding: 20px; border-radius: 10px; border: 2px solid #00c853; width: 85%; max-width: 400px; }
+        .close-btn { background: #f44336; color: white; border: none; padding: 10px; margin-top: 15px; width: 100%; font-size: 16px; border-radius: 5px; cursor: pointer;}
         
-        .progress-circle { position: relative; width: 100px; height: 100px; display: none; margin-bottom: 15px; }
-        .progress-circle svg { width: 100%; height: 100%; transform: rotate(-90deg); }
-        .progress-circle circle { fill: none; stroke-width: 8; stroke: #f3f3f3; }
-        .progress-circle .progress-value { stroke: var(--primary); stroke-dasharray: 283; stroke-dashoffset: 283; transition: stroke-dashoffset 0.1s linear; stroke-linecap: round; }
-        .progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-weight: 800; font-size: 1.2rem; color: var(--primary); }
+        .btn-ronda { background: #424242; color: white; border: 1px solid #777; padding: 10px; margin: 5px; width: 45%; border-radius: 5px; cursor: pointer;}
+        .btn-sel-modo { background: #9c27b0; color: white; border: none; padding: 15px; margin: 10px 0; width: 100%; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;}
         
-        .tab-transition { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Botón Flotante y Panel de Notificaciones */
-        .floating-btn {
-            position: fixed; bottom: 20px; right: 20px; width: 55px; height: 55px;
-            background: var(--primary); color: white; border-radius: 50%;
-            display: flex; justify-content: center; align-items: center; font-size: 1.5rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3); cursor: grab; z-index: 9999;
-            user-select: none; touch-action: none; transition: transform 0.2s;
-        }
-        .floating-btn:active { cursor: grabbing; transform: scale(0.95); }
-        .notif-panel {
-            display: none; position: fixed; bottom: 85px; right: 20px; width: 300px;
-            max-height: 400px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            z-index: 9998; overflow-y: auto; border: 1px solid var(--border);
-            animation: fadeIn 0.2s ease-in-out;
-        }
-        .notif-header { background: var(--primary); color: white; padding: 12px 15px; font-weight: bold; position: sticky; top: 0; border-radius: 12px 12px 0 0; display: flex; justify-content: space-between; align-items: center; }
-        .notif-item { padding: 12px 15px; border-bottom: 1px solid var(--border); font-size: 0.85rem; color: #334155; line-height: 1.4; display: flex; gap: 10px; align-items: flex-start; }
-        .notif-icon { font-size: 1.2rem; }
+        #info-partida { color: #aaa; font-size: 14px; margin-bottom: 10px; }
+        #estado-turno { font-size: 18px; color: #00e676; font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
+    <div class="top-bar">
+        <button class="btn-top" onclick="abrirModalModo()">Jugar</button>
+        <button class="btn-top" onclick="reiniciarActual()">Reiniciar</button>
+        <button class="btn-top" style="background: #9c27b0;" onclick="abrirModalRegistro()">Registro</button>
+        <button class="btn-top btn-modo" onclick="abrirModalModo()">Modo</button>
+        <button class="btn-top btn-ajuste" onclick="abrirModalAjustes()">Ajustes</button>
+    </div>
+    <div style="margin-bottom: 10px;">
+        <button class="btn-top" style="background: #ff9800; width: 80%; max-width: 320px;" onclick="abrirModalGuardarHistoria()"> Guardar Historia</button>
+    </div>
 
-    <!-- Franja roja eliminada -->
+    <div id="info-partida">Simulador en Espera. Selecciona un Modo para iniciar.</div>
+    <div id="estado-turno">-</div>
 
-    <header>
-        <div class="header-container">
-            <div class="header-top">
-                <div class="logo-title">🛡️ Llévatelo Ya</div>
-                
-                <div class="trust-badge-group">
-                    <span class="trust-badge">✔️ 100% Verificado</span>
-                    <button class="btn-auth-header" id="btnAuthHeader" onclick="openRegModal()">👤 Iniciar Sesión / Registro</button>
-                    <button class="btn-auth-header" id="btnLogout" style="display:none; background: #dc2626;" onclick="cerrarSesion()">Salir de la Cuenta</button>
-                </div>
-            </div>
-
-            <!-- Banner de usuarios eliminado -->
-
-              <div class="search-wrapper" id="filtrosBusqueda">
-                <input type="text" id="searchInput" placeholder="¿Qué buscas? Ej: Samsung...">
-                <input type="text" id="filterUbicacion" placeholder="Ubicación. Ej: Cúa" style="flex:1;">
-                <input type="number" id="filterPrecioMin" placeholder="Precio Min ($)" style="width: 110px;">
-                <input type="number" id="filterPrecioMax" placeholder="Precio Max ($)" style="width: 110px;">
-                <select id="filterSelect">
-                    <option value="todos">Todos los Estados</option>
-                    <option value="Nuevo">Nuevos</option>
-                    <option value="Usado">Usados</option>
-                </select>
-            </div>
-            <div style="text-align: center; margin-top: 5px;">
-                <button type="button" onclick="toggleFiltros()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; padding: 0; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));" id="btnToggleFiltros" title="Ocultar Filtros">🔼</button>
-            </div>
+    <div class="tablero" id="caja-tablero">
+        <button id="btn-izq" class="btn-accion btn-jugar" style="display:none;" onclick="ejecutarJugada(0)">  Izq</button>
+        
+        <div style="flex-grow: 1; text-align: center;">
+            <div class="puntas-display" id="puntas-text">Mesa Vacía</div>
+            <div id="mesa-fichas" style="display:flex; flex-wrap:wrap; justify-content:center; align-items:center;"></div>
         </div>
-    </header>
 
+        <button id="btn-der" class="btn-accion btn-jugar" style="display:none;" onclick="ejecutarJugada(1)">Der  </button>
+    </div>
     
-<div class="tabs" id="userTabs">
-        <button class="tab-btn active" onclick="showSection('productos')">Tienda</button>
-        <button class="tab-btn" onclick="showSection('misproductos')">Mis Productos</button>
-        <button class="tab-btn" onclick="showSection('perfil')">Mi Perfil</button>
-        <button class="tab-btn" onclick="showSection('configuracion')">Configuración</button>
+    <button id="btn-centro" class="btn-accion btn-jugar" style="display:none; width:100%; margin-bottom:10px;" onclick="ejecutarJugada(-1)">Lanzar al Centro (Primera)</button>
+    <button id="btn-paso" class="btn-accion" style="display:none; width:100%; background:#f44336; margin-bottom:10px;" onclick="registrarPaso()">PASAR TURNO</button>
+    <h3 style="margin-bottom: 5px; color: #64b5f6;">Mi Mano (Maestro)</h3>
+    <div id="seccion-mano" class="mano-box">
+        <div id="mi-mano"></div>
     </div>
+    <button class="btn-accion" style="width:100%; background:#311b92; border:2px solid #b388ff; color:white; font-size:14px; margin-bottom:15px; border-radius:8px; padding:12px;" onclick="abrirModalFichasSobrantes()">Revelar Fichas Restantes</button>
+    
 
-    <main>
-        <!-- Sección Info para No Registrados -->
-        <div id="infoPublica" class="section-content active">
-            <div class="dashboard-panel" style="text-align: center; padding: 3rem 1.5rem; background: linear-gradient(to bottom, #ffffff, #f8fafc); border: 1px solid #e2e8f0; border-top: 4px solid var(--primary);">
-                <h1 style="font-size: 2.2rem; color: var(--primary); margin-bottom: 1rem; font-weight: 900; letter-spacing: -1px;">Vende Rápido. Compra Seguro. 🛡️</h1>
-                <p style="font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; line-height: 1.6; max-width: 600px; margin-left: auto; margin-right: auto;">
-                    Únete a <b>Llévatelo Ya</b>, el mercado digital líder donde compradores y vendedores reales hacen tratos sin intermediarios.
-                </p>
-                
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; text-align: left;">
-                    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">📸</div>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #0f172a;">Publica Gratis</h3>
-                        <p style="font-size: 0.9rem; color: #64748b;">Sube tus productos con fotos en segundos y llega a miles de clientes activos.</p>
-                    </div>
-                    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">💬</div>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #0f172a;">Trato Directo</h3>
-                        <p style="font-size: 0.9rem; color: #64748b;">Los clientes te escriben directo a tu WhatsApp. Sin demoras ni comisiones.</p>
-                    </div>
-                    <div style="background: white; padding: 1.5rem; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
-                        <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-                        <h3 style="font-size: 1.1rem; margin-bottom: 5px; color: #0f172a;">Red Segura</h3>
-                        <p style="font-size: 0.9rem; color: #64748b;">Comunidad protegida con sistema de verificación (KYC) para evitar fraudes.</p>
-                    </div>
-                </div>
-
-                <button class="btn-submit-reg" style="max-width: 350px; margin: 0 auto; font-size: 1.1rem; padding: 1rem; box-shadow: 0 10px 15px -3px rgba(37,99,235,0.3);" onclick="openRegModal()">🚀 Crear mi Cuenta o Entrar</button>
-            </div>
-        </div>
-
-        <!-- Sección 1: Productos Públicos -->
-        <div id="productos" class="section-content">
-            <div class="grid-products" id="productGrid">
-                <div class="empty-state">Cargando catálogo en tiempo real...</div>
-            </div>
-        </div>
-
-        <!-- Sección 2: Mis Productos -->
-        <div id="misproductos" class="section-content">
-            <div class="dashboard-panel">
-                <h2 style="display:flex; align-items:center;">➕ Agregar Nuevo Producto <button class="btn-info" type="button" onclick="abrirInfo('Publicar Artículo', 'Aquí puedes poner en venta tu producto.<br><br><b>Recuerda:</b> Sube fotos claras y pon un precio competitivo. ¡Puedes publicar la cantidad de productos que desees de forma ilimitada!')">i</button></h2>
-                <form id="addProductForm">
-                    <div class="form-group"><label>Nombre del Producto *</label><input type="text" id="prodNombre" required placeholder="Ej: PS5 Nuevo"></div>
-                    <div class="form-group"><label>Descripción Detallada *</label><input type="text" id="prodDesc" required placeholder="Accesorios, tiempo de uso..."></div>
-                    <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;"><label>Estado *</label><select id="prodEstado" required><option value="Nuevo">Nuevo</option><option value="Usado">Usado</option></select></div>
-                        <div class="form-group" style="flex: 1;"><label>Ubicación *</label><input type="text" id="prodUbicacion" required placeholder="Ej: Cúa"></div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;"><label>Métodos de Pago *</label><input type="text" id="prodPagos" required placeholder="Ej: Pago Móvil, Zelle"></div>
-                        <div class="form-group" style="flex: 1;"><label>Precio en Dólares ($) *</label><input type="number" step="0.01" id="prodPrecio" required placeholder="Ej: 150"></div>
-                    </div>
-                    <div class="form-group">
-                        <label>Fotos (Sube de 1 a 2 fotos, la primera es obligatoria) *</label>
-                        <input type="file" id="prodFoto1" accept="image/*" required style="margin-bottom: 8px; padding: 0.4rem; border: 1px dashed #cbd5e1;">
-                        <input type="file" id="prodFoto2" accept="image/*" style="padding: 0.4rem; border: 1px dashed #cbd5e1;">
-                    </div>
-                    <div class="form-group" style="display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1;">
-                        <input type="checkbox" id="chkAhorroDatos" style="width: 20px; height: 20px; cursor: pointer;" checked>
-                        <label for="chkAhorroDatos" style="margin: 0; cursor: pointer; font-size: 0.9rem; color: #0f172a; font-weight: bold;">Ahorro de Datos (Imágenes de carga rápida y ligera)</label>
-                    </div>
-                    <button type="submit" class="btn-submit-reg" style="margin-top: 10px;">Publicar Producto 🚀</button>
-                </form>
-            </div>
-            <div class="dashboard-panel">
-                <h2>📦 Mis Publicaciones Activas</h2>
-                <div class="grid-products" id="myProductGrid"></div>
-            </div>
-        </div>
-
-        <!-- Sección 3: Perfil -->
-        <div id="perfil" class="section-content">
-            <div class="dashboard-panel">
-                <div style="display: flex; flex-direction: column; align-items: center; margin-bottom: 25px; background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px dashed #cbd5e1;">
-                    <div style="position: relative; width: 95px; height: 95px; border-radius: 50%; background: #e2e8f0; display: flex; justify-content: center; align-items: center; overflow: hidden; border: 3px solid var(--primary); box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        <img id="perfilPortadaImg" src="https://cdn-icons-png.flaticon.com/512/149/149071.png" style="width: 100%; height: 100%; object-fit: cover; cursor: pointer;" onclick="abrirFotoGrande(this.src)" title="Toca para ver en grande">
-                    </div>
-                    <input type="file" id="inputPortada" accept="image/*" style="display: none;" onchange="subirPortadaPerfil(this)">
-                    <button onclick="document.getElementById('inputPortada').click()" style="margin-top: -12px; z-index: 2; background: var(--primary); color: white; border: none; padding: 4px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);">✏️ Editar Portada</button>
-                    <h2 style="border:none; margin: 15px 0 0 0; display:flex; align-items:center; font-size: 1.3rem;">👤 Datos de tu Perfil <button class="btn-info" type="button" onclick="abrirInfo('Mi Perfil', 'Aquí verás el estado oficial de tu cuenta.<br><br>Tus datos principales no se pueden editar manualmente por seguridad.')">i</button></h2>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 20px;">
-                    <div></div>
-                    <div style="display: flex; gap: 10px; align-items: center;">
-                        <span id="badgePlan" style="background: #1e293b; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">Plan: Básico</span>
-                        <button class="btn-info" type="button" onclick="abrirInfo('Desbloquea tu Potencial de Ventas 🚀', '¿Sabías que los vendedores PRO cierran sus ventas <b>3 veces más rápido</b>?<br><br>Al subir a PRO, habilitas el <b>botón directo a tu WhatsApp</b>. Los compradores odian esperar; si ven tu WhatsApp, te compran a ti primero.<br><br>No dejes que tu competencia se lleve a tus clientes. <b>Verifícate primero y luego da el salto a PRO.</b>')">i</button>
-                        <span id="badgeKYC" style="background: #64748b; color: white; padding: 6px 12px; border-radius: 20px; font-weight: bold; font-size: 0.85rem;">Sin Verificación</span>
-                    </div>
-                </div>
-                
-                <div id="alertaRechazo" style="display: none; background: #fee2e2; color: #991b1b; padding: 15px; border-radius: 8px; margin-bottom: 15px; font-size: 0.9rem; font-weight: bold;">
-                    ❌ Tu verificación fue rechazada: <span id="motivoRechazo"></span>. <button onclick="abrirKYCModal()" style="background:#dc2626; color:white; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; margin-left: 10px; font-weight:bold;">Vuelve a intentarlo</button>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                    <div class="form-group" style="flex: 1;"><label>Nombres 🔒</label><input type="text" id="perfilNombres" readonly style="background:#e2e8f0; color:#475569; cursor:not-allowed;" title="Dato bloqueado por seguridad"></div>
-                    <div class="form-group" style="flex: 1;"><label>Apellidos 🔒</label><input type="text" id="perfilApellidos" readonly style="background:#e2e8f0; color:#475569; cursor:not-allowed;" title="Dato bloqueado por seguridad"></div>
-                </div>
-                <div class="form-group"><label>Cédula 🔒</label><input type="text" id="perfilCedula" readonly style="background:#e2e8f0; color:#475569; cursor:not-allowed;" title="Dato bloqueado por seguridad"></div>
-                
-                <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 15px;">
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <button class="btn-submit-reg" id="btnVerificarKYC" style="background: #0ea5e9; display:none; margin: 0; flex: 1;" onclick="abrirKYCModal()">📸 Verificar Identidad (KYC)</button>
-                        <button class="btn-info" id="btnInfoKYC" style="display:none; width:35px; height:35px; font-size:1.1rem;" onclick="abrirInfo('Verificación KYC', '<b>¿Para qué sirve?</b><br>Al subir tu cédula, obtendrás un sello de VERIFICADO ✅ en tus anuncios.<br><br><b>Beneficios:</b><br>- Da extrema confianza a compradores.<br>- Te permite subir productos sin restricciones.')">i</button>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 10px;">
-                        <button class="btn-submit-reg" id="btnSubirPro" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); display:none; margin: 0; flex: 1;" onclick="abrirProModal()">⭐ Subir a Plan PRO ($0.30)</button>
-                        <button class="btn-info" id="btnInfoPro" style="display:none; width:35px; height:35px; font-size:1.1rem; background:#f59e0b;" onclick="abrirInfo('Beneficios del Plan PRO ⭐', 'Desbloquea el nivel máximo de ventas:<br><br>1️⃣ <b>Botón de WhatsApp:</b> Los clientes te escriben directo a tu chat.<br>2️⃣ <b>Fijar Productos:</b> Pon tus artículos en el tope de la página para que se vendan rápido.')">i</button>
-                    </div>
-                </div>
-
-                <div id="seccionTelefono" style="display: none; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
-                    <h2 style="border:none; margin:0; color:#d97706; display:flex; align-items:center;">📱 WhatsApp (Plan PRO) <button class="btn-info" type="button" onclick="abrirInfo('Configurar Número', 'Guarda aquí tu número de teléfono (Ejemplo: 4121234567).<br><br>Esto enlazará el botón de tus anuncios directamente con tu WhatsApp para que te escriban de inmediato.')">i</button></h2>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Tu plan te permite guardar tu número. Tus clientes te contactarán directo por WhatsApp.</p>
-                    <div class="form-group">
-                        <div style="display:flex; gap:5px;">
-                            <input type="text" value="+58" readonly style="width: 60px; background:#f1f5f9; text-align:center; font-weight:bold;">
-                            <input type="number" id="perfilTelefono" placeholder="Ej: 4121234567" oninput="if(this.value.length > 10) this.value = this.value.slice(0, 10);">
-                        </div>
-                    </div>
-                    <button class="btn-submit-reg" style="margin-bottom:10px;" onclick="guardarTelefono()">💾 Guardar Número</button>
-                </div>
-
-                </div>
-        </div>
-
-        <!-- Sección 4: Configuración -->
-        <div id="configuracion" class="section-content">
-            <div class="dashboard-panel">
-                <h2 style="font-size: 1.3rem; margin-bottom: 15px;">⚙️ Configuración de Cuenta</h2>
-                
-                <!-- Cambio de Contraseña -->
-                <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1; margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 10px;">🔑 Cambiar Contraseña</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">El sistema requiere <strong>máximo 6 dígitos</strong> (combinación entre letras y números).</p>
-                    <div class="form-group">
-                        <label>Nueva Contraseña</label>
-                        <input type="password" id="confNuevaClave" maxlength="6" placeholder="Máximo 6 caracteres">
-                    </div>
-                    <div class="form-group">
-                        <label>Confirmar Nueva Contraseña</label>
-                        <input type="password" id="confRepetirClave" maxlength="6" placeholder="Repite la contraseña">
-                    </div>
-                    <button class="btn-submit-reg" onclick="cambiarPasswordDirecto()" style="background: #2563eb; margin-top: 5px;">Actualizar Contraseña</button>
-                </div>
-
-                <!-- Términos y Uso -->
-                <div style="background: #fff1f2; padding: 15px; border-radius: 12px; border: 1px solid #fecdd3; margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; color: #be123c; margin-bottom: 10px;">📜 Términos y Políticas de Uso Estricto</h3>
-                    <p style="font-size: 0.9rem; color: #4c0519; line-height: 1.6;">
-                        En <strong>Llévatelo Ya</strong> fomentamos el comercio limpio, legal y seguro. Queremos dejar claro que <strong>CUALQUIER USO INDEBIDO</strong> de esta plataforma resultará en un bloqueo inmediato de la cuenta por 48 horas o de forma permanente, según la gravedad.<br><br>
-                        Está terminantemente prohibido publicar, promover o comercializar: drogas, armas, productos ilícitos, servicios de dudosa procedencia, o cualquier artículo que viole la ley. Tú sabes de lo que hablamos. Debes hacer las cosas bien y actuar de buena fe. Si detectamos comportamientos anómalos, tu cuenta será suspendida sin derecho a reclamo. Mantengamos un entorno seguro para todos.
-                    </p>
-                </div>
-
-                <!-- Centro de Ayuda -->
-                <div style="background: #f0fdf4; padding: 15px; border-radius: 12px; border: 1px solid #bbf7d0; margin-bottom: 20px;">
-                    <h3 style="font-size: 1.1rem; color: #166534; margin-bottom: 10px;">❓ Centro de Ayuda (Paso a Paso)</h3>
-                    <div style="font-size: 0.9rem; color: #14532d; line-height: 1.6;">
-                        <strong>1. Registro y Login:</strong> Crea tu cuenta con datos reales para dar confianza. Si olvidas tu clave, usa la opción "Olvidé mi contraseña" en la pantalla de inicio.<br>
-                        <strong>2. Publicar Productos:</strong> Ve a "Mis Productos", sube fotos claras, coloca precio y descripción. ¡Es ilimitado!<br>
-                        <strong>3. Verificación (KYC):</strong> En "Mi Perfil", sube tu cédula y selfie. Al ser aprobado, tendrás un sello verde de confianza.<br>
-                        <strong>4. Plan PRO:</strong> Activa tu botón de WhatsApp directo y fija tus productos de primeros en la Tienda.<br>
-                        <strong>5. Cambiar Clave:</strong> Desde esta misma sección puedes renovar tu contraseña cuando lo desees.<br>
-                    </div>
-                </div>
-
-                <!-- Comentarios y Mejoras -->
-                <div style="background: #f8fafc; padding: 15px; border-radius: 12px; border: 1px solid #cbd5e1;">
-                    <h3 style="font-size: 1.1rem; color: #0f172a; margin-bottom: 10px;">💡 Ayuda y Comentarios sobre Mejoras</h3>
-                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">¿Tienes alguna sugerencia para mejorar la página? Escríbenos.</p>
-                    <div class="form-group">
-                        <textarea id="txtComentario" maxlength="150" rows="3" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; resize: none; font-family: inherit;" placeholder="Escribe tu sugerencia aquí..."></textarea>
-                        <div style="text-align: right; font-size: 0.75rem; color: #64748b;" id="charCount">0/150</div>
-                    </div>
-                    <button class="btn-submit-reg" onclick="enviarComentario()" style="background: #0ea5e9;">Enviar Comentario</button>
-                </div>
-
-            </div>
-        </div>
-    </main>
-
-    <!-- Sistema de Alertas Profesionales -->
-    <div class="reg-modal-overlay" id="customAlertModal" style="z-index: 99999;">
-        <div class="reg-modal-card" style="text-align: center; max-width: 350px;">
-            <div class="reg-modal-title" style="color: var(--primary); font-size: 1.3rem;">Notificación</div>
-            <p id="customAlertText" style="margin: 15px 0; font-size: 1rem; color: #334155; font-weight: 500;"></p>
-            <button class="btn-submit-reg" onclick="closeCustomAlert()">Entendido</button>
+ <div id="modal-tipo-modo" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #00e676; margin-top: 0;">Seleccionar Modo</h2>
+            <button class="btn-sel-modo" onclick="abrirSeleccionHistoria('anclada')">  Modo Anclado</button>
+            <button class="btn-sel-modo" style="background: #2196f3;" onclick="abrirSeleccionHistoria('natural')">  Modo Natural</button>
+            <button class="btn-sel-modo" style="background: #f44336;" onclick="iniciarVerify()">  Modo Verify (Aleatorio)</button>
+            <button class="close-btn" onclick="cerrarModal('modal-tipo-modo')">Cancelar</button>
         </div>
     </div>
 
-    <!-- Sistema de Confirmación Profesional -->
-    <div class="reg-modal-overlay" id="customConfirmModal" style="z-index: 99999;">
-        <div class="reg-modal-card" style="text-align: center; max-width: 350px;">
-            <div class="reg-modal-title" style="color: #dc2626; font-size: 1.3rem;">⚠️ Atención</div>
-            <p id="customConfirmText" style="margin: 15px 0; font-size: 1rem; color: #334155; font-weight: 500;"></p>
-            <div style="display: flex; gap: 10px;">
-                <button class="btn-submit-reg" style="background: #ef4444;" onclick="confirmarEliminar()">Sí, borrar</button>
-                <button class="btn-submit-reg" style="background: #64748b;" onclick="cerrarConfirmar()">Cancelar</button>
+    <div id="modal-historias" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #ff9800; margin-top: 0;">Seleccionar Historia</h2>
+            <p style="color:#aaa; font-size:14px;">Modo: <span id="modo-elegido-texto"></span></p>
+            <div id="lista-historias" style="max-height: 250px; overflow-y: auto;">
+                <!-- Cargado dinámicamente -->
             </div>
+            <button class="close-btn" onclick="cerrarModal('modal-historias')">Atrás</button>
         </div>
     </div>
 
-    <!-- Sistema de Tutoriales / Info (Botón i) -->
-    <div class="reg-modal-overlay" id="infoModal" style="z-index: 99999;">
-        <div class="reg-modal-card" style="text-align: center; max-width: 400px;">
-            <span class="modal-close" style="color: #0f172a;" onclick="closeInfoModal()">&times;</span>
-            <div class="reg-modal-title" id="infoModalTitle" style="color: var(--primary); font-size: 1.3rem;">Ayuda</div>
-            <p id="infoModalText" style="margin: 15px 0; font-size: 0.95rem; color: #475569; line-height: 1.6; text-align: left;"></p>
-            <button class="btn-submit-reg" onclick="closeInfoModal()">¡Entendido!</button>
-        </div>
-    </div>
-
-    <!-- Pantalla de Carga Interactiva -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner" id="loadingSpinner"></div>
-        <div class="progress-circle" id="loadingProgress">
-            <svg>
-                <circle cx="50" cy="50" r="45"></circle>
-                <circle cx="50" cy="50" r="45" class="progress-value" id="progressCircleValue"></circle>
-            </svg>
-            <div class="progress-text" id="progressText">0%</div>
-        </div>
-        <h3 style="margin-top: 15px; color: var(--primary); font-weight: 800;" id="loadingText">Procesando...</h3>
-    </div>
-
-    <!-- Modal Multi-Uso Auth -->
-    <div class="reg-modal-overlay" id="regModal">
-        <div class="reg-modal-card">
-            <span class="modal-close" style="color: #0f172a;" onclick="closeRegModal()">&times;</span>
+    <div id="modal-ajustes" class="modal">
+        <div class="modal-content">
+            <h2 style="color: #4caf50; margin-top: 0;">Ajustes del Simulador</h2>
+            <p style="color:#fff;">Velocidad del Bot (ms): <span id="vel-valor">6000</span>ms</p>
+            <input type="range" id="vel-slider" min="1000" max="10000" step="500" value="6000" style="width: 100%;" oninput="document.getElementById('vel-valor').innerText = this.value">
             
-            <!-- Iniciar Sesión -->
-            <div id="loginSection">
-                <div class="reg-modal-header"><div class="reg-modal-title">🔐 Iniciar Sesión</div></div>
-                <form id="loginForm">
-                    <div class="form-group"><label>Correo Electrónico</label><input type="email" id="loginEmail" required></div>
-                    <div class="form-group">
-                        <label>Contraseña</label>
-                        <div style="position: relative; display: flex; align-items: center;">
-                            <input type="password" id="loginPass" required style="padding-right: 40px;">
-                            <span onclick="togglePass('loginPass', this)" style="position: absolute; right: 12px; cursor: pointer; font-size: 1.1rem; user-select: none;">👁️</span>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-submit-reg">Ingresar a mi Cuenta</button>
-                </form>
-                <div style="text-align: right; margin-top: 10px;">
-                    <a href="#" onclick="abrirRecuperarModal()" style="color:var(--primary); font-size: 0.85rem; font-weight: bold; text-decoration: none;">¿Olvidé mi contraseña?</a>
-                </div>
-                <div class="divider-text">¿Eres nuevo? <a href="#" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:bold;">Crea tu cuenta gratis</a></div>
-            </div>
+            <h3 style="color: #64b5f6; margin-top: 15px;">Comportamiento IA (Bots)</h3>
+            <select id="bot-modo-select" style="width: 100%; padding: 10px; background: #333; color: white; border: none; border-radius: 5px; font-weight: bold;">
+                <option value="estratega">Modo Estratega (Roles por jugador)</option>
+                <option value="azar">Modo Al Azar (A lo loco/Intuición)</option>
+            </select>
 
-            <!-- Recuperar Contraseña -->
-            <div id="recuperarSection" style="display: none;">
-                <div class="reg-modal-header">
-                    <div class="reg-modal-title">🔑 Restablecer Clave</div>
-                    <div class="reg-modal-sub">Guarda una nueva contraseña para tu cuenta</div>
-                </div>
-                <form id="recuperarForm">
-                    <div class="form-group">
-                        <label>Correo de la Cuenta</label>
-                        <input type="email" id="recuperarEmail" required placeholder="tu@correo.com">
-                    </div>
-                    <div class="form-group">
-                        <label>Nueva Contraseña (Máx 6 dígitos)</label>
-                        <input type="password" id="recuperarClave" maxlength="6" required placeholder="Letras y números">
-                    </div>
-                    <button type="submit" class="btn-submit-reg" style="background: #eab308; color: #451a03;">Guardar Nueva Contraseña</button>
-                </form>
-                <div class="divider-text"><a href="#" onclick="volverAlLogin()" style="color:var(--primary); font-weight:bold;">Volver a Iniciar Sesión</a></div>
-            </div>
-
-            <!-- Registro -->
-            <div id="registerSection" style="display: none;">
-                <div class="reg-modal-header"><div class="reg-modal-title">📝 Registro Rápido</div><div class="reg-modal-sub">Solo tomará 30 segundos</div></div>
-                <form id="registrationForm">
-                    <div class="form-group"><label>Correo Electrónico <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="email" id="regEmail" required></div>
-                    <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;"><label>Nombres <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="text" id="regFirstName" required></div>
-                        <div class="form-group" style="flex: 1;"><label>Apellidos <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="text" id="regLastName" required></div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;"><label>Edad <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="number" id="regEdad" required></div>
-                        <div class="form-group" style="flex: 1;"><label>Cédula de Identidad <button class="btn-info" type="button" onclick="abrirInfo('Datos Seguros', 'Tus datos no son editables por seguridad. Usar datos reales te servirá más adelante para vender más productos y generar confianza.')">i</button></label><input type="text" id="regCedula" required placeholder="V-12345678" autocomplete="off"></div>
-                    </div>
-                    <div style="display: flex; gap: 10px;">
-                        <div class="form-group" style="flex: 1;">
-                            <label>Contraseña</label>
-                            <div style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="regPass" required style="padding-right: 35px;">
-                                <span onclick="togglePass('regPass', this)" style="position: absolute; right: 10px; cursor: pointer; font-size: 1rem; user-select: none;">👁️</span>
-                            </div>
-                        </div>
-                        <div class="form-group" style="flex: 1;">
-                            <label>Confirmar</label>
-                            <div style="position: relative; display: flex; align-items: center;">
-                                <input type="password" id="regPassConfirm" required style="padding-right: 35px;">
-                                <span onclick="togglePass('regPassConfirm', this)" style="position: absolute; right: 10px; cursor: pointer; font-size: 1rem; user-select: none;">👁️</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group" style="display: flex; align-items: flex-start; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 10px;">
-                        <input type="checkbox" id="chkPoliticas" style="width: 20px; height: 20px; cursor: pointer; margin-top: 2px;" required>
-                        <label for="chkPoliticas" style="margin: 0; cursor: pointer; font-size: 0.82rem; color: #334155; line-height: 1.4;">
-                            He leído y acepto los <a href="#" onclick="abrirPrivacidadModal(event)" style="color:var(--primary); font-weight:bold;">Términos, Política de Privacidad y Exoneración de Responsabilidad</a> de Llévatelo Ya.
-                        </label>
-                    </div>
-                    <button type="submit" class="btn-submit-reg">🚀 Aprobar y Registrar</button>
-                </form>
-                <div class="divider-text">¿Ya tienes cuenta? <a href="#" onclick="toggleAuthMode()" style="color:var(--primary); font-weight:bold;">Inicia Sesión</a></div>
-            </div>
-        </div>
-    </div>
-    <!-- Modal Subir a PRO -->
-    <div class="reg-modal-overlay" id="proModal">
-        <div class="reg-modal-card" style="text-align: center;">
-            <span class="modal-close" style="color: #0f172a;" onclick="document.getElementById('proModal').style.display='none'">&times;</span>
-            <div class="reg-modal-title" style="color: #d97706;">⭐ Plan PRO</div>
-            <p style="margin: 15px 0; font-size: 0.95rem; color: #475569;">Sube a Pro por solo <b>$0.30</b>.<br>Obtén el botón de WhatsApp directo en tus publicaciones y el poder de <b>Fijar</b> tus productos de primeros.</p>
-            <button class="btn-submit-reg" onclick="irAWhatsAppPro()">📲 Pagar y Confirmar por WhatsApp</button>
-        </div>
-    </div>
-
-    <!-- Modal KYC -->
-    <div class="reg-modal-overlay" id="kycModal">
-        <div class="reg-modal-card">
-            <span class="modal-close" style="color: #0f172a;" onclick="document.getElementById('kycModal').style.display='none'">&times;</span>
-            <div class="reg-modal-title">📸 Verificación de Identidad</div>
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Sube una foto de tu cédula y una selfie clara.</p>
-            <div class="form-group">
-                <label>Foto de la Cédula (Frontal)</label>
-                <input type="file" id="kycCedula" accept="image/*">
-            </div>
-            <div class="form-group">
-                <label>Foto de tu Cara (Selfie)</label>
-                <input type="file" id="kycCara" accept="image/*">
-            </div>
-            <button class="btn-submit-reg" onclick="enviarKYC()">📤 Enviar para Revisión</button>
-        </div>
-    </div>
-
-    <!-- Modal Política de Privacidad y Términos Legales -->
-    <div class="reg-modal-overlay" id="privacidadModal">
-        <div class="reg-modal-card" style="max-width: 600px; max-height: 85vh; text-align: left;">
-            <span class="modal-close" style="color: #0f172a;" onclick="cerrarPrivacidadModal()">&times;</span>
-            <div class="reg-modal-title" style="color: var(--primary); text-align: center; margin-bottom: 10px;">📜 Términos, Privacidad y Exoneración</div>
-            <div style="font-size: 0.88rem; color: #334155; line-height: 1.6; max-height: 55vh; overflow-y: auto; padding-right: 10px; display: flex; flex-direction: column; gap: 12px;">
-                <p><strong>Última actualización:</strong> Septiembre 2026 | <strong>Plataforma:</strong> Llévatelo Ya (Cúa, Venezuela).</p>
-                
-                <h3 style="color: #0f172a; font-size: 1rem; margin-top: 5px;">1. Naturaleza de la Plataforma</h3>
-                <p><strong>Llévatelo Ya</strong> es una herramienta digital de anuncios clasificados y directorio de contactos comerciales entre usuarios independientes. La plataforma no actúa como intermediario financiero, casa de empeño, tienda directa, custodio de fondos ni garante de las transacciones comerciales que los usuarios acuerden entre sí.</p>
-                
-                <h3 style="color: #0f172a; font-size: 1rem; margin-top: 5px;">2. Exoneración Total de Responsabilidad</h3>
-                <p>El creador, administradores y operadores de <strong>Llévatelo Ya</strong> <strong>NO SE HACEN RESPONSABLES</strong> por:</p>
-                <ul style="padding-left: 20px;">
-                    <li>Fraudes, estafas, incumplimientos de pago, entregas defectuosas o productos en mal estado acordados entre comprador y vendedor.</li>
-                    <li>Pérdidas económicas, disputas personales, encuentros presenciales o acuerdos monetarios fuera o dentro de la plataforma.</li>
-                    <li>Fallos técnicos imprevistos, pérdida de datos en la base de datos o interrupciones del servicio en Vercel o Firebase.</li>
-                </ul>
-                <p>Toda negociación, transferencia de dinero o entrega de mercancía se realiza bajo el <strong>riesgo exclusivo y responsabilidad absoluta de los usuarios participantes</strong>.</p>
-
-                <h3 style="color: #0f172a; font-size: 1rem; margin-top: 5px;">3. Seguridad y Privacidad de los Datos</h3>
-                <p>Recopilamos datos de registro (nombres, apellidos, edad, cédula, correo electrónico) y opcionalmente documentos de identidad (KYC) y números de teléfono para la validación interna y prevención de fraudes. Tus datos de acceso y verificación son almacenados bajo protocolos seguros de Firebase Auth y Realtime Database. No compartimos tu información personal con terceros con fines comerciales.</p>
-
-                <h3 style="color: #0f172a; font-size: 1rem; margin-top: 5px;">4. Verificación de Identidad (KYC) y Plan PRO</h3>
-                <p>La verificación de identidad (KYC) es un proceso voluntario u obligatorio según las políticas internas para otorgar el sello verificado. El Plan PRO habilita funciones adicionales como botones directos de WhatsApp y fijación de anuncios. El pago del plan PRO se coordina directamente por canales externos autorizados.</p>
-
-                <h3 style="color: #0f172a; font-size: 1rem; margin-top: 5px;">5. Aceptación Incondicional</h3>
-                <p>Al hacer clic en <strong>"Aprobar y Registrar"</strong>, el usuario declara ser mayor de edad (+18 años), haber leído íntegramente estas políticas, comprender cada proceso de la plataforma y liberar de toda responsabilidad legal, civil o penal a los desarrolladores de Llévatelo Ya.</p>
-            </div>
-            <button class="btn-submit-reg" style="margin-top: 15px;" onclick="cerrarPrivacidadModal()">Entendido y de Acuerdo</button>
-        </div>
-    </div>
-
-    <!-- Modal para ver foto en grande -->
-    <div class="modal" id="imageModal">
-        <span class="modal-close" onclick="closeModal()">&times;</span>
-        <button class="modal-btn prev" id="modalPrevBtn" onclick="cambiarFotoModal(-1)">❮</button>
-        <img class="modal-content" id="modalImage" alt="Foto Ampliada">
-        <button class="modal-btn next" id="modalNextBtn" onclick="cambiarFotoModal(1)">❯</button>
-        <div class="modal-counter" id="modalCounter"></div>
-    </div>
-
-    <!-- Modal para foto única (Perfil / Portada) -->
-    <div class="modal" id="singleImageModal" style="z-index: 999999;">
-        <span class="modal-close" onclick="document.getElementById('singleImageModal').style.display='none'">&times;</span>
-        <img class="modal-content" id="singleImageContent" alt="Foto Ampliada">
-    </div>
-
-    <!-- Centro de Notificaciones (Flotante) -->
-    <div class="floating-btn" id="btnFloatingNotif" title="Notificaciones">🔔</div>
-    <div class="notif-panel" id="panelNotif">
-        <div class="notif-header">
-            <span>🔔 Notificaciones</span>
-            <span style="cursor: pointer; font-size: 1.2rem;" onclick="document.getElementById('panelNotif').style.display='none'">&times;</span>
-        </div>
-        <div id="listaNotificaciones">
-            <div class="notif-item" id="notifVacia" style="color:#94a3b8; justify-content:center;">No hay notificaciones recientes.</div>
-        </div>
-    </div>
-<!-- Panel de Administración de Mejoras (Oculto por defecto, solo para ti) -->
-    <div class="reg-modal-overlay" id="adminMejorasModal" style="z-index: 99999;">
-        <div class="reg-modal-card" style="max-width: 500px;">
-            <span class="modal-close" style="color: #0f172a;" onclick="document.getElementById('adminMejorasModal').style.display='none'">&times;</span>
-            <div class="reg-modal-title" style="color: var(--primary);">🛠️ Panel de Administración</div>
-            <div style="background: #e0f2fe; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #bae6fd; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-weight: bold; color: #0369a1;">👁️ Visitas Únicas (Dispositivos):</span>
-                <span id="contadorVisitasAdmin" style="font-size: 1.3rem; font-weight: 900; color: #0284c7;">0</span>
-            </div>
-            <p style="font-size: 0.85rem; color: #64748b; margin-bottom: 15px;">Aquí ves los comentarios de los usuarios.</p>
-            <div id="listaComentariosAdmin" style="max-height: 300px; overflow-y: auto; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; background: #f8fafc;">
-                <!-- Comentarios se inyectan aquí -->
-            </div>
+            <button class="close-btn" style="background:#4caf50;" onclick="guardarAjustes()">Guardar</button>
         </div>
     </div>
     
+    <div id="modal-registro" class="modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <h2 style="color: #9c27b0; margin-top: 0;">Registro de Partidas</h2>
+            <div id="contenido-registro" style="max-height: 200px; overflow-y: auto; text-align: left; background: #121212; padding: 10px; border-radius: 5px; font-size: 13px; color: #ccc; margin-bottom: 10px;">
+                Cargando registros...
+            </div>
+            <button class="btn-ronda" style="background: #2196f3; width: 100%; margin-bottom: 5px; border:none; padding:10px; border-radius:5px; cursor:pointer;" onclick="copiarRegistro()">Copiar Registro</button>
+            <button class="close-btn" style="background: #9c27b0;" onclick="cerrarModal('modal-registro')">Cerrar</button>
+        </div>
+    </div>
 
-<script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-        import { getDatabase, ref, onValue, push, set, remove, update, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, sendPasswordResetEmail, updatePassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+        <div id="modal-guardar-historia" class="modal">
+        <div class="modal-content" style="max-width: 450px; max-height: 90vh; overflow-y: auto;">
+            <h2 style="color: #ff9800; margin-top: 0;">Guardar Historia</h2>
+            <p style="color:#aaa; font-size:13px; text-align:left;">Asigna nombre, pega el registro y opcionalmente las fichas sobrantes (ej: 2/2 3/3):</p>
+            <input type="text" id="input-nombre-historia" placeholder="Nombre de la historia..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #555; background: #222; color: white; margin-bottom: 10px; box-sizing: border-box;">
+            <textarea id="input-texto-historia" rows="5" placeholder="Pega aquí el registro de la partida..." style="width: 100%; padding: 10px; border-radius: 5px; border: 1px solid #555; background: #222; color: white; margin-bottom: 10px; box-sizing: border-box; font-family: monospace; font-size: 12px;"></textarea>
+            
+            <input type="text" id="sobrantes-yo" placeholder="Sobrantes Yo (Maestro)..." style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #555; background: #222; color: white; margin-bottom: 5px; box-sizing: border-box; font-size: 12px;">
+            <input type="text" id="sobrantes-mesa2" placeholder="Sobrantes Mesa 2..." style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #555; background: #222; color: white; margin-bottom: 5px; box-sizing: border-box; font-size: 12px;">
+            <input type="text" id="sobrantes-amigo3" placeholder="Sobrantes Amigo 3..." style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #555; background: #222; color: white; margin-bottom: 5px; box-sizing: border-box; font-size: 12px;">
+            <input type="text" id="sobrantes-mesa4" placeholder="Sobrantes Mesa 4..." style="width: 100%; padding: 8px; border-radius: 5px; border: 1px solid #555; background: #222; color: white; margin-bottom: 15px; box-sizing: border-box; font-size: 12px;">
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDFCJfaYGgcgQuRia1qc4hmZkEWmiBuX2k",
-          authDomain: "llevatelo-seguro.firebaseapp.com",
-          databaseURL: "https://llevatelo-seguro-default-rtdb.firebaseio.com",
-          projectId: "llevatelo-seguro",
-          storageBucket: "llevatelo-seguro.firebasestorage.app",
-          messagingSenderId: "1010159796781",
-          appId: "1:1010159796781:web:42706c5108a2fc08ceaea4"
-        };
+            <button class="btn-ronda" style="background: #00c853; width: 100%; margin-bottom: 5px; border:none; padding:12px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="procesarYGuardarHistoria()">  Guardar Historia</button>
+            <button class="close-btn" style="background: #f44336;" onclick="cerrarModal('modal-guardar-historia')">Cancelar</button>
+        </div>
+    </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const auth = getAuth(app);
+    <div id="modal-fichas-sobrantes" class="modal">
+        <div class="modal-content" style="max-width: 400px; border-color: #b388ff;">
+            <h2 style="color: #ffeb3b; margin-top: 0;">Fichas Restantes</h2>
+            <div id="contenido-fichas-sobrantes" style="max-height: 260px; overflow-y: auto; margin-bottom: 15px;">
+                <!-- Fichas cargadas dinámicamente -->
+            </div>
+            <button class="close-btn" style="background: #f44336;" onclick="cerrarModal('modal-fichas-sobrantes')">Cerrar</button>
+        </div>
+    </div>
 
-        // --- SISTEMA SILENCIOSO DE REGISTRO DE DISPOSITIVOS ÚNICOS ---
-        try {
-            if (!localStorage.getItem('dispositivo_llevatelo_registrado')) {
-                push(ref(db, 'historial_visitas_unicas'), {
-                    fecha: serverTimestamp(),
-                    agente: navigator.userAgent
-                });
-                localStorage.setItem('dispositivo_llevatelo_registrado', 'true');
-            }
-        } catch (e) {} // Totalmente silencioso para el usuario
+    <script>
+        // ==========================================
+        // 1. BASE DE DATOS Y PARSER DE HISTORIAS
+        // ==========================================
+        const ORDEN_TURNOS = ['yo', 'mesa2', 'amigo3', 'mesa4'];
 
-        let currentUser = null;
-        let todosLosProductos = {};
-        let userData = {};
+                function abrirModalGuardarHistoria() {
+            document.getElementById('input-nombre-historia').value = '';
+            document.getElementById('input-texto-historia').value = '';
+            document.getElementById('sobrantes-yo').value = '';
+            document.getElementById('sobrantes-mesa2').value = '';
+            document.getElementById('sobrantes-amigo3').value = '';
+            document.getElementById('sobrantes-mesa4').value = '';
+            document.getElementById('modal-guardar-historia').style.display = 'flex';
+        }
 
-        // --- SISTEMA DE ALERTAS Y TUTORIALES (Elimina el 'localhost dice') ---
-        window.alert = function(msg) {
-            document.getElementById('customAlertText').innerText = msg;
-            document.getElementById('customAlertModal').style.display = 'flex';
-        };
-        window.closeCustomAlert = () => document.getElementById('customAlertModal').style.display = 'none';
-        
-        window.abrirInfo = (titulo, mensaje) => {
-            document.getElementById('infoModalTitle').innerText = titulo;
-            document.getElementById('infoModalText').innerHTML = mensaje;
-            document.getElementById('infoModal').style.display = 'flex';
-        };
-        window.closeInfoModal = () => document.getElementById('infoModal').style.display = 'none';
+                function parsearTextoLog(texto, sobrantes) {
+            let lineas = texto.split('\n');
+            let movimientos = [];
+            let fichasPorJugador = { yo: [], mesa2: [], amigo3: [], mesa4: [] };
+            let salida = 'yo';
 
-        window.abrirFotoGrande = (url) => {
-            document.getElementById('singleImageContent').src = url;
-            document.getElementById('singleImageModal').style.display = 'flex';
-        };
-
-        // Controles de Interfaz
-        
-        window.openRegModal = () => document.getElementById('regModal').style.display = 'flex';
-        window.closeRegModal = () => document.getElementById('regModal').style.display = 'none';
-        window.abrirPrivacidadModal = (e) => {
-            if(e) e.preventDefault();
-            document.getElementById('privacidadModal').style.display = 'flex';
-        };
-        window.cerrarPrivacidadModal = () => {
-            document.getElementById('privacidadModal').style.display = 'none';
-        };
- window.toggleAuthMode = () => {
-            const login = document.getElementById('loginSection');
-            const reg = document.getElementById('registerSection');
-            if(login.style.display === 'none') { login.style.display = 'block'; reg.style.display = 'none'; }
-            else { login.style.display = 'none'; reg.style.display = 'block'; }
-        };
-        window.showSection = (sec) => {
-            showLoading("Cargando sección...");
-            setTimeout(() => {
-                document.querySelectorAll('.section-content').forEach(el => {
-                    el.classList.remove('active');
-                    el.classList.remove('tab-transition');
-                });
-                document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-                const seccion = document.getElementById(sec);
-                if(seccion) {
-                    seccion.classList.add('active');
-                    seccion.classList.add('tab-transition');
+            ['yo', 'mesa2', 'amigo3', 'mesa4'].forEach(jug => {
+                if (sobrantes && sobrantes[jug]) {
+                    let matches = sobrantes[jug].matchAll(/(\d)\/(\d)/g);
+                    for (const match of matches) {
+                        let f1 = parseInt(match[1]);
+                        let f2 = parseInt(match[2]);
+                        let yaTiene = fichasPorJugador[jug].some(f => (f[0] === f1 && f[1] === f2) || (f[0] === f2 && f[1] === f1));
+                        if (!yaTiene) fichasPorJugador[jug].push([f1, f2]);
+                    }
                 }
-                if(window.event && window.event.currentTarget && window.event.currentTarget.classList) {
-                    window.event.currentTarget.classList.add('active');
-                }
-                if(sec === 'misproductos' || sec === 'productos') renderMyProducts();
-                hideLoading();
-            }, 500);
-        };
-        
-        const showLoading = (msg, isProgress = false) => {
-            document.getElementById('loadingText').innerText = msg;
-            document.getElementById('loadingOverlay').style.display = 'flex';
-            if (isProgress) {
-                document.getElementById('loadingSpinner').style.display = 'none';
-                document.getElementById('loadingProgress').style.display = 'block';
-                updateProgress(0);
-            } else {
-                document.getElementById('loadingSpinner').style.display = 'block';
-                document.getElementById('loadingProgress').style.display = 'none';
-            }
-        };
-        
-        const hideLoading = () => document.getElementById('loadingOverlay').style.display = 'none';
-        
-        const updateProgress = (percent) => {
-            const circle = document.getElementById('progressCircleValue');
-            const text = document.getElementById('progressText');
-            if(circle && text) {
-                const offset = 283 - (283 * percent) / 100;
-                circle.style.strokeDashoffset = offset;
-                text.innerText = Math.round(percent) + '%';
-            }
-        };
-
-        window.toggleFiltros = () => {
-            const filtros = document.getElementById('filtrosBusqueda');
-            const btn = document.getElementById('btnToggleFiltros');
-            if (filtros.style.display === 'none') {
-                filtros.style.display = 'flex';
-                btn.innerText = '🔼';
-            } else {
-                filtros.style.display = 'none';
-                btn.innerText = '🔽';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }
-        };
-
-        const comprimirImagen = (file, maxRes, calidad = 0.85) => {
-            return new Promise((resolve) => {
-                if (!file || !file.type.startsWith('image/')) {
-                    alert("⚠️ El archivo seleccionado no es una imagen válida.");
-                    return resolve(file);
-                }
-                const reader = new FileReader();
-                reader.onerror = () => {
-                    alert("⚠️ Error al leer el archivo de imagen. Intenta con otra foto.");
-                    resolve(file);
-                };
-                reader.readAsDataURL(file);
-                reader.onload = (event) => {
-                    const img = new Image();
-                    img.onerror = () => {
-                        alert("⚠️ No se pudo cargar la imagen. Es posible que esté dañada o formato no compatible.");
-                        resolve(file);
-                    };
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        try {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width; 
-                            let height = img.height;
-                            if (!width || !height) {
-                                alert("⚠️ La imagen tiene dimensiones inválidas.");
-                                return resolve(file);
-                            }
-                            if (width > maxRes || height > maxRes) {
-                                if (width > height) { 
-                                    height = Math.round(height * (maxRes / width)); 
-                                    width = maxRes; 
-                                } else { 
-                                    width = Math.round(width * (maxRes / height)); 
-                                    height = maxRes; 
-                                }
-                            } 
-                            canvas.width = width; 
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.fillStyle = '#FFFFFF';
-                            ctx.fillRect(0, 0, width, height);
-                            ctx.drawImage(img, 0, 0, width, height);
-                            canvas.toBlob((blob) => {
-                                if (!blob) {
-                                    alert("⚠️ Error al procesar y convertir la imagen.");
-                                    return resolve(file);
-                                }
-                                resolve(new File([blob], file.name || "imagen.jpg", { type: 'image/jpeg', lastModified: Date.now() }));
-                            }, 'image/jpeg', calidad);
-                        } catch (err) {
-                            alert("⚠️ Error al optimizar la imagen: " + err.message);
-                            resolve(file);
-                        }
-                    };
-                };
             });
-        };
 
-        window.togglePass = (id, el) => {
-            const input = document.getElementById(id);
-            if (input.type === "password") { input.type = "text"; el.innerText = "🙈"; }
-            else { input.type = "password"; el.innerText = "👁️"; }
-        };
+            lineas.forEach(linea => {
+                linea = linea.trim();
+                if (!linea || linea.includes('IA SUGIRIÓ') || linea.includes('NUEVA VUELTA INICIADA')) return;
 
-        window.subirPortadaPerfil = async (input) => {
-            const file = input.files[0];
-            if(!file || !currentUser) return;
-            showLoading("Subiendo tu foto de portada...");
-            try {
-                const finalFile = await comprimirImagen(file, 800, 0.85);
-                const fd = new FormData(); fd.append('image', finalFile);
-                const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
-                const data = await res.json();
-                if (data.success) {
-                    await update(ref(db, 'usuarios/' + currentUser.uid), { portadaUrl: data.data.display_url });
-                    document.getElementById('perfilPortadaImg').src = data.data.display_url;
-                    hideLoading();
-                    alert("✅ Foto de portada actualizada con éxito.");
-                } else throw new Error("Fallo al subir a ImgBB");
-            } catch(err) {
-                hideLoading();
-                alert("❌ Error al subir portada: " + err.message);
-            }
-        };
-
-        window.verPortadaVendedor = async (vendedorUid) => {
-            showLoading("Cargando perfil del vendedor...");
-            try {
-                const res = await fetch(`https://llevatelo-seguro-default-rtdb.firebaseio.com/usuarios/${vendedorUid}.json`);
-                const vendedor = await res.json();
-                hideLoading();
+                let jugador = null;
+                let lLower = linea.toLowerCase();
                 
-                if(vendedor) {
-                    const foto = vendedor.portadaUrl || "https://cdn-icons-png.flaticon.com/512/149/149071.png";
-                    const nombre = vendedor.nombres ? vendedor.nombres + ' ' + (vendedor.apellidos || '') : 'Vendedor';
-                    const kycBadge = vendedor.kyc === 'verificado' ? '✅ Verificado' : (vendedor.kyc === 'pendiente' ? '⏳ Revisión' : '⚠️ Sin Verificación');
-                    
-                    document.getElementById('infoModalTitle').innerHTML = `Perfil de Vendedor`;
-                    document.getElementById('infoModalText').innerHTML = `
-                        <div style="text-align: center;">
-                            <img src="${foto}" style="width:110px; height:110px; border-radius:50%; object-fit:cover; border:3px solid var(--primary); margin-bottom:12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); cursor: pointer;" onclick="abrirFotoGrande('${foto}')" title="Toca para ver en grande">
-                            <h3 style="color:#0f172a; margin-bottom:6px;">${nombre}</h3>
-                            <span style="background:#f1f5f9; padding:4px 12px; border-radius:20px; font-size:0.85rem; font-weight:bold; color:#475569; border: 1px solid #cbd5e1;">${kycBadge}</span>
-                        </div>
-                    `;
-                    document.getElementById('infoModal').style.display = 'flex';
-                } else {
-                    alert("⚠️ Perfil de vendedor no encontrado.");
+                if (lLower.includes('yo (maestro)') || lLower.includes('yo jugué') || lLower.includes('yo (')) jugador = 'yo';
+                else if (lLower.includes('mesa2') || lLower.includes('mesa 2')) jugador = 'mesa2';
+                else if (lLower.includes('amigo3') || lLower.includes('amigo 3')) jugador = 'amigo3';
+                else if (lLower.includes('mesa4') || lLower.includes('mesa 4')) jugador = 'mesa4';
+
+                if (!jugador) return;
+
+                if (lLower.includes('pasó') || lLower.includes('paso') || lLower.includes('pasã')) {
+                    movimientos.push({ jugador: jugador, ficha: 'PASÓ', lado: -2 });
+                    return;
                 }
-            } catch(e) {
-                hideLoading();
-                alert("❌ Error al cargar el perfil.");
-            }
-        };
 
-        // Sistema de Autenticación
-        onAuthStateChanged(auth, (user) => {
-            const barraBusqueda = document.querySelector('.search-wrapper');
-            if (user) {
-                currentUser = user;
-                document.getElementById('btnAuthHeader').style.display = 'none';
-                document.getElementById('btnLogout').style.display = 'block';
-                document.getElementById('userTabs').style.display = 'flex';
-                if(barraBusqueda) barraBusqueda.style.display = 'flex';
-                showSection('productos');
+                let matchFicha = linea.match(/\[(\d)\/(\d)\]/);
+                if (!matchFicha) return;
+                let f1 = parseInt(matchFicha[1]);
+                let f2 = parseInt(matchFicha[2]);
+                let ficha = [f1, f2];
+
+                let yaTiene = fichasPorJugador[jugador].some(f => (f[0] === f1 && f[1] === f2) || (f[0] === f2 && f[1] === f1));
+                if (!yaTiene) {
+                    fichasPorJugador[jugador].push(ficha);
+                }
+
+                let lado = 0;
+                if (lLower.includes('centro')) {
+                    lado = -1;
+                    if (movimientos.length === 0) salida = jugador;
+                } else if (lLower.includes('derecha') || lLower.includes('der')) {
+                    lado = 1;
+                } else if (lLower.includes('izquierda') || lLower.includes('izq')) {
+                    lado = 0;
+                }
+
+                if (movimientos.length === 0 && lado !== -1) salida = jugador;
+
+                movimientos.push({ jugador: jugador, ficha: ficha, lado: lado });
+            });
+
+            if (movimientos.length === 0) return null;
+
+            let manosCompletas = {};
+            ['yo', 'mesa2', 'amigo3', 'mesa4'].forEach(jug => {
+                manosCompletas[jug] = [...fichasPorJugador[jug]];
+            });
+
+            return { salida: salida, manos: manosCompletas, movimientos: movimientos };
+        }
+
+        function procesarYGuardarHistoria() {
+            let nombre = document.getElementById('input-nombre-historia').value.trim();
+            let texto = document.getElementById('input-texto-historia').value.trim();
+
+            let sobrantes = {
+                yo: document.getElementById('sobrantes-yo').value.trim(),
+                mesa2: document.getElementById('sobrantes-mesa2').value.trim(),
+                amigo3: document.getElementById('sobrantes-amigo3').value.trim(),
+                mesa4: document.getElementById('sobrantes-mesa4').value.trim()
+            };
+
+            if (!nombre) return alert("Por favor ingresa un nombre para la historia.");
+            if (!texto) return alert("Por favor pega el texto del registro.");
+
+            let resultado = parsearTextoLog(texto, sobrantes);
+            if (!resultado) return alert("No se pudieron interpretar las jugadas. Verifica el formato del texto introducido.");
+
+            let objetoHistoria = {
+                salida: resultado.salida,
+                manosIniciales: resultado.manos,
+                movimientos: resultado.movimientos,
+                fecha: new Date().toLocaleString()
+            };
+
+            let hGuardadas = JSON.parse(localStorage.getItem('historias_guardadas') || '{}');
+            hGuardadas[nombre] = objetoHistoria;
+            localStorage.setItem('historias_guardadas', JSON.stringify(hGuardadas));
+
+            alert(`¡Historia "${nombre}" guardada con éxito!`);
+            cerrarModal('modal-guardar-historia');
+        }
+
+
+        // ==========================================
+        // 2. VARIABLES DE ESTADO Y FLUJO TEMPORAL
+        // ==========================================
+
+        let config = { velocidadMs: 6000, rondaElegida: 'Ninguna', modoJuego: '', modoBot: 'estratega' };
+
+
+        function copiarRegistro() {
+            let contenido = document.getElementById('contenido-registro').innerText;
+            navigator.clipboard.writeText(contenido).then(() => alert("¡Registro copiado!")).catch(err => console.error(err));
+        }
+
+        function guardarRegistroPartida(ronda, modo, estadoFinal) {
+
+            let registros = JSON.parse(localStorage.getItem('historial_domino_ia') || '[]');
+            if(registros.length > 0 && registros[0].ronda === ronda && !registros[0].estado.includes("Terminada")) {
+                registros[0].estado = estadoFinal;
+                registros[0].movimientos = partida.movimientos || [];
+            } else {
+                let nuevoReg = {
+                    fecha: new Date().toLocaleString(),
+                    ronda: ronda,
+                    modo: modo,
+                    estado: estadoFinal,
+                    movimientos: partida.movimientos || [],
+                    manosIniciales: partida.manosInicialesRespaldo,
+                    salida: ORDEN_TURNOS[partida.turnoInicialRespaldo]
+                };
+                registros.unshift(nuevoReg);
+            }
+            if(registros.length > 20) registros.pop();
+            localStorage.setItem('historial_domino_ia', JSON.stringify(registros));
+        }
+
+        // Sincronización instantánea entre pestañas abiertas
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'historial_domino_ia' || e.key === 'historias_guardadas' || e.key === null) {
+                let modalReg = document.getElementById('modal-registro');
+                if (modalReg && modalReg.style.display === 'flex') {
+                    actualizarVistaRegistro();
+                }
+                let modalHist = document.getElementById('modal-historias');
+                if (modalHist && modalHist.style.display === 'flex' && config.modoJuego) {
+                    abrirSeleccionHistoria(config.modoJuego);
+                }
+            }
+        });
+
+
+        let partida = { activa: false, puntas: [], mesa: [], pases: 0, turnoIndex: 0, manos: {}, fichaSeleccionada: -1, movimientos: [] };
+        let logRondaActual = [];
+        let turnoLogIndex = 0;
+        let historialRoto = false;
+
+        function parsearHistorial(rondaNum) {
+            if(!HISTORIAL_CODIFICADO[rondaNum]) return [];
+            return HISTORIAL_CODIFICADO[rondaNum].map(str => {
+                let partes = str.split(':');
+                let fichas = partes[1].split(',');
+                return { jugador: partes[0], ficha: [parseInt(fichas[0]), parseInt(fichas[1])], lado: parseInt(partes[2]) };
+            });
+        }
+
+        function abrirModalModo() { document.getElementById('modal-tipo-modo').style.display = 'flex'; }
+        function abrirModalAjustes() { 
+            document.getElementById('bot-modo-select').value = config.modoBot;
+            document.getElementById('modal-ajustes').style.display = 'flex'; 
+        }
+        function abrirModalRegistro() { document.getElementById('modal-registro').style.display = 'flex'; actualizarVistaRegistro(); }
+        function cerrarModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function actualizarVistaRegistro() {
+            let registros = JSON.parse(localStorage.getItem('historial_domino_ia') || '[]');
+            let html = "";
+            if(registros.length === 0) {
+                html = "<p style='text-align:center;'>No hay registros guardados aún.</p>";
+            } else {
+                registros.forEach((reg, index) => {
+                    let movsHtml = "";
+                    if(reg.movimientos && reg.movimientos.length > 0) {
+                        reg.movimientos.forEach((m) => {
+                            let ladoTxt = m.lado === 0 ? 'Izquierda' : (m.lado === 1 ? 'Derecha' : (m.lado === -1 ? 'Centro' : 'Pasa'));
+                            let fichaTxt = Array.isArray(m.ficha) ? `[${m.ficha[0]}/${m.ficha[1]}]` : m.ficha;
+                            movsHtml += `<div style="font-size:11px; color:#aaa; margin-left:10px;">&bull; <b>${m.jugador.toUpperCase()}</b>: ${fichaTxt} (${ladoTxt})</div>`;
+                        });
+                    }
+                    html += `<div style="border-bottom: 1px solid #333; padding: 8px 0;">
+                        <b>#${index+1} - ${reg.ronda}</b> (${reg.modo})<br>
+                        <small style="color:#aaa;">${reg.fecha}</small><br>
+                        <span style="color:#00e676;">${reg.estado}</span>
+                        <div style="margin-top: 5px; background: #1a1a1a; padding: 5px; border-radius: 4px; max-height: 120px; overflow-y: auto;">${movsHtml}</div>
+                    </div>`;
+                });
+            }
+            document.getElementById('contenido-registro').innerHTML = html;
+        }
+
+        function abrirSeleccionHistoria(modo) {
+            config.modoJuego = modo;
+            document.getElementById('modo-elegido-texto').innerText = modo.toUpperCase();
+            cerrarModal('modal-tipo-modo');
+            
+            let html = "";
+            let hGuardadas = JSON.parse(localStorage.getItem('historias_guardadas') || '{}');
+            let llaves = Object.keys(hGuardadas);
+
+            if(llaves.length === 0) {
+                html = "<p style='color:#aaa; font-size:13px; text-align:center;'>No hay historias guardadas.<br>Usa el botón <b>Guardar Historia</b> visible en el menú principal para agregar una.</p>";
+            } else {
+                for(let nom in hGuardadas) {
+                    let nomEscaped = nom.replace(/'/g, "\\'");
+                    html += `<div style="display:flex; align-items:center; justify-content:space-between; margin:5px 0;">
+                        <button class="btn-ronda" style="background:#4caf50; border-color:#00e676; flex-grow:1; margin-right:5px; width:auto;" onclick="iniciarPartidaGuardada('custom', '${nomEscaped}')"> ${nom}</button>
+                        <button style="background:#f44336; color:white; border:none; padding:10px 12px; border-radius:5px; font-weight:bold; cursor:pointer;" onclick="eliminarHistoria('${nomEscaped}')"></button>
+                    </div>`;
+                }
+            }
+
+            document.getElementById('lista-historias').innerHTML = html;
+            document.getElementById('modal-historias').style.display = 'flex';
+        }
+
+        function eliminarHistoria(nombre) {
+            if(!confirm(`¿Estás seguro de eliminar la historia "${nombre}"?`)) return;
+            let hGuardadas = JSON.parse(localStorage.getItem('historias_guardadas') || '{}');
+            delete hGuardadas[nombre];
+            localStorage.setItem('historias_guardadas', JSON.stringify(hGuardadas));
+            abrirSeleccionHistoria(config.modoJuego);
+        }
+
+        function guardarAjustes() {
+            config.velocidadMs = parseInt(document.getElementById('vel-slider').value);
+            config.modoBot = document.getElementById('bot-modo-select').value;
+            cerrarModal('modal-ajustes');
+        }
+
+        function reiniciarActual() {
+            localStorage.removeItem('historial_domino_ia');
+            localStorage.removeItem('historias_guardadas');
+            partida.activa = false;
+            partida.mesa = [];
+            partida.puntas = [];
+            partida.manos = {yo:[], mesa2:[], amigo3:[], mesa4:[]};
+            document.getElementById('mesa-fichas').innerHTML = '';
+            document.getElementById('mi-mano').innerHTML = '';
+            document.getElementById('estado-turno').innerHTML = '-';
+            document.getElementById('info-partida').innerHTML = 'Todos los registros y mesa limpiados por completo.';
+            alert("¡Reinicio Completo! No quedó rastro de ninguna partida y la mesa está vacía.");
+        }
+
+        function generarFichasAleatorias() {
+            let todas = [];
+            for(let i=0; i<=6; i++) { for(let j=i; j<=6; j++) { todas.push([i,j]); } }
+            return todas.sort(() => Math.random() - 0.5);
+        }
+
+        function iniciarVerify() {
+            cerrarModal('modal-tipo-modo');
+            config.modoJuego = 'verify';
+            config.rondaElegida = 'Modo Verify (Aleatorio)';
+
+            let fichas = generarFichasAleatorias();
+            
+            // Reparto para ver quién sale
+            let tempSorteo = { 'yo': fichas.pop(), 'mesa2': fichas.pop(), 'amigo3': fichas.pop(), 'mesa4': fichas.pop() };
+            let maxVal = -1; let salida = 'yo';
+            for (let jug in tempSorteo) {
+                let v = tempSorteo[jug][0] + tempSorteo[jug][1];
+                if(tempSorteo[jug][0] === tempSorteo[jug][1]) v += 100; // Prioriza dobles
+                if(v > maxVal) { maxVal = v; salida = jug; }
+            }
+
+            alert(`--- MODO VERIFY: SORTEO INICIAL ---\nTú: [${tempSorteo['yo']}]\nMesa2 (Rival): [${tempSorteo['mesa2']}]\nAmigo3 (Compañero): [${tempSorteo['amigo3']}]\nMesa4 (Rival): [${tempSorteo['mesa4']}]\n\n¡La ficha más alta la tiene ${salida.toUpperCase()}, él sale!`);
+
+            // Repartimos las 28 aleatoriamente (7 a cada uno)
+            fichas = generarFichasAleatorias();
+            partida.manos = { 'yo': fichas.splice(0,7), 'mesa2': fichas.splice(0,7), 'amigo3': fichas.splice(0,7), 'mesa4': fichas.splice(0,7) };
+            
+            prepararMesa(salida);
+            logRondaActual = [];
+            historialRoto = true;
+
+            document.getElementById('info-partida').innerHTML = `Simulando: <b>Modo VERIFY</b> | Salida: <b style="color:#ffeb3b">${salida.toUpperCase()}</b>`;
+            actualizarUI();
+            gestionarTurno();
+        }
+
+        function iniciarPartidaGuardada(tipo, id) {
+            cerrarModal('modal-historias');
+            let datosRonda;
+            
+            config.rondaElegida = `Historia: ${id}`;
+            let hGuardadas = JSON.parse(localStorage.getItem('historias_guardadas') || '{}');
+            let h = hGuardadas[id];
+            if(!h || !h.manosIniciales) return alert("Esta historia guardada es incompatible o no existe.");
+            datosRonda = { salida: h.salida, manos: JSON.parse(JSON.stringify(h.manosIniciales)) };
+            logRondaActual = h.movimientos || [];
+
+            partida.manos = JSON.parse(JSON.stringify(datosRonda.manos));
+            prepararMesa(datosRonda.salida);
+            historialRoto = false;
+
+            let modoStr = config.modoJuego === 'anclada' ? 'ANCLADO' : 'NATURAL';
+            document.getElementById('info-partida').innerHTML = `Simulando: <b>${config.rondaElegida}</b> | Modo: <b style="color:#00e676">${modoStr}</b>`;
+            
+            actualizarUI();
+            gestionarTurno();
+        }
+
+        function prepararMesa(salida) {
+            partida.puntas = [];
+            partida.mesa = [];
+            partida.pases = 0;
+            partida.activa = true;
+            partida.fichaSeleccionada = -1;
+            partida.movimientos = [];
+            partida.turnoIndex = ORDEN_TURNOS.indexOf(salida);
+            turnoLogIndex = 0;
+            partida.manosInicialesRespaldo = JSON.parse(JSON.stringify(partida.manos));
+            partida.turnoInicialRespaldo = partida.turnoIndex;
+        }
+
+        function revelarFichasSobrantes() {
+            let html = "<div style='background:#311b92; padding:10px; border-radius:5px; margin-top:10px; font-size:14px; text-align:left;'><b>Fichas Restantes:</b><br>";
+            ['yo', 'mesa2', 'amigo3', 'mesa4'].forEach(jug => {
+                let nombre = jug === 'yo' ? 'YO (MAESTRO)' : jug.toUpperCase();
+                let fs = (partida.manos[jug] || []).map(f => `[${f[0]}/${f[1]}]`).join(" ");
+                html += `<span style="color:#ffeb3b;">${nombre}:</span> ${fs.length > 0 ? fs : 'Ninguna'}<br>`;
+            });
+            html += "</div>";
+            return html;
+        }
+
+        function abrirModalFichasSobrantes() {
+            let container = document.getElementById('contenido-fichas-sobrantes');
+            if (!partida.manos || Object.keys(partida.manos).length === 0) {
+                container.innerHTML = "<p style='color:#aaa;'>No hay una partida activa en este momento.</p>";
+            } else {
+                let html = "";
+                const nombres = { 
+                    'yo': 'YO (MAESTRO)', 
+                    'mesa2': 'MESA 2 (RIVAL)', 
+                    'amigo3': 'AMIGO 3 (COMPAÑERO)', 
+                    'mesa4': 'MESA 4 (RIVAL)' 
+                };
+                ['yo', 'mesa2', 'amigo3', 'mesa4'].forEach(jug => {
+                    let mano = partida.manos[jug] || [];
+                    let fs = mano.map(f => `[${f[0]}/${f[1]}]`).join(" ");
+                    html += `<div style="background:#2a2a2a; padding:10px; border-radius:6px; margin-bottom:8px; text-align:left; border-left:4px solid #b388ff;">
+                        <b style="color:#ffeb3b; font-size:13px;">${nombres[jug]}:</b><br>
+                        <span style="font-size:15px; font-weight:bold; color:#fff;">${fs.length > 0 ? fs : '<i style="color:#888; font-size:13px;">Sin fichas</i>'}</span>
+                    </div>`;
+                });
+                container.innerHTML = html;
+            }
+            document.getElementById('modal-fichas-sobrantes').style.display = 'flex';
+        }
+        function actualizarUI() {
+
+
+        let htmlMano = "";
+            let jugadaEsperada = !historialRoto && turnoLogIndex < logRondaActual.length ? logRondaActual[turnoLogIndex] : null;
+
+            partida.manos['yo'].forEach((f, i) => {
+                let extraClase = (i === partida.fichaSeleccionada) ? "seleccionada" : "";
                 
-                onValue(ref(db, 'usuarios/' + user.uid), (snap) => {
-                    if (!snap.exists()) {
-                        signOut(auth);
+                if (!historialRoto && jugadaEsperada && jugadaEsperada.jugador === 'yo' && Array.isArray(jugadaEsperada.ficha)) {
+                    if((f[0] === jugadaEsperada.ficha[0] && f[1] === jugadaEsperada.ficha[1]) || (f[0] === jugadaEsperada.ficha[1] && f[1] === jugadaEsperada.ficha[0])) {
+                        extraClase += " ficha-historia";
+                    }
+                }
+
+                htmlMano += `<div class="ficha ficha-mano ${extraClase}" onclick="seleccionarFicha(${i})">[${f[0]}/${f[1]}]</div>`;
+            });
+            
+      
+      document.getElementById('mi-mano').innerHTML = htmlMano;
+
+            let htmlIzq = "", htmlDer = "", htmlCentro = "";
+            partida.mesa.forEach(m => {
+                let pCol = m.jugador === 'yo' ? '#ffeb3b' : (m.jugador === 'amigo3' ? '#4fc3f7' : '#ff8a65');
+                let txt = `<div class="ficha ficha-mesa">[${m.ficha[0]}/${m.ficha[1]}]<br><small style="font-size:10px; color:${pCol};">${m.jugador}</small></div>`;
+                if(m.lado === 0) htmlIzq = txt + htmlIzq;
+                else if(m.lado === 1) htmlDer = htmlDer + txt;
+                else htmlCentro = txt;
+            });
+            document.getElementById('mesa-fichas').innerHTML = htmlIzq + htmlCentro + htmlDer;
+
+            if(partida.puntas.length > 0) {
+                document.getElementById('puntas-text').innerText = `Puntas: [ ${partida.puntas[0]} - ${partida.puntas[1]} ]`;
+            } else {
+                document.getElementById('puntas-text').innerText = "Mesa Vacía";
+            }
+
+            document.getElementById('btn-izq').style.display = 'none';
+            document.getElementById('btn-der').style.display = 'none';
+            document.getElementById('btn-centro').style.display = 'none';
+            document.getElementById('btn-paso').style.display = 'none';
+        }
+
+                function prepararGuardadoFinal() {
+            let histStr = "";
+            let fecha = new Date();
+            let hora = fecha.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true });
+
+            partida.movimientos.forEach(m => {
+                let jNom = m.jugador === 'yo' ? 'Yo (Maestro)' : m.jugador.toUpperCase();
+                if (m.lado === -2) {
+                    histStr += `[${hora}]  ${jNom} PASÓ.\n`;
+                } else {
+                    let ladoTxt = m.lado === -1 ? 'al Centro' : (m.lado === 0 ? 'por la Izquierda' : 'por la Derecha');
+                    let pref = m.lado === -1 ? 'salió' : 'jugó';
+                    if (m.jugador === 'yo') pref = m.lado === -1 ? 'salí' : 'jugué';
+                    histStr += `[${hora}]  ${jNom} ${pref} [${m.ficha[0]}/${m.ficha[1]}] ${ladoTxt}.\n`;
+                }
+            });
+
+            document.getElementById('input-texto-historia').value = histStr;
+            
+            ['yo', 'mesa2', 'amigo3', 'mesa4'].forEach(jug => {
+                let mano = partida.manos[jug] || [];
+                let fs = mano.map(f => `${f[0]}/${f[1]}`).join(" ");
+                document.getElementById('sobrantes-' + jug).value = fs;
+            });
+            
+            document.getElementById('input-nombre-historia').value = "Historia Modificada - " + fecha.toLocaleDateString();
+            document.getElementById('modal-guardar-historia').style.display = 'flex';
+        }
+
+        function gestionarTurno() {
+            if(!partida.activa) return;
+            
+            let jugadorActual = ORDEN_TURNOS[partida.turnoIndex];
+            
+            if(partida.manos[jugadorActual].length === 0) {
+                partida.activa = false;
+                let msjFin = `¡Terminada! ${jugadorActual.toUpperCase()} GANÓ`;
+                let infoExtra = revelarFichasSobrantes();
+                document.getElementById('estado-turno').innerHTML = `¡FIN! <span style="color:#ffeb3b">${jugadorActual.toUpperCase()} GANÓ</span><br>${infoExtra} <br><button class="btn-accion btn-jugar" style="margin-top:10px; font-size:12px; padding:10px; background:#00c853;" onclick="prepararGuardadoFinal()">Guardar Historia Creada</button> <button class="btn-accion" style="margin-top:10px; font-size:12px; padding:10px;" onclick="abrirModalModo()">Volver</button>`;
+                guardarRegistroPartida(config.rondaElegida, config.modoJuego, msjFin);
+                return;
+            }
+            if(partida.pases >= 4) {
+                partida.activa = false;
+                let msjFin = `¡Terminada! PARTIDA TRANCADA`;
+                let infoExtra = revelarFichasSobrantes();
+                document.getElementById('estado-turno').innerHTML = `¡PARTIDA TRANCADA!<br>${infoExtra} <br><button class="btn-accion btn-jugar" style="margin-top:10px; font-size:12px; padding:10px; background:#00c853;" onclick="prepararGuardadoFinal()">Guardar Historia Creada</button> <button class="btn-accion" style="margin-top:10px; font-size:12px; padding:10px;" onclick="abrirModalModo()">Volver</button>`;
+                guardarRegistroPartida(config.rondaElegida, config.modoJuego, msjFin);
+                return;
+            }
+
+            if (!historialRoto && turnoLogIndex >= logRondaActual.length && config.modoJuego !== 'verify') {
+                partida.activa = false;
+                let msjFin = `¡Fin del Registro Histórico!`;
+                let infoExtra = revelarFichasSobrantes();
+                document.getElementById('estado-turno').innerHTML = `<span style="color:#ff9800;">¡FIN DEL REGISTRO ALCANZADO!</span><br>${infoExtra} <br><button class="btn-accion btn-jugar" style="margin-top:10px; font-size:12px; padding:10px; background:#00c853;" onclick="prepararGuardadoFinal()">Guardar Historia Creada</button> <button class="btn-accion" style="margin-top:10px; font-size:12px; padding:10px;" onclick="abrirModalModo()">Volver</button>`;
+                guardarRegistroPartida(config.rondaElegida, config.modoJuego, msjFin);
+                return;
+            }
+
+            document.getElementById('estado-turno').innerText = `Turno actual: ${jugadorActual.toUpperCase()}`;
+
+            if(jugadorActual === 'yo') {
+                habilitarBotonesUsuario();
+            } else {
+                setTimeout(() => { jugarBot(jugadorActual); }, config.velocidadMs);
+            }
+        }
+
+        function avanzarTurno() {
+
+            partida.turnoIndex++;
+            turnoLogIndex++;
+            if(partida.turnoIndex > 3) partida.turnoIndex = 0;
+            actualizarUI();
+            gestionarTurno();
+        }
+
+        // ==========================================
+        // 5. CONTROL DEL USUARIO (Validación Temporal)
+        // ==========================================
+        function seleccionarFicha(index) {
+            if(ORDEN_TURNOS[partida.turnoIndex] !== 'yo') return;
+            partida.fichaSeleccionada = index;
+            actualizarUI();
+            habilitarBotonesUsuario();
+        }
+
+        function habilitarBotonesUsuario() {
+            let manoUsuario = partida.manos['yo'];
+            let tieneJugadas = partida.puntas.length === 0 ? true : manoUsuario.some(f => partida.puntas.includes(f[0]) || partida.puntas.includes(f[1]));
+            
+            if(!tieneJugadas) {
+                document.getElementById('btn-paso').style.display = 'block';
+                return;
+            }
+
+            if(partida.fichaSeleccionada !== -1) {
+                if(partida.puntas.length === 0) {
+                    document.getElementById('btn-centro').style.display = 'block';
+                } else {
+                    document.getElementById('btn-izq').style.display = 'block';
+                    document.getElementById('btn-der').style.display = 'block';
+                }
+            }
+        }
+
+        function verificarJugadaHistorica(ficha, lado) {
+            if(historialRoto || turnoLogIndex >= logRondaActual.length) return false;
+            let logEsperado = logRondaActual[turnoLogIndex];
+            
+            if(lado === -2) return logEsperado.lado === -2; 
+
+            let coincideFicha = (ficha[0] === logEsperado.ficha[0] && ficha[1] === logEsperado.ficha[1]) || 
+                                (ficha[0] === logEsperado.ficha[1] && ficha[1] === logEsperado.ficha[0]);
+            let coincideLado = (logEsperado.lado === lado);
+
+            return coincideFicha && coincideLado;
+        }
+
+        function ejecutarJugada(lado) {
+            let index = partida.fichaSeleccionada;
+            let ficha = partida.manos['yo'][index];
+            
+            let esFielAlLog = verificarJugadaHistorica(ficha, lado);
+
+            if (config.modoJuego === 'anclada' && !historialRoto) {
+                if(!esFielAlLog) {
+                    let jugadaReal = logRondaActual[turnoLogIndex];
+                    if (jugadaReal && jugadaReal.lado === -2) {
+                        alert(`MODO ANCLADO: Históricamente en este turno pasaste. ¡Debes presionar PASAR TURNO!`);
+                    } else if (jugadaReal && Array.isArray(jugadaReal.ficha)) {
+                        let ladoText = jugadaReal.lado === 0 ? 'Izquierda' : (jugadaReal.lado === 1 ? 'Derecha' : 'Centro');
+                        alert(`MODO ANCLADO: Históricamente jugaste [${jugadaReal.ficha[0]}/${jugadaReal.ficha[1]}] por el lado: ${ladoText}. ¡No puedes cambiar la jugada!`);
+                    } else {
+                        alert(`MODO ANCLADO: Debes seguir exactamente la jugada registrada.`);
+                    }
+                    return;
+                }
+            } else if (config.modoJuego === 'natural') {
+                if(!esFielAlLog && !historialRoto) {
+                    historialRoto = true;
+                    console.log("¡HAS CAMBIADO LA HISTORIA! A partir de este momento los bots reaccionan usando IA Natural.");
+                }
+            }
+
+            let cuadra = false;
+            let fichaAcomodada = [...ficha];
+            let nuevasPuntas = [...partida.puntas];
+
+            if(partida.puntas.length === 0) {
+                cuadra = true; nuevasPuntas = ficha;
+            } else {
+                if(lado === 0) { 
+                    if(ficha[0] === partida.puntas[0]) { nuevasPuntas[0] = ficha[1]; cuadra = true; fichaAcomodada = [ficha[1], ficha[0]]; }
+                    else if(ficha[1] === partida.puntas[0]) { nuevasPuntas[0] = ficha[0]; cuadra = true; fichaAcomodada = [ficha[0], ficha[1]]; }
+                } else if(lado === 1) { 
+                    if(ficha[0] === partida.puntas[1]) { nuevasPuntas[1] = ficha[1]; cuadra = true; fichaAcomodada = [ficha[0], ficha[1]]; }
+                    else if(ficha[1] === partida.puntas[1]) { nuevasPuntas[1] = ficha[0]; cuadra = true; fichaAcomodada = [ficha[1], ficha[0]]; }
+                }
+            }
+
+            if(!cuadra) return alert("La ficha no cuadra en ese lado.");
+            partida.manos['yo'].splice(index, 1);
+            partida.puntas = nuevasPuntas;
+            partida.mesa.push({ficha: fichaAcomodada, jugador: 'yo', lado: lado});
+            
+            partida.movimientos.push({jugador: 'yo', ficha: fichaAcomodada, lado: lado});
+            guardarRegistroPartida(config.rondaElegida, config.modoJuego, 'En curso (Jugada)');
+
+            partida.pases = 0;
+            partida.fichaSeleccionada = -1;
+            
+            avanzarTurno();
+        }
+
+        function registrarPaso() {
+            let esFielAlLog = verificarJugadaHistorica(null, -2);
+            
+            if (config.modoJuego === 'anclada' && !historialRoto) {
+                if(!esFielAlLog) {
+                    let jugadaReal = logRondaActual[turnoLogIndex];
+                    if (jugadaReal && Array.isArray(jugadaReal.ficha)) {
+                        let ladoText = jugadaReal.lado === 0 ? 'Izquierda' : (jugadaReal.lado === 1 ? 'Derecha' : 'Centro');
+                        alert(`MODO ANCLADO: Históricamente no pasaste en este turno. Jugaste [${jugadaReal.ficha[0]}/${jugadaReal.ficha[1]}] por ${ladoText}.`);
+                    } else {
+                        alert(`MODO ANCLADO: Históricamente no pasaste en este turno.`);
+                    }
+                    return;
+                }
+            } else if (config.modoJuego === 'natural' && !esFielAlLog && !historialRoto) {
+                historialRoto = true;
+                console.log("¡HAS CAMBIADO LA HISTORIA AL PASAR! Los bots usarán IA Natural.");
+            }
+
+            partida.pases++;
+            partida.movimientos.push({jugador: 'yo', ficha: 'PASÓ', lado: -2});
+            guardarRegistroPartida(config.rondaElegida, config.modoJuego, 'En curso (Paso)');
+            avanzarTurno();
+        }
+
+        // ==========================================
+        // 6. CEREBRO IA: BOTS CON CONCIENCIA DEL TIEMPO
+        // ==========================================
+        function jugarBot(jugador) {
+            let mano = partida.manos[jugador];
+            let jugables = mano.filter(f => partida.puntas.length === 0 || partida.puntas.includes(f[0]) || partida.puntas.includes(f[1]));
+
+            let fichaElegida = null;
+            let ladoElegido = null;
+
+            if (!historialRoto && turnoLogIndex < logRondaActual.length) {
+                let logEsperado = logRondaActual[turnoLogIndex];
+                
+                if (logEsperado && logEsperado.jugador === jugador) {
+                    if (logEsperado.lado === -2) {
+                        partida.pases++;
+                        partida.movimientos.push({jugador: jugador, ficha: 'PASÓ', lado: -2});
+                        guardarRegistroPartida(config.rondaElegida, config.modoJuego, 'En curso (Bot Pasó)');
+                        avanzarTurno();
+                        return;
+                    } else {
+                        fichaElegida = logEsperado.ficha;
+                        ladoElegido = logEsperado.lado;
+                    }
+                } else {
+                    if(jugables.length === 0) {
+                        partida.pases++;
+                        partida.movimientos.push({jugador: jugador, ficha: 'PASÓ', lado: -2});
+                        guardarRegistroPartida(config.rondaElegida, config.modoJuego, 'En curso (Bot Pasó)');
+                        avanzarTurno();
                         return;
                     }
-                    userData = snap.val() || {};
-                    
-                    if (userData.portadaUrl) {
-                        const img = document.getElementById('perfilPortadaImg');
-                        if (img) img.src = userData.portadaUrl;
-                    }
-
-                    if(!userData.plan) userData.plan = 'basico';
-                    if(!userData.kyc) userData.kyc = 'sin_verificar';
-                    
-                    document.getElementById('perfilNombres').value = userData.nombres || '';
-                    document.getElementById('perfilApellidos').value = userData.apellidos || '';
-                    document.getElementById('perfilCedula').value = userData.cedula || '';
-                    document.getElementById('perfilTelefono').value = userData.telefono || '';
-                    
-                    // Lógica UI Perfil
-                    document.getElementById('badgePlan').innerText = "Plan: " + (userData.plan === 'pro' ? 'PRO ⭐' : 'Básico');
-                    document.getElementById('badgePlan').style.background = userData.plan === 'pro' ? '#d97706' : '#1e293b';
-                    
-                    let kycTexto = "Sin Verificación", kycColor = "#64748b";
-                    if(userData.kyc === 'pendiente') { kycTexto = "En Revisión ⏳"; kycColor = "#eab308"; }
-                    if(userData.kyc === 'verificado') { kycTexto = "Verificado ✅"; kycColor = "#10b981"; }
-                    if(userData.kyc === 'rechazado') { kycTexto = "Rechazado ❌"; kycColor = "#ef4444"; }
-                    
-                    document.getElementById('badgeKYC').innerText = kycTexto;
-                    document.getElementById('badgeKYC').style.background = kycColor;
-
-                    if(userData.kyc === 'rechazado') {
-                        document.getElementById('alertaRechazo').style.display = 'block';
-                        document.getElementById('motivoRechazo').innerText = userData.motivoRechazo || 'Datos incorrectos';
-                    } else {
-                        document.getElementById('alertaRechazo').style.display = 'none';
-                    }
-
-                    const mostrarKYC = (userData.kyc === 'sin_verificar' || userData.kyc === 'rechazado');
-                    document.getElementById('btnVerificarKYC').style.display = mostrarKYC ? 'block' : 'none';
-                    const btnInfoK = document.getElementById('btnInfoKYC');
-                    if(btnInfoK) btnInfoK.style.display = mostrarKYC ? 'inline-flex' : 'none';
-                    
-                    const mostrarPro = (userData.plan === 'basico' && userData.kyc === 'verificado');
-                    document.getElementById('btnSubirPro').style.display = mostrarPro ? 'block' : 'none';
-                    const btnInfoP = document.getElementById('btnInfoPro');
-                    if(btnInfoP) btnInfoP.style.display = mostrarPro ? 'inline-flex' : 'none';
-                    document.getElementById('seccionTelefono').style.display = (userData.plan === 'pro') ? 'block' : 'none';
-                });
+                    let decision = IA_Natural(jugador, jugables);
+                    fichaElegida = decision.ficha;
+                    ladoElegido = decision.lado;
+                }
             } else {
-                currentUser = null;
-                document.getElementById('btnAuthHeader').style.display = 'block';
-                document.getElementById('btnLogout').style.display = 'none';
-                document.getElementById('userTabs').style.display = 'none';
-                if(barraBusqueda) barraBusqueda.style.display = 'none';
-                showSection('infoPublica');
-            }
-        });
-
-        // Registro de Usuario Nuevo
-        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const cedulaVal = document.getElementById('regCedula').value.trim();
-            if(cedulaVal.includes('@')) return alert("❌ Error: En el campo Cédula no debes ingresar tu correo. Ingresa tu número de Cédula (Ej: V-12345678).");
-            const edadIngresada = parseInt(document.getElementById('regEdad').value);
-            if(edadIngresada < 18) return alert("❌ Acceso Denegado. Debes ser mayor de edad para registrarte.");
-            const pass1 = document.getElementById('regPass').value;
-            const pass2 = document.getElementById('regPassConfirm').value;
-            if(pass1 !== pass2) return alert("❌ Las contraseñas no coinciden. Verifícalas.");
-            if(!document.getElementById('chkPoliticas').checked) return alert("⚠️ Debes aceptar los Términos, Política de Privacidad y Exoneración de Responsabilidad para registrarte.");
-            
-            showLoading("Verificando datos y aprobando registro...");
-            try {
-                const payload = {
-                    nombres: document.getElementById('regFirstName').value,
-                    apellidos: document.getElementById('regLastName').value,
-                    edad: document.getElementById('regEdad').value,
-                    cedula: document.getElementById('regCedula').value,
-                    email: document.getElementById('regEmail').value,
-                    password: pass1
-                };
-
-                const response = await fetch('https://llevatelo-seguro.vercel.app/api', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'handleRegistrationSubmit', payload: payload })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Error en el servidor');
-
-                hideLoading();
-                alert("✅ " + data.message);
-                closeRegModal();
-                document.getElementById('registrationForm').reset();
-            } catch(err) {
-                hideLoading();
-                alert("❌ Error: " + err.message);
-            }
-        });
-
-        // Inicio de Sesión
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            showLoading("Iniciando sesión...");
-            try {
-                await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value);
-                hideLoading();
-                closeRegModal();
-                document.getElementById('loginForm').reset();
-            } catch(err) {
-                hideLoading();
-                alert("❌ Error de acceso. Verifica tu correo o contraseña.");
-            }
-        });
-
-        window.cerrarSesion = () => signOut(auth);
-
-        window.abrirProModal = () => document.getElementById('proModal').style.display = 'flex';
-        window.irAWhatsAppPro = () => {
-            const msj = encodeURIComponent(`Hola, quiero subir al Plan PRO. Mi número de identificación (Cédula) es: ${userData.cedula}`);
-            window.open(`https://wa.me/584241959869?text=${msj}`, '_blank');
-            document.getElementById('proModal').style.display = 'none';
-            agregarNotificacion("⭐", "Solicitud para subir a Plan PRO enviada.");
-        };
-
-        window.abrirKYCModal = () => document.getElementById('kycModal').style.display = 'flex';
-        window.enviarKYC = async () => {
-            const f1 = document.getElementById('kycCedula').files[0];
-            const f2 = document.getElementById('kycCara').files[0];
-            if(!f1 || !f2) return alert("⚠️ Debes adjuntar ambas fotos.");
-            showLoading("Subiendo imágenes de forma instantánea...");
-            try {
-                const uploadPromises = [f1, f2].map(async (f, index) => {
-                    const fd = new FormData(); fd.append('image', f);
-                    try {
-                        const res = await fetch('https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca', { method: 'POST', body: fd });
-                        const data = await res.json();
-                        if (!data.success) {
-                            alert(`⚠️ La imagen de verificación #${index + 1} falló al subirse.`);
-                            return null;
-                        }
-                        return data.data.display_url;
-                    } catch (err) {
-                        alert(`⚠️ Error de red al subir la foto de KYC #${index + 1}.`);
-                        return null;
-                    }
-                });
-                
-                let urls = (await Promise.all(uploadPromises)).filter(url => url !== null);
-                
-                if (urls.length < 2) {
-                    hideLoading();
-                    return alert("❌ Error al subir fotos (Posiblemente bloqueado por tu internet o navegador). Por favor intenta de nuevo.");
+                if(jugables.length === 0) {
+                    partida.pases++;
+                    partida.movimientos.push({jugador: jugador, ficha: 'PASÓ', lado: -2});
+                    guardarRegistroPartida(config.rondaElegida, config.modoJuego, 'En curso (Bot Pasó)');
+                    avanzarTurno();
+                    return;
                 }
-
-                showLoading("Enviando verificación al servidor...");
-                const response = await fetch('https://llevatelo-seguro.vercel.app/api', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'enviarKYC',
-                        payload: {
-                            uid: currentUser.uid,
-                            fotosKyc: urls
-                        }
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Error en el servidor');
-
-                hideLoading();
-                agregarNotificacion("📸", "Tus documentos de verificación (KYC) están en revisión.");
-                alert("✅ " + data.message);
-                document.getElementById('kycModal').style.display = 'none';
-            } catch(e) {
-                hideLoading(); alert("❌ Error: " + e.message);
+                let decision = IA_Natural(jugador, jugables);
+                fichaElegida = decision.ficha;
+                ladoElegido = decision.lado;
             }
-        };
 
-        // Guardar Teléfono y Clave
-        window.guardarTelefono = async () => {
-            if(!currentUser) return;
-            const tel = document.getElementById('perfilTelefono').value;
-            if(tel.length < 10) return alert("⚠️ Ingresa un número válido, sin el 0 inicial (Ej: 4121234567)");
-            await update(ref(db, 'usuarios/' + currentUser.uid), { telefono: tel });
-            alert("✅ ¡Teléfono guardado! Ahora tus productos tendrán un botón directo a tu WhatsApp.");
-        };
-
-        // Sistema de Notificaciones Flotante
-        const btnNotif = document.getElementById('btnFloatingNotif');
-        const panelNotif = document.getElementById('panelNotif');
-        let isDragging = false, startX, startY, initialX, initialY;
-
-        const startDrag = (clientX, clientY) => { isDragging = true; startX = clientX; startY = clientY; initialX = btnNotif.offsetLeft; initialY = btnNotif.offsetTop; btnNotif.style.transition = 'none'; };
-        const onDrag = (clientX, clientY) => { if(isDragging) { btnNotif.style.left = (initialX + clientX - startX) + 'px'; btnNotif.style.top = (initialY + clientY - startY) + 'px'; btnNotif.style.bottom = 'auto'; btnNotif.style.right = 'auto'; } };
-        const endDrag = () => { isDragging = false; btnNotif.style.transition = 'transform 0.2s'; };
-
-        btnNotif.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
-        document.addEventListener('mousemove', (e) => onDrag(e.clientX, e.clientY));
-        document.addEventListener('mouseup', endDrag);
-        
-        btnNotif.addEventListener('touchstart', (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-        document.addEventListener('touchmove', (e) => onDrag(e.touches[0].clientX, e.touches[0].clientY), {passive: true});
-        document.addEventListener('touchend', endDrag);
-
-        btnNotif.addEventListener('click', () => { 
-            if(Math.abs(btnNotif.offsetLeft - initialX) < 5 && Math.abs(btnNotif.offsetTop - initialY) < 5) {
-                panelNotif.style.display = panelNotif.style.display === 'block' ? 'none' : 'block'; 
-            }
-        });
-
-        window.agregarNotificacion = (icono, texto) => {
-            const lista = document.getElementById('listaNotificaciones');
-            const vacia = document.getElementById('notifVacia');
-            if(vacia) vacia.style.display = 'none';
-            const item = document.createElement('div');
-            item.className = 'notif-item';
-            item.innerHTML = `<div class="notif-icon">${icono}</div><div>${texto}</div>`;
-            lista.insertBefore(item, lista.firstChild);
+            let f = fichaElegida;
+            let fichaAcomodada = [...f];
             
-            // Animación del botón flotante para avisar
-            btnNotif.style.transform = 'scale(1.3)';
-            setTimeout(() => btnNotif.style.transform = 'scale(1)', 300);
-        };
-
-        // Lógica de Comentarios
-        const txtComentario = document.getElementById('txtComentario');
-        if(txtComentario) {
-            txtComentario.addEventListener('input', function() {
-                document.getElementById('charCount').innerText = this.value.length + '/150';
-            });
-        }
-
-        window.enviarComentario = async () => {
-            const txt = document.getElementById('txtComentario').value.trim();
-            if(!txt) return;
-            if(txt.toLowerCase() === "admin") { document.getElementById('adminMejorasModal').style.display = 'flex'; return; } 
-            if(!currentUser) return alert("Debes iniciar sesión para comentar.");
-            
-            showLoading("Enviando...");
-            try {
-                await push(ref(db, 'mejoras'), {
-                    uid: currentUser.uid,
-                    nombre: userData.nombres || 'Anónimo',
-                    texto: txt
-                });
-                hideLoading();
-                document.getElementById('txtComentario').value = '';
-                document.getElementById('charCount').innerText = '0/150';
-                agregarNotificacion("💡", "¡Gracias! Tu comentario de mejora fue enviado.");
-                alert("✅ Comentario enviado con éxito.");
-            } catch(e) { hideLoading(); alert("❌ Error: " + e.message); }
-        };
-
-        // Leer Comentarios en el Admin Panel
-        onValue(ref(db, 'mejoras'), (snap) => {
-            const lista = document.getElementById('listaComentariosAdmin');
-            if(!lista) return;
-            lista.innerHTML = '';
-            snap.forEach(child => {
-                const data = child.val();
-                lista.innerHTML += `
-                    <div style="border-bottom: 1px solid #cbd5e1; padding: 10px 0; margin-bottom: 8px;">
-                        <strong style="color:var(--primary); font-size:0.95rem;">${data.nombre}:</strong>
-                        <p style="font-size:0.9rem; margin: 6px 0; color:#334155;">${data.texto}</p>
-                        <button onclick="eliminarComentario('${child.key}')" style="background:#ef4444; color:white; border:none; padding:6px 12px; border-radius:6px; font-weight:bold; cursor:pointer;">🗑️ Eliminar</button>
-                    </div>`;
-            });
-        });
-        window.eliminarComentario = async (key) => await remove(ref(db, 'mejoras/' + key));
-
-        // Leer contador de visitas únicas en el Admin Panel
-        onValue(ref(db, 'historial_visitas_unicas'), (snap) => {
-            const contadorEl = document.getElementById('contadorVisitasAdmin');
-            if(contadorEl) {
-                contadorEl.innerText = snap.exists() ? Object.keys(snap.val()).length : "0";
-            }
-        });
-
-        // Cambiar Contraseña Directo (Configuración)
-        window.cambiarPasswordDirecto = async () => {
-            if(!currentUser) return;
-            const c1 = document.getElementById('confNuevaClave').value;
-            const c2 = document.getElementById('confRepetirClave').value;
-            
-            if(c1.length > 6) return alert("⚠️ La contraseña no debe superar los 6 dígitos.");
-            if(c1 !== c2) return alert("❌ Las contraseñas no coinciden.");
-            if(c1.length === 0) return alert("⚠️ Ingresa una contraseña.");
-
-            showLoading("Actualizando contraseña...");
-            try {
-                await updatePassword(currentUser, c1);
-                hideLoading();
-                document.getElementById('confNuevaClave').value = '';
-                document.getElementById('confRepetirClave').value = '';
-                agregarNotificacion("🔑", "Tu contraseña ha sido restablecida con éxito.");
-                alert("✅ ¡Cambio exitoso!");
-            } catch(err) {
-                hideLoading();
-                if(err.code === 'auth/requires-recent-login') alert("⚠️ Por seguridad, cierra sesión y vuelve a entrar antes de cambiar tu clave.");
-                else alert("❌ Error: Verifica los datos ingresados.");
-            }
-        };
-
-        // Recuperar Contraseña desde Login
-        window.abrirRecuperarModal = () => {
-            document.getElementById('loginSection').style.display = 'none';
-            document.getElementById('registerSection').style.display = 'none';
-            document.getElementById('recuperarSection').style.display = 'block';
-        };
-        window.volverAlLogin = () => {
-            document.getElementById('recuperarSection').style.display = 'none';
-            document.getElementById('loginSection').style.display = 'block';
-        };
-
-        document.getElementById('recuperarForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('recuperarEmail').value;
-            showLoading("Procesando nueva contraseña...");
-            try {
-                await sendPasswordResetEmail(auth, email);
-                hideLoading();
-                agregarNotificacion("🔑", "Se procesó el restablecimiento para " + email);
-                alert("✅ ¡Listo, cambio exitoso! Por medidas de seguridad de la plataforma, hemos enviado una confirmación a tu correo para habilitar la nueva contraseña.");
-                document.getElementById('recuperarForm').reset();
-                volverAlLogin();
-            } catch(err) {
-                hideLoading();
-                alert("❌ Error: " + err.message);
-            }
-        });
-
-        // Agregar Producto a la Base de Datos
-        document.getElementById('addProductForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if(!currentUser) return alert("Debes iniciar sesión.");
-            if(userData.plan === 'pro' && !userData.telefono) return alert("⚠️ Alto: Debes guardar tu número de WhatsApp en 'Mi Perfil' antes de publicar.");
-            
-            // Límite de publicaciones eliminado: ahora todos publican ilimitadamente.
-            
-            const inputsFotos = [
-                document.getElementById('prodFoto1'),
-                document.getElementById('prodFoto2')
-            ];
-            
-            const files = [];
-            inputsFotos.forEach(input => {
-                if(input.files.length > 0) {
-                    files.push(input.files[0]);
-                }
-            });
-
-            if(files.length === 0) return alert("⚠️ Selecciona al menos la primera foto.");
-
-            showLoading("Procesando publicación (Estado: Pendiente)...", true);
-            try {
-                const usarAhorro = document.getElementById('chkAhorroDatos').checked;
-                const maxRes = usarAhorro ? 600 : 1200;
-                const calidad = usarAhorro ? 0.80 : 0.90;
-
-                let fotosUrls = [];
-                let totalFiles = files.length;
-
-                for (let i = 0; i < files.length; i++) {
-                    let finalFile = await comprimirImagen(files[i], maxRes, calidad);
-                    const fd = new FormData();
-                    fd.append('image', finalFile);
-                    
-                    const url = await new Promise((resolve, reject) => {
-                        const xhr = new XMLHttpRequest();
-                        xhr.open('POST', 'https://api.imgbb.com/1/upload?key=b1ad441b22bf5ce2ac3ca68ae8d163ca');
-                        
-                        xhr.upload.onprogress = (event) => {
-                            if (event.lengthComputable) {
-                                const fileProgress = (event.loaded / event.total) * 100;
-                                const globalProgress = ((i * 100) + fileProgress) / totalFiles;
-                                updateProgress(globalProgress);
-                                if (globalProgress < 100) {
-                                    document.getElementById('loadingText').innerText = `Subiendo fotos... Estado: Pendiente (${Math.round(globalProgress)}%)`;
-                                }
-                            }
-                        };
-                        
-                        xhr.onload = () => {
-                            if (xhr.status === 200) {
-                                const data = JSON.parse(xhr.responseText);
-                                if (data.success) resolve(data.data.display_url);
-                                else reject(new Error("Fallo en ImgBB"));
-                            } else {
-                                reject(new Error("Error de red"));
-                            }
-                        };
-                        xhr.onerror = () => reject(new Error("Error de red"));
-                        xhr.send(fd);
-                    });
-                    
-                    if(url) fotosUrls.push(url);
-                }
-
-                updateProgress(100);
-                document.getElementById('loadingText').innerText = "100% ¡Listo! Pasando a estado Publicado ✅";
-
-                if(fotosUrls.length === 0) throw new Error("No se pudo subir ninguna imagen.");
-                
-                const payload = {
-                    uid: currentUser.uid,
-                    nombre: document.getElementById('prodNombre').value,
-                    descripcion: document.getElementById('prodDesc').value,
-                    estado: document.getElementById('prodEstado').value,
-                    ubicacion: document.getElementById('prodUbicacion').value,
-                    metodosPago: document.getElementById('prodPagos').value,
-                    precio: document.getElementById('prodPrecio').value,
-                    fotos: fotosUrls,
-                    telefonoVendedor: userData.plan === 'pro' ? userData.telefono : "",
-                    verificado: userData.kyc === 'verificado',
-                    visibilidad: 'publicado'
-                };
-
-                const response = await fetch('https://llevatelo-seguro.vercel.app/api', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'addProduct', payload: payload })
-                });
-
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Error en el servidor');
-                
-                hideLoading();
-                agregarNotificacion("🛍️", "Publicaste un nuevo artículo: " + document.getElementById('prodNombre').value);
-                alert("✅ ¡Producto guardado públicamente desde el servidor!");
-                document.getElementById('addProductForm').reset();
-                showSection('misproductos'); 
-            } catch(err) {
-                hideLoading();
-                alert("❌ Ocurrió un error publicando: " + err.message);
-            }
-        });
-
-        // Cargar todos los productos
-        onValue(ref(db, 'productos'), (snapshot) => {
-            todosLosProductos = snapshot.val() || {};
-            renderProducts();
-            renderMyProducts();
-        });
-
-        function formatearFecha(timestamp) {
-            if(!timestamp) return 'Reciente';
-            const d = new Date(timestamp);
-            return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
-        }
-
-        function renderProducts() {
-            const grid = document.getElementById('productGrid');
-            grid.innerHTML = '';
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const filterLoc = document.getElementById('filterUbicacion').value.toLowerCase();
-            const filterMin = parseFloat(document.getElementById('filterPrecioMin').value) || 0;
-            const filterMax = parseFloat(document.getElementById('filterPrecioMax').value) || Infinity;
-            const filter = document.getElementById('filterSelect').value;
-            
-            let arrProds = Object.keys(todosLosProductos).map(key => ({ key, ...todosLosProductos[key] }));
-            if(arrProds.length === 0) return grid.innerHTML = '<div class="empty-state">El catálogo está vacío por ahora.</div>';
-
-            arrProds.sort((a, b) => {
-                if (a.fijado && !b.fijado) return -1;
-                if (!a.fijado && b.fijado) return 1;
-                if (a.fijado && b.fijado) return (b.fijadoTime || 0) - (a.fijadoTime || 0);
-                const timeA = a.fechaPublicacion || 0;
-                const timeB = b.fechaPublicacion || 0;
-                return timeB - timeA; 
-            });
-
-            let contador = 0;
-            arrProds.forEach(prod => {
-                if (prod.visibilidad === 'pendiente') return; // Ocultar si está pendiente
-
-                const textCheck = prod.nombre.toLowerCase().includes(search) || prod.descripcion.toLowerCase().includes(search);
-                const locCheck = prod.ubicacion.toLowerCase().includes(filterLoc);
-                const statCheck = filter === 'todos' || prod.estado === filter;
-                const priceCheck = parseFloat(prod.precio) >= filterMin && parseFloat(prod.precio) <= filterMax;
-
-                if(textCheck && locCheck && statCheck && priceCheck) {
-                    contador++;
-                    const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
-                        const imageTags = fotos.map((f, i) => `<img src="${f}" decoding="async" loading="lazy" onclick="openModal('${prod.key}', ${i})">`).join('');
-
-                const linkWa = prod.telefonoVendedor ? `https://wa.me/58${prod.telefonoVendedor}?text=Hola,%20vengo%20de%20Llévatelo%20Seguro.%20Me%20interesa%20comprar:%20*${encodeURIComponent(prod.nombre)}*` : '#';
-
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-gallery">
-                            ${prod.fijado ? '<div class="badge-verificado" style="background:#f59e0b; left:12px; right:auto;">⭐ FIJADO</div>' : ''}
-                            ${prod.verificado ? '<div class="badge-verificado" style="background:#10b981;">✔️ VERIFICADO</div>' : '<div class="badge-verificado" style="background:#64748b;">SIN VERIFICACIÓN</div>'}
-                            <div class="scroll-gallery">${imageTags}</div>
-                        </div>
-                        <div class="card-body">
-                            <h2 class="card-title">${prod.nombre}</h2>
-                            <p class="card-desc">${prod.descripcion}</p>
-                            <div class="card-info">
-                                <div>📍 <strong>Ubicación:</strong> ${prod.ubicacion}</div>
-                                <div>📦 <strong>Estado:</strong> ${prod.estado}</div>
-                                <div>💳 <strong>Pago:</strong> ${prod.metodosPago}</div>
-                                <div style="color:var(--primary); font-weight:bold; margin-top:5px;">📅 Publicado: ${formatearFecha(prod.fechaPublicacion)}</div>
-                            </div>
-                            <div class="card-price">$${prod.precio}</div>
-                            <button onclick="verPortadaVendedor('${prod.uid}')" class="btn-buy" style="background:#f1f5f9; color:#0f172a; border: 1px solid #cbd5e1; margin-bottom: 8px; font-size: 0.9rem;">👤 Ver Perfil del Vendedor</button>
-                            ${prod.telefonoVendedor ? `<a href="${linkWa}" target="_blank" class="btn-buy" style="background:#25D366; color:white; border:none;">💬 Contactar por WhatsApp</a>` : `<button class="btn-buy" style="background:#ccc; cursor:not-allowed;">Vendedor sin contacto</button>`}
-                        </div>`;
-                    grid.appendChild(card);
-                }
-            });
-            if(contador === 0) grid.innerHTML = '<div class="empty-state">No se encontró nada con esa búsqueda.</div>';
-        }
-
-        // Cargar Lista "Mis Productos"
-        function renderMyProducts() {
-            if(!currentUser) return;
-            const grid = document.getElementById('myProductGrid');
-            grid.innerHTML = '';
-            let count = 0;
-            
-            let misProdsArr = Object.keys(todosLosProductos)
-                .map(key => ({ key, ...todosLosProductos[key] }))
-                .filter(prod => prod.uid === currentUser.uid);
-
-            misProdsArr.sort((a, b) => (b.fechaPublicacion || 0) - (a.fechaPublicacion || 0));
-
-            misProdsArr.forEach(prod => {
-                const key = prod.key;
-                count++;
-                const foto = (Array.isArray(prod.fotos) ? prod.fotos[0] : Object.values(prod.fotos)[0]);
-                const estadoVisual = prod.visibilidad === 'pendiente' ? '<span style="color:#f59e0b; font-size:0.8rem; font-weight:bold;">⏳ Pendiente</span>' : '<span style="color:#10b981; font-size:0.8rem; font-weight:bold;">✅ Publicado al 100%</span>';
-                
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.style.padding = '15px';
-                div.innerHTML = `
-                    <div style="display:flex; gap:15px; align-items:center;">
-                        <div style="position:relative;">
-                            <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
-                        </div>
-                        <div style="flex:1;">
-                            <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
-                            <strong style="color:var(--primary); font-size:1.2rem;">$${prod.precio}</strong>
-                            <div style="margin-top: 4px;">${estadoVisual}</div>
-                        </div>
-                    </div>
-                        <img src="${foto}" style="width:70px; height:70px; object-fit:cover; border-radius:8px;">
-                        <div style="flex:1;">
-                            <h4 style="margin-bottom:5px;">${prod.nombre}</h4>
-                            <strong style="color:var(--primary); font-size:1.2rem;">$${prod.precio}</strong>
-                        </div>
-                    </div>
-                    <div style="display:flex; gap:10px; margin-top:15px;">
-                        ${userData.plan === 'pro' ? `<button onclick="fijarProd('${key}')" style="flex:1; padding:8px; background:#f59e0b; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">⭐ Fijar</button>` : ''}
-                        <button onclick="eliminarProdPropio('${key}')" style="flex:1; padding:8px; background:#ef4444; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">🗑️ Eliminar</button>
-                    </div>
-                `;
-                grid.appendChild(div);
-            });
-            if(count === 0) grid.innerHTML = '<div class="empty-state" style="grid-column: span 3;">Aún no tienes productos publicados.</div>';
-        }
-
-        window.fijarProd = async (key) => {
-            showLoading("Fijando producto de primero...");
-            try {
-                const response = await fetch('https://llevatelo-seguro.vercel.app/api', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'fijarProd', payload: { key } })
-                });
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.error || 'Error en el servidor');
-                hideLoading();
-                alert("✅ " + data.message);
-            } catch(err) {
-                hideLoading();
-                alert("❌ Error: " + err.message);
-            }
-        };
-
-        let keyAEliminar = null;
-        window.eliminarProdPropio = (key) => {
-            keyAEliminar = key;
-            document.getElementById('customConfirmText').innerText = "¿Estás 100% seguro de que deseas borrar esta publicación de tu tienda?";
-            document.getElementById('customConfirmModal').style.display = 'flex';
-        };
-        window.confirmarEliminar = async () => {
-            document.getElementById('customConfirmModal').style.display = 'none';
-            if(keyAEliminar) {
-                showLoading("Eliminando producto...");
-                try {
-                    const response = await fetch('https://llevatelo-seguro.vercel.app/api', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'confirmarEliminar', payload: { key: keyAEliminar } })
-                    });
-                    const data = await response.json();
-                    if (!response.ok) throw new Error(data.error || 'Error en el servidor');
-                    hideLoading();
-                    agregarNotificacion("🗑️", "Eliminaste un producto de tu tienda.");
-                    alert("✅ " + data.message);
-                } catch(err) {
-                    hideLoading();
-                    alert("❌ Error: " + err.message);
-                }
-                keyAEliminar = null;
-            }
-        };
-        window.cerrarConfirmar = () => {
-            document.getElementById('customConfirmModal').style.display = 'none';
-            keyAEliminar = null;
-        };
-
-        // Modal de Fotos (Reutilizado)
-        let currentModalKey = null, currentModalIndex = 0;
-        window.openModal = (key, index = 0) => {
-            currentModalKey = key; currentModalIndex = index;
-            actualizarModal();
-            document.getElementById('imageModal').style.display = 'flex';
-        };
-        window.closeModal = () => document.getElementById('imageModal').style.display = 'none';
-        
-        function actualizarModal() {
-            const prod = todosLosProductos[currentModalKey];
-            if(!prod) return;
-            const fotos = Array.isArray(prod.fotos) ? prod.fotos : Object.values(prod.fotos);
-            document.getElementById('modalImage').src = fotos[currentModalIndex];
-            const counter = document.getElementById('modalCounter');
-            
-            if(fotos.length > 1){
-                document.getElementById('modalPrevBtn').style.display = 'block';
-                document.getElementById('modalNextBtn').style.display = 'block';
-                counter.style.display = 'block';
-                counter.innerText = (currentModalIndex + 1) + ' / ' + fotos.length;
+            if(partida.puntas.length === 0) {
+                partida.puntas = f; 
             } else {
-                document.getElementById('modalPrevBtn').style.display = 'none';
-                document.getElementById('modalNextBtn').style.display = 'none';
-                counter.style.display = 'none';
+                if(ladoElegido === 0) {
+                    if(f[0] === partida.puntas[0]) { partida.puntas[0] = f[1]; fichaAcomodada = [f[1], f[0]]; }
+                    else { partida.puntas[0] = f[0]; fichaAcomodada = [f[0], f[1]]; }
+                } else {
+                    if(f[0] === partida.puntas[1]) { partida.puntas[1] = f[1]; fichaAcomodada = [f[0], f[1]]; }
+                    else { partida.puntas[1] = f[0]; fichaAcomodada = [f[1], f[0]]; }
+                }
             }
-        }
-        window.cambiarFotoModal = (dir) => {
-            const fotos = Array.isArray(todosLosProductos[currentModalKey].fotos) ? todosLosProductos[currentModalKey].fotos : Object.values(todosLosProductos[currentModalKey].fotos);
-            currentModalIndex = (currentModalIndex + dir + fotos.length) % fotos.length;
-            actualizarModal();
-        };
 
-        document.getElementById('searchInput').addEventListener('input', renderProducts);
-        document.getElementById('filterUbicacion').addEventListener('input', renderProducts);
-        document.getElementById('filterPrecioMin').addEventListener('input', renderProducts);
-        document.getElementById('filterPrecioMax').addEventListener('input', renderProducts);
-        document.getElementById('filterSelect').addEventListener('change', renderProducts);
+            let idx = mano.findIndex(x => (x[0]===f[0] && x[1]===f[1]) || (x[0]===f[1] && x[1]===f[0]));
+            if(idx !== -1) partida.manos[jugador].splice(idx, 1);
+            
+            partida.mesa.push({ficha: fichaAcomodada, jugador: jugador, lado: ladoElegido});
+            
+            partida.movimientos.push({jugador: jugador, ficha: fichaAcomodada, lado: ladoElegido});
+            guardarRegistroPartida(config.rondaElegida, config.modoJuego, 'En curso (Bot Jugó)');
+
+            partida.pases = 0;
+            
+            avanzarTurno();
+        }
+
+        // ==========================================
+        // 7. MOTOR IA NATURAL EVOLUTIVO
+        // ==========================================
+        function IA_Natural(jugador, jugables) {
+            let mejorFicha = jugables[0];
+            let lado = 0;
+
+            // --- MODO AL AZAR (Juegan a lo loco / intuición) ---
+            if (config.modoBot === 'azar') {
+                mejorFicha = jugables[Math.floor(Math.random() * jugables.length)];
+                if (partida.puntas.length > 0) {
+                    let cIzq = (mejorFicha[0] === partida.puntas[0] || mejorFicha[1] === partida.puntas[0]);
+                    let cDer = (mejorFicha[0] === partida.puntas[1] || mejorFicha[1] === partida.puntas[1]);
+                    if (cIzq && cDer) lado = Math.random() > 0.5 ? 0 : 1;
+                    else if (cIzq) lado = 0;
+                    else lado = 1;
+                } else {
+                    lado = -1;
+                }
+                return { ficha: mejorFicha, lado: lado };
+            }
+
+            // --- MODO ESTRATEGA (Asignado a cada rol sin cambiar) ---
+            let maxPuntos = -9999;
+            jugables.forEach(f => {
+                let pts = f[0] + f[1]; 
+                if(f[0] === f[1]) pts += 100; // Doble es prioridad
+                
+                // Comportamiento asignado
+                if(jugador === 'mesa2') pts += 5; // Mesa2 intenta descargar fichas gordas agresivamente
+                else if(jugador === 'amigo3' && (f[0]===6 || f[1]===6)) pts -= 20; // Amigo3 evita jugar el 6 si puede (se guarda la gorda)
+                else if(jugador === 'mesa4') pts += (Math.random() * 15); // Mesa4 evalúa con ligera aleatoriedad
+                
+                if(pts > maxPuntos) {
+                    maxPuntos = pts;
+                    mejorFicha = f;
+                }
+            });
+
+            if(partida.puntas.length > 0) {
+                let cuadraIzq = (mejorFicha[0] === partida.puntas[0] || mejorFicha[1] === partida.puntas[0]);
+                let cuadraDer = (mejorFicha[0] === partida.puntas[1] || mejorFicha[1] === partida.puntas[1]);
+                
+                if (cuadraIzq && cuadraDer) {
+                    lado = (jugador === 'mesa4') ? 1 : 0; // Mesa4 siempre inclina hacia derecha, otros izq
+                } else if (cuadraIzq) {
+                    lado = 0;
+                } else {
+                    lado = 1;
+                }
+            } else { 
+                lado = -1; 
+            }
+
+            return { ficha: mejorFicha, lado: lado };
+        }
+
     </script>
 </body>
 </html>
- 
