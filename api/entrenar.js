@@ -7,16 +7,17 @@ export default async function handler(req, res) {
         let rawKey = process.env.FIREBASE_PRIVATE_KEY || "";
         const formattedKey = rawKey.replace(/\\n/g, '\n').replace(/"/g, '').trim();
 
-        if (!getApps().length) {
+                if (!getApps().length) {
             initializeApp({
                 credential: cert({
                     projectId: process.env.FIREBASE_PROJECT_ID,
                     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
                     privateKey: formattedKey,
                 }),
-                databaseURL: process.env.FIREBASE_DATABASE_URL
+                databaseURL: "https://llevatelo-seguro-default-rtdb.firebaseio.com"
             });
         }
+
 
         const db = getDatabase();
         const refLecciones = db.ref("experiencia_ia_global/historial_lecciones");
