@@ -1,22 +1,24 @@
 import { initializeApp, cert, getApps } from "firebase-admin/app";
 import { getDatabase } from "firebase-admin/database";
 
-// Inicializar Firebase Admin usando variables de entorno seguras
-if (!getApps().length) {
-    initializeApp({
-        credential: cert({
-            projectId: process.env.FIREBASE_PROJECT_ID,
-            clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-            privateKey: process.env.FIREBASE_PRIVATE_KEY ? process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n') : undefined,
-        }),
-        databaseURL: process.env.FIREBASE_DATABASE_URL
-    });
-}
-
-const db = getDatabase();
-
 export default async function handler(req, res) {
     try {
+        // Limpieza automática y segura de la llave privada de Firebase
+        let rawKey = process.env.FIREBASE_PRIVATE_KEY || "";
+        const formattedKey = rawKey.replace(/\\n/g, '\n').replace(/"/g, '').trim();
+
+        if (!getApps().length) {
+            initializeApp({
+                credential: cert({
+                    projectId: process.env.FIREBASE_PROJECT_ID,
+                    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+                    privateKey: formattedKey,
+                }),
+                databaseURL: process.env.FIREBASE_DATABASE_URL
+            });
+        }
+
+        const db = getDatabase();
         const refLecciones = db.ref("experiencia_ia_global/historial_lecciones");
         const snapshot = await refLecciones.once("value");
         const data = snapshot.val();
@@ -28,7 +30,6 @@ export default async function handler(req, res) {
         let lecciones = Object.values(data);
         let resumenOptimizado = {};
 
-        // Procesar y calcular la inteligencia de las jugadas
         lecciones.forEach(lec => {
             let keyFicha = `${lec.fichaElegida[0]}-${lec.fichaElegida[1]}`;
             if (!resumenOptimizado[keyFicha]) {
@@ -43,10 +44,7 @@ export default async function handler(req, res) {
             resumenOptimizado[keyFicha].pesoEstrategico = Math.round((resumenOptimizado[keyFicha].victorias / total) * 100);
         });
 
-        // 1. Guardar el resumen limpio en la nube para que tu app lo lea al instante
         await db.ref("experiencia_ia_global/pesos_optimizados").set(resumenOptimizado);
-
-        // 2. Purgar el historial crudo pesado para liberar espacio en Firebase
         await refLecciones.remove();
 
         return res.status(200).json({ 
