@@ -54,11 +54,11 @@
         </div>
     </div>
 
-    <!-- Modal para Grabar Video con Sello de Agua -->
+    <!-- Modal para Tomar Foto con Sello de Agua -->
     <div id="video-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
         <div class="bg-slate-800 p-6 rounded-3xl max-w-md w-full border border-slate-700 text-center shadow-2xl relative">
-            <h3 class="text-lg font-black text-sky-300 mb-1">📹 Grabar Evidencia Verificada</h3>
-            <p class="text-xs text-slate-400 mb-3">El video incluirá una marca de agua oficial con fecha y hora exacta inalterable.</p>
+            <h3 class="text-lg font-black text-sky-300 mb-1">📸 Tomar Foto de Evidencia Verificada</h3>
+            <p class="text-xs text-slate-400 mb-3">La foto incluirá una marca de agua oficial con fecha y hora exacta inalterable.</p>
             
             <!-- Vista previa con Canvas para la marca de agua -->
             <div class="relative bg-black rounded-2xl overflow-hidden aspect-video mb-4 flex items-center justify-center border border-slate-700 shadow-inner">
@@ -66,18 +66,14 @@
                 <canvas id="watermark-canvas" class="w-full h-full object-cover"></canvas>
             </div>
 
-            <div id="recording-status" class="text-xs font-bold text-rose-400 mb-4 hidden flex items-center justify-center gap-1.5 animate-pulse">
-                <span class="w-2 h-2 rounded-full bg-rose-500"></span> Grabando evidencia oficial...
-            </div>
-
             <div class="flex gap-2 justify-center">
-                <button id="start-record" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-emerald-600/30">Iniciar Grabación</button>
-                <button id="stop-record" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-rose-600/30 hidden">Detener y Enviar</button>
+                <button id="capture-photo" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-emerald-600/30">📸 Tomar y Enviar Foto</button>
                 <button id="cancel-record" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2.5 rounded-2xl font-bold text-xs transition">Cancelar</button>
             </div>
-            <div id="uploading-msg" class="text-xs text-sky-400 font-semibold mt-3 hidden animate-pulse">Subiendo evidencia en video a la nube... Por favor espera.</div>
+            <div id="uploading-msg" class="text-xs text-sky-400 font-semibold mt-3 hidden animate-pulse">Subiendo foto de evidencia a la nube... Por favor espera.</div>
         </div>
     </div>
+
 
     <!-- Firebase SDKs -->
     <script type="module">
@@ -101,9 +97,6 @@
 
         let activeTaskId = null;
         let mediaStream = null;
-        let mediaRecorder = null;
-        let recordedChunks = [];
-        let canvasStream = null;
         let animationFrameId = null;
         let currentServerOffset = 0;
 
@@ -179,12 +172,13 @@
                     hasPending = true;
                     const actionDiv = document.createElement('div');
                     actionDiv.className = "pt-3 border-t border-slate-700/60";
-                    actionDiv.innerHTML = `
+                                        actionDiv.innerHTML = `
                         <button onclick="openVideoModal('${id}')" 
                             class="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold py-3 px-4 rounded-2xl transition shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2">
-                            📹 Grabar Video para Marcar como Completa
+                            📸 Tomar Foto para Marcar como Completa
                         </button>
                     `;
+
                     card.appendChild(actionDiv);
                     pendingContainer.appendChild(card);
                 } else {
@@ -212,12 +206,12 @@
             document.getElementById('progress-bar').style.width = `${percentage}%`;
         });
 
-        // Lógica de grabación de video con Canvas Watermark (Fecha y Hora exactas inalterables)
+        // Lógica de captura de foto con Canvas Watermark (Fecha y Hora exactas inalterables)
         window.openVideoModal = async function(id) {
             activeTaskId = id;
             document.getElementById('video-modal').classList.remove('hidden');
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true });
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
                 const sourceVideo = document.getElementById('source-video');
                 sourceVideo.srcObject = mediaStream;
                 sourceVideo.play();
@@ -240,7 +234,7 @@
 
                         ctx.fillStyle = '#38bdf8';
                         ctx.font = 'bold 22px monospace';
-                        ctx.fillText('🛡️ HOGAR SEGURO - EVIDENCIA', 50, 65);
+                        ctx.fillText('   HOGAR SEGURO - EVIDENCIA', 50, 65);
 
                         const exactTime = new Date(Date.now() + currentServerOffset);
                         ctx.fillStyle = '#ffffff';
@@ -250,62 +244,42 @@
                     animationFrameId = requestAnimationFrame(renderWatermark);
                 }
                 renderWatermark();
-
-                canvasStream = canvas.captureStream(30);
-                const audioTrack = mediaStream.getAudioTracks()[0];
-                if (audioTrack) {
-                    canvasStream.addTrack(audioTrack);
-                }
             } catch (err) {
-                alert("No se pudo acceder a la cámara o micrófono. Verifica los permisos de tu navegador.");
+                alert("No se pudo acceder a la cámara. Verifica los permisos de tu navegador.");
                 closeModal();
             }
         };
 
-        document.getElementById('start-record').onclick = () => {
-            recordedChunks = [];
-            try {
-                mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp9,opus' });
-            } catch (e) {
-                mediaRecorder = new MediaRecorder(canvasStream);
-            }
+        document.getElementById('capture-photo').onclick = () => {
+            const canvas = document.getElementById('watermark-canvas');
+            document.getElementById('uploading-msg').classList.remove('hidden');
+            document.getElementById('capture-photo').disabled = true;
 
-            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
-            mediaRecorder.onstop = async () => {
-                document.getElementById('uploading-msg').classList.remove('hidden');
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                const videoPath = `evidencias/${activeTaskId}_${Date.now()}.webm`;
-                const sRef = storageRef(storage, videoPath);
+            canvas.toBlob(async (blob) => {
+                const photoPath = `evidencias/${activeTaskId}_${Date.now()}.jpg`;
+                const sRef = storageRef(storage, photoPath);
 
                 try {
                     await uploadBytes(sRef, blob);
-                    const videoUrl = await getDownloadURL(sRef);
+                    const photoUrl = await getDownloadURL(sRef);
 
-                    // Al subir la evidencia con marca de agua, la tarea pasa automáticamente a completada
+                    // Al subir la foto con marca de agua, la tarea pasa automáticamente a completada
                     await update(ref(db, `tasks/${activeTaskId}`), {
-                        videoUrl,
-                        videoPath,
+                        photoUrl,
+                        photoPath,
                         completed: true
                     });
 
-                    alert("¡Video y evidencia con marca de agua subidos con éxito! Tarea completada.");
+                    alert("¡Foto y evidencia con marca de agua subidas con éxito! Tarea completada.");
                 } catch (err) {
                     console.error(err);
-                    alert("Hubo un error al subir el video a la nube.");
+                    alert("Hubo un error al subir la foto a la nube.");
                 } finally {
                     document.getElementById('uploading-msg').classList.add('hidden');
+                    document.getElementById('capture-photo').disabled = false;
                     closeModal();
                 }
-            };
-
-            mediaRecorder.start();
-            document.getElementById('start-record').classList.add('hidden');
-            document.getElementById('stop-record').classList.remove('hidden');
-            document.getElementById('recording-status').classList.remove('hidden');
-        };
-
-        document.getElementById('stop-record').onclick = () => {
-            if (mediaRecorder) mediaRecorder.stop();
+            }, 'image/jpeg', 0.9);
         };
 
         document.getElementById('cancel-record').onclick = closeModal;
@@ -316,12 +290,10 @@
                 mediaStream.getTracks().forEach(track => track.stop());
             }
             document.getElementById('video-modal').classList.add('hidden');
-            document.getElementById('start-record').classList.remove('hidden');
-            document.getElementById('stop-record').classList.add('hidden');
-            document.getElementById('recording-status').classList.add('hidden');
             const sourceVideo = document.getElementById('source-video');
             sourceVideo.srcObject = null;
         }
+
     </script>
 </body>
 </html>
