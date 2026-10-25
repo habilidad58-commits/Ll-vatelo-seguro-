@@ -65,12 +65,15 @@
                 <video id="source-video" autoplay muted playsinline class="hidden"></video>
                 <canvas id="watermark-canvas" class="w-full h-full object-cover"></canvas>
             </div>
-
-            <div class="flex gap-2 justify-center">
-                <button id="capture-photo" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-emerald-600/30">📸 Tomar y Enviar Foto</button>
+            <div class="flex flex-col gap-2 justify-center">
+                <div class="flex gap-2 justify-center">
+                    <button id="capture-photo" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-emerald-600/30">📸 Tomar y Enviar Foto</button>
+                    <button id="switch-camera" class="bg-sky-600 hover:bg-sky-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-sky-600/30">🔄 Cambiar Cámara</button>
+                </div>
                 <button id="cancel-record" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2.5 rounded-2xl font-bold text-xs transition">Cancelar</button>
             </div>
-            <div id="uploading-msg" class="text-xs text-sky-400 font-semibold mt-3 hidden animate-pulse">Subiendo foto de evidencia a la nube... Por favor espera.</div>
+
+               <div id="uploading-msg" class="text-xs text-sky-400 font-semibold mt-3 hidden animate-pulse">Subiendo foto de evidencia a la nube... Por favor espera.</div>
         </div>
     </div>
 
@@ -79,7 +82,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDFCJfaYGgcgQuRia1qc4hmZkEWmiBuX2k",
@@ -93,12 +95,12 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const storage = getStorage(app);
-
         let activeTaskId = null;
         let mediaStream = null;
         let animationFrameId = null;
         let currentServerOffset = 0;
+        let currentFacingMode = 'environment';
+
 
         // Sincronizar hora de Firebase (.info/serverTimeOffset)
         const offsetRef = ref(db, ".info/serverTimeOffset");
@@ -200,87 +202,94 @@
             if (!hasHistory) {
                 historyContainer.innerHTML = '<div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-center text-slate-400">🏆 Tu historial aparecerá aquí al completar tareas con video.</div>';
             }
-
             const percentage = totalTasks > 0 ? (completedTasksCount / totalTasks) * 100 : 0;
-            document.getElementById('task-counter').innerText = `${completedtasksCount || completedTasksCount} de ${totalTasks} completadas`;
+            document.getElementById('task-counter').innerText = `${completedTasksCount} de ${totalTasks} completadas`;
             document.getElementById('progress-bar').style.width = `${percentage}%`;
-        });
 
-        // Lógica de captura de foto con Canvas Watermark (Fecha y Hora exactas inalterables)
-        window.openVideoModal = async function(id) {
-            activeTaskId = id;
-            document.getElementById('video-modal').classList.remove('hidden');
+                 });
+        // Lógica de cámara, cambio de lente y guardado en Base64 con Marca de Agua
+        async function startCamera() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
             try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: false });
+                mediaStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 1280, height: 720, facingMode: currentFacingMode }, 
+                    audio: false 
+                });
                 const sourceVideo = document.getElementById('source-video');
                 sourceVideo.srcObject = mediaStream;
                 sourceVideo.play();
-
-                const canvas = document.getElementById('watermark-canvas');
-                canvas.width = 1280;
-                canvas.height = 720;
-                const ctx = canvas.getContext('2d');
-
-                function renderWatermark() {
-                    if (!sourceVideo.paused && !sourceVideo.ended) {
-                        ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
-                        
-                        // Estilo de la marca de agua con fecha y hora exacta
-                        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-                        ctx.fillRect(30, 30, 520, 85);
-                        ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
-                        ctx.lineWidth = 3;
-                        ctx.strokeRect(30, 30, 520, 85);
-
-                        ctx.fillStyle = '#38bdf8';
-                        ctx.font = 'bold 22px monospace';
-                        ctx.fillText('   HOGAR SEGURO - EVIDENCIA', 50, 65);
-
-                        const exactTime = new Date(Date.now() + currentServerOffset);
-                        ctx.fillStyle = '#ffffff';
-                        ctx.font = 'bold 18px monospace';
-                        ctx.fillText(`Fecha: ${exactTime.toLocaleDateString()} ${exactTime.toLocaleTimeString()}`, 50, 95);
-                    }
-                    animationFrameId = requestAnimationFrame(renderWatermark);
-                }
-                renderWatermark();
             } catch (err) {
                 alert("No se pudo acceder a la cámara. Verifica los permisos de tu navegador.");
                 closeModal();
             }
+        }
+
+        window.openVideoModal = async function(id) {
+            activeTaskId = id;
+            document.getElementById('video-modal').classList.remove('hidden');
+            await startCamera();
+
+            const sourceVideo = document.getElementById('source-video');
+            const canvas = document.getElementById('watermark-canvas');
+            canvas.width = 1280;
+            canvas.height = 720;
+            const ctx = canvas.getContext('2d');
+
+            function renderWatermark() {
+                if (sourceVideo && !sourceVideo.paused && !sourceVideo.ended) {
+                    ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+                    
+                    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                    ctx.fillRect(30, 30, 520, 85);
+                    ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
+                    ctx.lineWidth = 3;
+                    ctx.strokeRect(30, 30, 520, 85);
+
+                    ctx.fillStyle = '#38bdf8';
+                    ctx.font = 'bold 22px monospace';
+                    ctx.fillText('   HOGAR SEGURO - EVIDENCIA', 50, 65);
+
+                    const exactTime = new Date(Date.now() + currentServerOffset);
+                    ctx.fillStyle = '#ffffff';
+                    ctx.font = 'bold 18px monospace';
+                    ctx.fillText(`Fecha: ${exactTime.toLocaleDateString()} ${exactTime.toLocaleTimeString()}`, 50, 95);
+                }
+                animationFrameId = requestAnimationFrame(renderWatermark);
+            }
+            renderWatermark();
         };
 
-        document.getElementById('capture-photo').onclick = () => {
+        document.getElementById('switch-camera').onclick = async () => {
+            currentFacingMode = currentFacingMode === 'environment' ? 'user' : 'environment';
+            await startCamera();
+        };
+
+        document.getElementById('capture-photo').onclick = async () => {
             const canvas = document.getElementById('watermark-canvas');
             document.getElementById('uploading-msg').classList.remove('hidden');
             document.getElementById('capture-photo').disabled = true;
 
-            canvas.toBlob(async (blob) => {
-                const photoPath = `evidencias/${activeTaskId}_${Date.now()}.jpg`;
-                const sRef = storageRef(storage, photoPath);
+            try {
+                const photoData = canvas.toDataURL('image/jpeg', 0.8);
 
-                try {
-                    await uploadBytes(sRef, blob);
-                    const photoUrl = await getDownloadURL(sRef);
+                await update(ref(db, `tasks/${activeTaskId}`), {
+                    photoData,
+                    completed: true
+                });
 
-                    // Al subir la foto con marca de agua, la tarea pasa automáticamente a completada
-                    await update(ref(db, `tasks/${activeTaskId}`), {
-                        photoUrl,
-                        photoPath,
-                        completed: true
-                    });
-
-                    alert("¡Foto y evidencia con marca de agua subidas con éxito! Tarea completada.");
-                } catch (err) {
-                    console.error(err);
-                    alert("Hubo un error al subir la foto a la nube.");
-                } finally {
-                    document.getElementById('uploading-msg').classList.add('hidden');
-                    document.getElementById('capture-photo').disabled = false;
-                    closeModal();
-                }
-            }, 'image/jpeg', 0.9);
+                alert("¡Foto y evidencia con marca de agua guardadas con éxito! Tarea completada.");
+            } catch (err) {
+                console.error(err);
+                alert("Hubo un error al guardar la foto.");
+            } finally {
+                document.getElementById('uploading-msg').classList.add('hidden');
+                document.getElementById('capture-photo').disabled = false;
+                closeModal();
+            }
         };
+
 
         document.getElementById('cancel-record').onclick = closeModal;
 
