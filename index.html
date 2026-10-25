@@ -3,1152 +3,325 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dominio de Cifras - Sistema BS</title>
-<style>
-    :root {
-        --bg-dark: #0f172a;
-        --panel-bg: #1e293b;
-        --player-color: #00e676;
-        --ai-color: #ff5252;
-        --border-color: #334155;
-    }
-
-    body {
-        background-color: var(--bg-dark);
-        color: #f8fafc;
-        font-family: system-ui, -apple-system, sans-serif;
-        margin: 0;
-        padding: 15px;
-        display: flex;
-        flex-direction: column;
-        align-items: center; 
-        min-height: 95vh;
-    }
-
-    h1 {
-        margin: 5px 0 10px 0;
-        font-size: 22px;
-        color: #38bdf8;
-        text-align: center;
-    }
-
-    .menu-selector {
-        display: flex;
-        gap: 8px;
-        width: 100%;
-        max-width: 480px;
-        margin-bottom: 12px;
-        box-sizing: border-box;
-    }
-
-    .mode-btn {
-        flex: 1;
-        padding: 8px;
-        background: var(--panel-bg);
-        color: #94a3b8;
-        border: 1px solid var(--border-color);
-        border-radius: 6px;
-        font-weight: bold;
-        font-size: 12px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .mode-btn.active {
-        background: #0284c7;
-        color: white;
-        border-color: #38bdf8;
-    }
-
-    .balance-container {
-        width: 100%;
-        max-width: 480px;
-        background: var(--panel-bg);
-        padding: 10px 15px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        margin-bottom: 12px;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-
-    .balance-input {
-        background: #0f172a;
-        color: var(--player-color);
-        border: 1px solid var(--border-color);
-        padding: 6px;
-        border-radius: 6px;
-        font-weight: bold;
-        width: 110px;
-        text-align: center;
-        font-size: 16px;
-    }
-
-    .score-board {
-        display: flex;
-        justify-content: space-between;
-        width: 100%;
-        max-width: 480px;
-        background: var(--panel-bg);
-        padding: 10px 15px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        margin-bottom: 12px;
-        box-sizing: border-box;
-    }
-
-    .score-box {
-        text-align: center;
-    }
-
-    .score-val {
-        font-size: 18px;
-        font-weight: bold;
-    }
-
-    .status-bar {
-        background: var(--panel-bg);
-        padding: 8px 12px;
-        border-radius: 6px;
-        font-size: 12px;
-        margin-bottom: 12px;
-        color: #e2e8f0;
-        border-left: 4px solid #38bdf8;
-        width: 100%;
-        max-width: 480px;
-        box-sizing: border-box;
-        line-height: 1.3;
-    }
-
-    .grid-board {
-        display: grid;
-        grid-template-columns: repeat(5, 1fr);
-        gap: 6px;
-        width: 100%;
-        max-width: 480px;
-        aspect-ratio: 1;
-        background: var(--panel-bg);
-        padding: 8px;
-        border-radius: 12px;
-        border: 2px solid var(--border-color);
-        box-sizing: border-box;
-    }
-
-    .cell {
-        background: #0f172a;
-        border-radius: 6px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        font-size: 20px;
-        font-weight: bold;
-        cursor: pointer;
-        border: 1px solid #1e293b;
-        transition: all 0.2s ease;
-        user-select: none;
-        position: relative;
-    }
-
-    .cell:hover {
-        border-color: #38bdf8;
-        background: #1e293b;
-    }
-
-    .cell.player1 {
-        background: rgba(0, 230, 118, 0.15);
-        color: var(--player-color);
-        border: 2px solid var(--player-color);
-    }
-
-    .cell.player2 {
-        background: rgba(255, 82, 82, 0.15);
-        color: var(--ai-color);
-        border: 2px solid var(--ai-color);
-    }
-
-    .cell.last-player {
-        box-shadow: 0 0 16px #ffd700, inset 0 0 8px #ffd700;
-        border-color: #ffd700 !important;
-    }
-
-    .cell.last-ai {
-        box-shadow: 0 0 16px #38bdf8, inset 0 0 8px #38bdf8;
-        border-color: #38bdf8 !important;
-    }
-
-    .cell .owner-tag {
-        font-size: 7px;
-        position: absolute;
-        bottom: 2px;
-        opacity: 0.8;
-    }
-
-    .inventory-container {
-        width: 100%;
-        max-width: 480px;
-        margin-top: 12px;
-        background: var(--panel-bg);
-        padding: 10px;
-        border-radius: 10px;
-        border: 1px solid var(--border-color);
-        box-sizing: border-box;
-    }
-
-    .inventory-title {
-        font-size: 11px;
-        color: #94a3b8;
-        margin-bottom: 6px;
-        text-align: center;
-        font-weight: bold;
-    }
-
-    .number-picker {
-        display: flex;
-        justify-content: space-between;
-        gap: 3px;
-    }
-
-    .num-btn {
-        flex: 1;
-        padding: 6px 0;
-        background: #0f172a;
-        color: white;
-        border: 1px solid var(--border-color);
-        border-radius: 5px;
-        font-weight: bold;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-
-    .num-btn.selected {
-        background: var(--player-color);
-        color: black;
-        box-shadow: 0 0 8px var(--player-color);
-        border-color: var(--player-color);
-    }
-
-    .num-btn:disabled, .btn-action:disabled {
-        opacity: 0.25;
-        cursor: not-allowed;
-    }
-
-    .controls {
-        margin-top: 12px;
-        display: flex;
-        gap: 8px;
-        width: 100%;
-        max-width: 480px;
-    }
-
-    .btn-action {
-        flex: 1;
-        padding: 10px;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        cursor: pointer;
-        font-size: 13px;
-    }
-    .btn-reset {
-        background: #ef4444;
-        color: white;
-    }
-
-    .btn-rules {
-        background: #0284c7;
-        color: white;
-    }
-
-    .timer-badge {
-        background: #1e293b;
-        border: 1px solid #38bdf8;
-        color: #38bdf8;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 12px;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 10px;
-        width: 100%;
-        max-width: 480px;
-        box-sizing: border-box;
-    }
-
-    /* Modal Styles */
-    .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(15, 23, 42, 0.85);
-        z-index: 1000;
-        justify-content: center;
-        align-items: center;
-        padding: 15px;
-        box-sizing: border-box;
-    }
-
-    .modal-content {
-        background: var(--panel-bg);
-        border: 1px solid #38bdf8;
-        border-radius: 12px;
-        width: 100%;
-        max-width: 450px;
-        max-height: 85vh;
-        overflow-y: auto;
-        padding: 20px;
-        box-sizing: border-box;
-        color: #f8fafc;
-    }
-
-    .modal-content h2 {
-        color: #38bdf8;
-        margin-top: 0;
-        font-size: 18px;
-        text-align: center;
-    }
-
-    .modal-content p, .modal-content li {
-        font-size: 13px;
-        line-height: 1.4;
-        color: #cbd5e1;
-    }
-
-    .modal-close-btn {
-        width: 100%;
-        padding: 10px;
-        background: #0284c7;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        margin-top: 15px;
-        cursor: pointer;
-    }
-
-    /* Botón flotante de Registro de Jugadas (Log) */
-    .log-btn-float {
-        position: fixed;
-        bottom: 12px;
-        right: 12px;
-        width: 36px;
-        height: 36px;
-        background: #0284c7;
-        color: white;
-        border: 1px solid #38bdf8;
-        border-radius: 50%;
-        font-weight: bold;
-        font-size: 14px;
-        cursor: pointer;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-        z-index: 999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .log-area {
-        width: 100%;
-        height: 220px;
-        background: #0f172a;
-        color: #38bdf8;
-        border: 1px solid #334155;
-        border-radius: 6px;
-        padding: 10px;
-        font-family: monospace;
-        font-size: 11px;
-        box-sizing: border-box;
-        resize: none;
-        white-space: pre;
-    }
-
-    .btn-copy-log {
-        width: 100%;
-        padding: 8px;
-        background: #00e676;
-        color: #0f172a;
-        border: none;
-        border-radius: 6px;
-        font-weight: bold;
-        margin-top: 10px;
-        cursor: pointer;
-    }
-</style>
-
+    <title>Mis Tareas - Hogar Organizado</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-
-    <h1>DOMINIO DE CIFRAS</h1>
-
-    <div class="menu-selector">
-        <button class="mode-btn active" id="btn-ia-easy" onclick="cambiarModo('ia', 'easy')">IA Fácil</button>
-        <button class="mode-btn" id="btn-ia-medium" onclick="cambiarModo('ia', 'medium')">IA Media</button>
-        <button class="mode-btn" id="btn-ia-hard" onclick="cambiarModo('ia', 'hard')">IA Difícil</button>
-        <button class="mode-btn" id="btn-pvp" onclick="cambiarModo('pvp', 'hard')">Modo 1v1</button>
-    </div>
-
-    <div class="balance-container">
-        <span style="font-size: 12px; font-weight: bold; color: #38bdf8;">SALDO DISPONIBLE (BS):</span>
-        <input type="number" id="user-balance" class="balance-input" value="1000" onchange="actualizarSaldoManual(this.value)">
-    </div>
-
-    <div class="inventory-container" style="margin-bottom: 12px; margin-top: 0;">
-        <div class="inventory-title" id="risk-title">MULTIPLICADOR DE RIESGO (1x - 10x):</div>
-        <div class="number-picker" id="risk-picker"></div>
-    </div>
-
-    <div class="score-board">
-        <div class="score-box">
-            <div style="color: var(--player-color); font-size: 10px; font-weight: bold;" id="label-p1">BS VERDE (TÚ)</div>
-            <div class="score-val" id="pts-p1" style="color: var(--player-color);">0</div>
-        </div>
-        <div class="score-box">
-            <div style="color: #38bdf8; font-size: 10px; font-weight: bold;">LIBRES</div>
-            <div class="score-val" id="free-cells" style="color: #38bdf8;">25</div>
-        </div>
-        <div class="score-box">
-            <div style="color: var(--ai-color); font-size: 10px; font-weight: bold;" id="label-p2">BS ROJO (IA)</div>
-            <div class="score-val" id="pts-p2" style="color: var(--ai-color);">0</div>
-        </div>
-    </div>
-
-    <div class="status-bar" id="status-text">
-        Partida iniciada. Selecciona una ficha (su costo en BS) y colócala en el tablero.
-    </div>
-
-    <div class="timer-badge" id="timer-display">⏱️ Tiempo para responder: 20s</div>
-
-    <div class="grid-board" id="board"></div>
-
-    <div class="inventory-container">
-        <div class="inventory-title" id="inventory-title">FICHAS RESTANTES (JUGADOR 1):</div>
-        <div class="number-picker" id="picker"></div>
-    </div>
-    <div class="controls">
-        <button class="btn-action btn-rules" onclick="abrirReglas()">Reglas y Estrategia</button>
-        <button class="btn-action btn-reset" id="btn-reset" onclick="reiniciarJuego()">Comenzar</button>
-    </div>
-
-
-
-    <!-- Modal de Reglas y Estrategia -->
-    <div class="modal-overlay" id="rules-modal">
-        <div class="modal-content">
-            <h2>📜 Guía Completa de Dominio de Cifras</h2>
+<body class="bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 text-slate-100 min-h-screen p-4 sm:p-8">
+    <div class="max-w-xl mx-auto">
+        <!-- Header Bonito y Animado -->
+        <header class="bg-slate-800/80 backdrop-blur-md p-6 rounded-3xl shadow-2xl mb-6 border border-slate-700 text-center relative overflow-hidden">
+            <div class="absolute -top-10 -right-10 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl"></div>
             
-            <p><strong>1. ¿Cómo se juega?</strong><br>
-            El juego se desarrolla en un tablero de 5x5 casillas. Cada jugador cuenta con un inventario idéntico de fichas numeradas del 1 al 9 (que representan su costo en BS). En tu turno, colocas una ficha en cualquier casilla vacía. Si tu ficha es estrictamente mayor que una ficha adyacente (arriba, abajo, izquierda o derecha) del rival, la capturas y pasa a ser de tu propiedad.</p>
+            <span class="text-3xl">🏡✨</span>
+            <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-sky-400 mt-1">Panel de Tareas del Hogar</h1>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1">¡Completa tus misiones del día grabando tu evidencia con sello de tiempo oficial!</p>
             
-            <p><strong>2. ¿Cómo se gana y se pierde?</strong><br>
-            La partida termina cuando el tablero se llena por completo o se agotan las fichas. Se suman los puntos de las fichas de cada jugador en el tablero:
-            <ul>
-                <li><strong>Victoria:</strong> Si tu puntuación es mayor que la de tu rival, recuperas tu inversión y obtienes una ganancia neta basada en la diferencia de puntos multiplicada por tu nivel de riesgo.</li>
-                <li><strong>Derrota:</strong> Si tu puntuación es menor, se descuenta la pérdida correspondiente de tu saldo.</li>
-                <li><strong>Empate:</strong> Si hay igualdad de puntos, se te devuelve exactamente tu inversión inicial intacta.</li>
-            </ul>
-            </p>
+            <div class="mt-4 inline-flex items-center gap-2 bg-slate-900/90 px-4 py-2 rounded-2xl border border-slate-700/80 shadow-inner">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs text-slate-300">Hora Oficial Nube:</span>
+                <span id="server-time" class="font-mono text-emerald-400 font-bold">Sincronizando...</span>
+            </div>
 
-            <p><strong>3. Sistema de Apuestas y Multiplicadores</strong><br>
-            Antes de comenzar, puedes configurar tu <strong>Saldo Disponible en BS</strong> y seleccionar un <strong>Multiplicador de Riesgo (de 1x a 10x)</strong>. Este multiplicador escala de forma directa tanto las ganancias potenciales como los riesgos al finalizar la partida.</p>
+            <!-- Barra de Progreso de Tareas -->
+            <div class="mt-5 pt-4 border-t border-slate-700/60 flex items-center justify-between text-xs text-slate-400">
+                <span>Progreso de hoy:</span>
+                <span id="task-counter" class="font-bold text-sky-300">0 completadas</span>
+            </div>
+            <div class="w-full bg-slate-900 h-2.5 rounded-full mt-2 overflow-hidden border border-slate-700">
+                <div id="progress-bar" class="bg-gradient-to-r from-emerald-500 to-sky-500 h-full w-0 transition-all duration-500"></div>
+            </div>
+        </header>
 
-            <p><strong>4. Límite de Tiempo</strong><br>
-            Cuentas con <strong>20 segundos</strong> por turno para realizar tu movimiento. Si el tiempo se agota, el sistema ejecutará una jugada automática de emergencia y cederá el turno.</p>
+        <!-- Pestañas de Navegación Visual -->
+        <div class="flex gap-2 mb-4">
+            <button onclick="switchTab('pending')" id="tab-pending" class="flex-1 py-2.5 rounded-2xl font-bold text-xs bg-sky-600 text-white shadow-lg shadow-sky-600/30 transition">
+                ⚡ Tareas Pendientes
+            </button>
+            <button onclick="switchTab('history')" id="tab-history" class="flex-1 py-2.5 rounded-2xl font-bold text-xs bg-slate-800 text-slate-400 hover:bg-slate-700 transition">
+                🏆 Historial de Logros
+            </button>
+        </div>
 
-            <p><strong>5. Estrategias Recomendadas y Qué Evitar</strong><br>
-            <ul>
-                <li><strong>Control inicial de esquinas:</strong> Al principio de la partida, cuando hay muchas casillas libres, es muy aconsejable asegurar las esquinas utilizando fichas de valor bajo (del 1 al 4). Esto protege posiciones estratégicas sin desperdiciar recursos valiosos.</li>
-                <li><strong>Reserva de números altos:</strong> Las fichas 8 y 9 son tus armas principales. Evita gastarlas al comienzo; guárdalas celosamente para las fases finales del tablero, donde te permitirán realizar capturas múltiples y asegurar la victoria en el cierre.</li>
-                <li><strong>Qué evitar:</strong> No expongas números débiles en casillas centrales descubiertas durante los primeros turnos, ya que facilitas que el oponente los capture sin esfuerzo con fichas medianas.</li>
-            </ul>
-            </p>
+        <!-- Contenedores de Secciones -->
+        <div id="pending-container" class="space-y-4">
+            <p class="text-slate-500 text-center py-6">Cargando tareas pendientes...</p>
+        </div>
 
-            <button class="modal-close-btn" onclick="cerrarReglas()">Entendido</button>
+        <div id="history-container" class="space-y-4 hidden">
+            <p class="text-slate-500 text-center py-6">No hay historial registrado aún.</p>
         </div>
     </div>
 
-    <!-- Botón Flotante 'i' -->
-    <button class="log-btn-float" onclick="abrirLog()">i</button>
+    <!-- Modal para Grabar Video con Sello de Agua -->
+    <div id="video-modal" class="fixed inset-0 bg-black/85 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 p-6 rounded-3xl max-w-md w-full border border-slate-700 text-center shadow-2xl relative">
+            <h3 class="text-lg font-black text-sky-300 mb-1">📹 Grabar Evidencia Verificada</h3>
+            <p class="text-xs text-slate-400 mb-3">El video incluirá una marca de agua oficial con fecha y hora exacta inalterable.</p>
+            
+            <!-- Vista previa con Canvas para la marca de agua -->
+            <div class="relative bg-black rounded-2xl overflow-hidden aspect-video mb-4 flex items-center justify-center border border-slate-700 shadow-inner">
+                <video id="source-video" autoplay muted playsinline class="hidden"></video>
+                <canvas id="watermark-canvas" class="w-full h-full object-cover"></canvas>
+            </div>
 
-    <!-- Modal de Registro de Jugadas -->
-    <div class="modal-overlay" id="log-modal">
-        <div class="modal-content">
-            <h2>📋 Registro de Jugadas</h2>
-            <textarea id="log-textarea" class="log-area" readonly></textarea>
-            <button class="btn-copy-log" onclick="copiarLog()">Copiar Registro</button>
-            <button class="modal-close-btn" onclick="cerrarLog()">Cerrar</button>
+            <div id="recording-status" class="text-xs font-bold text-rose-400 mb-4 hidden flex items-center justify-center gap-1.5 animate-pulse">
+                <span class="w-2 h-2 rounded-full bg-rose-500"></span> Grabando evidencia oficial...
+            </div>
+
+            <div class="flex gap-2 justify-center">
+                <button id="start-record" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-emerald-600/30">Iniciar Grabación</button>
+                <button id="stop-record" class="bg-rose-600 hover:bg-rose-500 text-white px-4 py-2.5 rounded-2xl font-bold text-xs transition shadow-lg shadow-rose-600/30 hidden">Detener y Enviar</button>
+                <button id="cancel-record" class="bg-slate-700 hover:bg-slate-600 text-slate-300 px-4 py-2.5 rounded-2xl font-bold text-xs transition">Cancelar</button>
+            </div>
+            <div id="uploading-msg" class="text-xs text-sky-400 font-semibold mt-3 hidden animate-pulse">Subiendo evidencia en video a la nube... Por favor espera.</div>
         </div>
     </div>
 
-    <script>
-             const SIZE = 5;
-        let boardState = Array(SIZE * SIZE).fill(null); 
-        
-        let invP1 = { 1:3, 2:3, 3:3, 4:3, 5:3, 6:2, 7:2, 8:2, 9:2 };
-        let invP2 = { 1:3, 2:3, 3:3, 4:3, 5:3, 6:2, 7:2, 8:2, 9:2 };
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        let selectedNumber = 1;
-        let turn = 'p1'; 
-        let lastPlayerIndex = null;
-        let lastAiIndex = null;
-        let playerMoveHistory = JSON.parse(localStorage.getItem('dominio_player_history') || '[]');
-        let gameLogList = [];
-        let moveCounter = 0;
-   let gameMode = 'ia'; 
-        let aiDifficulty = 'hard'; 
-        let isGameOver = false;
-        let userBalance = 1000;
-        let totalInvested = 0; 
-        let riskMultiplier = 1;
-        let gameStarted = false;
+        const firebaseConfig = {
+            apiKey: "AIzaSyDFCJfaYGgcgQuRia1qc4hmZkEWmiBuX2k",
+            authDomain: "llevatelo-seguro.firebaseapp.com",
+            databaseURL: "https://llevatelo-seguro-default-rtdb.firebaseio.com",
+            projectId: "llevatelo-seguro",
+            storageBucket: "llevatelo-seguro.firebasestorage.app",
+            messagingSenderId: "1010159796781",
+            appId: "1:1010159796781:web:59a630895396da68ceaea4"
+        };
 
-        // Variables de Psicología de Casino (Control de Ilusión y Destrucción)
-        let playerTotalGames = parseInt(localStorage.getItem('dominio_total_games') || '0');
-        let playerWinsInRow = parseInt(localStorage.getItem('dominio_wins_row') || '0');
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
 
-       let turnTimer = null;
-        let timeLeft = 20;
+        let activeTaskId = null;
+        let mediaStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let canvasStream = null;
+        let animationFrameId = null;
+        let currentServerOffset = 0;
 
-        function init() {
-            renderBoard();
-            renderPicker();
-            renderRiskPicker();
-            updateScores();
-            // El temporizador y el juego esperan a que el usuario presione Comenzar o haga su primera jugada
-            document.getElementById('timer-display').innerText = `⏱️ Presiona "Comenzar" para iniciar la partida`;
-        }
+        // Sincronizar hora de Firebase (.info/serverTimeOffset)
+        const offsetRef = ref(db, ".info/serverTimeOffset");
+        onValue(offsetRef, (snap) => {
+            currentServerOffset = snap.val() || 0;
+            setInterval(() => {
+                const estimatedServerTime = new Date(Date.now() + currentServerOffset);
+                document.getElementById('server-time').innerText = estimatedServerTime.toLocaleTimeString();
+            }, 1000);
+        });
 
-        function renderRiskPicker() {
-            const riskPickerEl = document.getElementById('risk-picker');
-            if (!riskPickerEl) return;
-            riskPickerEl.innerHTML = '';
-            for (let m = 1; m <= 10; m++) {
-                const btn = document.createElement('button');
-                btn.className = `num-btn ${riskMultiplier === m ? 'selected' : ''}`;
-                btn.innerText = `${m}x`;
-                btn.disabled = gameStarted;
-                btn.onclick = () => {
-                    if (!gameStarted) {
-                        riskMultiplier = m;
-                        renderRiskPicker();
-                    }
-                };
-                riskPickerEl.appendChild(btn);
-            }
-        }
+        // Control de Pestañas
+        window.switchTab = function(tab) {
+            const pendingContainer = document.getElementById('pending-container');
+            const historyContainer = document.getElementById('history-container');
+            const tabPending = document.getElementById('tab-pending');
+            const tabHistory = document.getElementById('tab-history');
 
-        function iniciarTurnoTimer() {
-            if (isGameOver) return;
-            detenerTimer();
-            
-            if (turn === 'p1' || gameMode === 'pvp') {
-                timeLeft = 20;
-                document.getElementById('timer-display').innerText = `⏱️ Tiempo para responder: ${timeLeft}s`;
-                
-                turnTimer = setInterval(() => {
-                    timeLeft--;
-                    document.getElementById('timer-display').innerText = `⏱️ Tiempo para responder: ${timeLeft}s`;
-                    if (timeLeft <= 0) {
-                        detenerTimer();
-                        ejecutarJugadaAutomaticaPorTimeout();
-                    }
-                }, 1000);
+            if (tab === 'pending') {
+                pendingContainer.classList.remove('hidden');
+                historyContainer.classList.add('hidden');
+                tabPending.className = "flex-1 py-2.5 rounded-2xl font-bold text-xs bg-sky-600 text-white shadow-lg shadow-sky-600/30 transition";
+                tabHistory.className = "flex-1 py-2.5 rounded-2xl font-bold text-xs bg-slate-800 text-slate-400 hover:bg-slate-700 transition";
             } else {
-                document.getElementById('timer-display').innerText = `⏱️ Turno de la Casa (IA)`;
+                pendingContainer.classList.add('hidden');
+                historyContainer.classList.remove('hidden');
+                tabHistory.className = "flex-1 py-2.5 rounded-2xl font-bold text-xs bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 transition";
+                tabPending.className = "flex-1 py-2.5 rounded-2xl font-bold text-xs bg-slate-800 text-slate-400 hover:bg-slate-700 transition";
             }
-        }
+        };
 
-        function detenerTimer() {
-            if (turnTimer) {
-                clearInterval(turnTimer);
-                turnTimer = null;
-            }
-        }
+        // Escuchar tareas en tiempo real
+        onValue(ref(db, 'tasks'), (snapshot) => {
+            const pendingContainer = document.getElementById('pending-container');
+            const historyContainer = document.getElementById('history-container');
+            pendingContainer.innerHTML = '';
+            historyContainer.innerHTML = '';
+            const data = snapshot.val();
 
-        function ejecutarJugadaAutomaticaPorTimeout() {
-            if (isGameOver) return;
-            let currentInv = (turn === 'p1') ? invP1 : invP2;
-            let availableNums = [];
-            for (let n = 1; n <= 9; n++) {
-                if (currentInv[n] > 0) availableNums.push(n);
-            }
-            if (availableNums.length === 0) return;
-
-            let emptyIndices = [];
-            boardState.forEach((val, idx) => { if (val === null) emptyIndices.push(idx); });
-            if (emptyIndices.length === 0) return;
-            let randomIdx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-            let randomNum = availableNums[Math.floor(Math.random() * availableNums.length)];
-
-            if (!gameStarted) {
-                gameStarted = true;
-                document.getElementById('btn-reset').disabled = true;
-                renderRiskPicker();
-            }
-
-            if (turn === 'p1') {
-
-                if (userBalance < randomNum) {
-                    let affordable = availableNums.filter(n => userBalance >= n);
-                    if (affordable.length > 0) {
-                        randomNum = affordable[0];
-                    } else {
-                        randomNum = availableNums[0];
-                    }
-                }
-                userBalance -= randomNum;
-                totalInvested += randomNum;
-                document.getElementById('user-balance').value = userBalance;
-            }
-
-            currentInv[randomNum]--;
-            let owner = (turn === 'p1') ? 'player1' : 'player2';
-            
-            document.getElementById('status-text').innerText = `⚠️ ¡Tiempo agotado! Una IA básica jugó por ti a lo loco ficha [${randomNum}]. Turno cedido a la casa.`;
-            ejecutarJugada(randomIdx, randomNum, owner);
-
-            if (!checkGameOver()) {
-                if (gameMode === 'ia') {
-                    turn = 'p2';
-                    renderPicker();
-                    setTimeout(turnIA, 300);
-                } else {
-                    turn = (turn === 'p1') ? 'p2' : 'p1';
-                    renderPicker();
-                    iniciarTurnoTimer();
-                }
-            }
-        }
-
-        function abrirReglas() {
-            document.getElementById('rules-modal').style.display = 'flex';
-        }
-
-        function cerrarReglas() {
-            document.getElementById('rules-modal').style.display = 'none';
-        }
-
-        function actualizarSaldoManual(val) {
-            let parsed = parseFloat(val);
-            if (!isNaN(parsed) && parsed >= 0) {
-                userBalance = parsed;
-            } else {
-                document.getElementById('user-balance').value = userBalance;
-                alert("Por favor ingresa un saldo válido en BS.");
-            }
-        }
-
-        function cambiarModo(modo, diff) {
-            gameMode = modo;
-            if (modo === 'ia') {
-                aiDifficulty = diff;
-            }
-            
-            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
-            if (modo === 'pvp') {
-                document.getElementById('btn-pvp').classList.add('active');
-                document.getElementById('label-p2').innerText = "BS ROJO (JUG2)";
-            } else {
-                document.getElementById(`btn-ia-${diff}`).classList.add('active');
-                document.getElementById('label-p2').innerText = `BS ROJO (IA ${diff.toUpperCase()})`;
-            }
-            reiniciarJuego();
-        }
-
-        function renderBoard() {
-            const boardEl = document.getElementById('board');
-            boardEl.innerHTML = '';
-            for (let i = 0; i < SIZE * SIZE; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'cell';
-                const cellData = boardState[i];
-
-                if (cellData) {
-                    cell.classList.add(cellData.owner);
-                    if (cellData.owner === 'player1' && i === lastPlayerIndex) {
-                        cell.classList.add('last-player');
-                    }
-                    if (cellData.owner === 'player2' && i === lastAiIndex) {
-                        cell.classList.add('last-ai');
-                    }
-                    cell.innerHTML = `<div>${cellData.val}</div><div class="owner-tag">${cellData.owner === 'player1' ? (gameMode === 'pvp' ? 'P1' : 'TÚ') : (gameMode === 'pvp' ? 'P2' : 'IA')}</div>`;
-                } else {
-                    cell.onclick = () => handleCellClick(i);
-                }
-                boardEl.appendChild(cell);
-            }
-        }
-
-        function renderPicker() {
-            const pickerEl = document.getElementById('picker');
-            let currentInv = (turn === 'p1') ? invP1 : invP2;
-            let titleText = (gameMode === 'pvp') ? `FICHAS RESTANTES (${turn === 'p1' ? 'JUGADOR 1' : 'JUGADOR 2'}):` : 'TUS FICHAS RESTANTES Y COSTO EN BS:';
-            document.getElementById('inventory-title').innerText = titleText;
-
-            pickerEl.innerHTML = '';
-            for (let n = 1; n <= 9; n++) {
-                const btn = document.createElement('button');
-                btn.className = `num-btn ${selectedNumber === n ? 'selected' : ''}`;
-                btn.innerText = `${n} (${currentInv[n]})`;
-                btn.disabled = currentInv[n] <= 0;
-                
-                btn.onclick = () => {
-                    if (currentInv[n] > 0) {
-                        selectedNumber = n;
-                        renderPicker();
-                    }
-                };
-                pickerEl.appendChild(btn);
-            }
-        }
-
-        function handleCellClick(index) {
-            if (isGameOver || boardState[index] !== null) return;
-            detenerTimer();
-            let currentInv = (turn === 'p1') ? invP1 : invP2;
-
-            if (currentInv[selectedNumber] <= 0) {
-                alert("¡Ya no te quedan fichas de este número!");
-                iniciarTurnoTimer();
+            if (!data) {
+                pendingContainer.innerHTML = '<div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-center text-slate-400">✨ ¡Todo al día! No hay tareas pendientes.</div>';
+                historyContainer.innerHTML = '<div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-center text-slate-400">🏆 Aún no hay historial de tareas completadas.</div>';
+                document.getElementById('task-counter').innerText = '0 completadas';
+                document.getElementById('progress-bar').style.width = '0%';
                 return;
             }
 
-            if (!gameStarted) {
-                gameStarted = true;
-                document.getElementById('btn-reset').disabled = true;
-                renderRiskPicker();
-            }
+            let totalTasks = 0;
+            let completedTasksCount = 0;
+            let hasPending = false;
+            let hasHistory = false;
 
-            // Validación de saldo en BS para el jugador 1 (Tú)
-            if (turn === 'p1') {
-                if (userBalance < selectedNumber) {
-                    alert(`¡Saldo insuficiente! Necesitas ${selectedNumber} BS para jugar esta ficha y tu saldo actual es de ${userBalance} BS.`);
-                    iniciarTurnoTimer();
-                    return;
-                }
-                userBalance -= selectedNumber;
-                totalInvested += selectedNumber; // Acumulamos lo invertido en la partida
-                document.getElementById('user-balance').value = userBalance;
-            }
+            Object.entries(data).reverse().forEach(([id, task]) => {
+                totalTasks++;
+                if (task.completed) completedTasksCount++;
 
-            currentInv[selectedNumber]--;
-            let owner = (turn === 'p1') ? 'player1' : 'player2';
-            ejecutarJugada(index, selectedNumber, owner);
-
-            if (!checkGameOver()) {
-                if (gameMode === 'ia' && turn === 'p1') {
-                    turn = 'p2';
-                    renderPicker();
-                    document.getElementById('status-text').innerText = "🤖 La IA está calculando su jugada (2s)...";
-                    setTimeout(turnIA, 2000);
-                } else if (gameMode === 'pvp') {
-
-                    turn = (turn === 'p1') ? 'p2' : 'p1';
-                    renderPicker();
-                    document.getElementById('status-text').innerText = `Turno de ${turn === 'p1' ? 'Jugador 1' : 'Jugador 2'}.`;
-                    iniciarTurnoTimer();
-                }
-            }
-        }
-        function ejecutarJugada(index, val, owner) {
-            boardState[index] = { val: val, owner: owner };
-            if (owner === 'player1') {
-                lastPlayerIndex = index;
-                playerMoveHistory.push({ val, index, freeCells: boardState.filter(c => c === null).length });
-                if (playerMoveHistory.length > 40) playerMoveHistory.shift();
-                localStorage.setItem('dominio_player_history', JSON.stringify(playerMoveHistory));
-            } else {
-                lastAiIndex = index;
-            }
-
-            const row = Math.floor(index / SIZE);
-            const col = index % SIZE;
-            let eatenInfo = [];
-
-            const neighbors = [
-                { r: row - 1, c: col }, { r: row + 1, c: col },
-                { r: row, c: col - 1 }, { r: row, c: col + 1 }
-            ];
-
-            neighbors.forEach(n => {
-                if (n.r >= 0 && n.r < SIZE && n.c >= 0 && n.c < SIZE) {
-                    const nIndex = n.r * SIZE + n.c;
-                    const neighborData = boardState[nIndex];
-                    if (neighborData && neighborData.owner !== owner && val > neighborData.val) {
-                        eatenInfo.push(`Ficha [${neighborData.val}] en cuadro [${nIndex + 1}] (Fila ${n.r + 1}, Col ${n.c + 1})`);
-                        neighborData.owner = owner;
-                    }
-                }
-            });
-
-            renderBoard();
-            const { ptsP1, ptsP2 } = updateScores();
-
-            moveCounter++;
-            let actor = (owner === 'player1') ? (gameMode === 'pvp' ? 'Jugador 1' : 'Tú (Jugador)') : (gameMode === 'pvp' ? 'Jugador 2' : `IA (${aiDifficulty.toUpperCase()})`);
-            let eatenText = eatenInfo.length > 0 ? `Comió: ${eatenInfo.join(', ')}` : 'Comió: Ninguna';
-            let logLine = `[Turno ${moveCounter}] ${actor}\n` +
-                          `• Ficha: [${val}] | Cuadro: [${index + 1}] (Fila ${row + 1}, Col ${col + 1})\n` +
-                          `• ${eatenText}\n` +
-                          `• Marcador actual -> Tú/P1: ${ptsP1} pts | IA/P2: ${ptsP2} pts\n` +
-                          `----------------------------------------`;
-            gameLogList.push(logLine);
-        }
-
-        function updateScores() {
-            let ptsP1 = 0;
-            let ptsP2 = 0;
-            let freeCells = 0;
-
-            boardState.forEach(cell => {
-                if (!cell) {
-                    freeCells++;
-                } else if (cell.owner === 'player1') {
-                    ptsP1 += cell.val;
-                } else if (cell.owner === 'player2') {
-                    ptsP2 += cell.val;
-                }
-            });
-
-            document.getElementById('pts-p1').innerText = ptsP1;
-            document.getElementById('pts-p2').innerText = ptsP2;
-            document.getElementById('free-cells').innerText = freeCells;
-
-            return { ptsP1, ptsP2, freeCells };
-        }
-
-        function checkGameOver() {
-            const { ptsP1, ptsP2, freeCells } = updateScores();
-            let p1OutOfMoves = Object.values(invP1).every(v => v === 0);
-            let p2OutOfMoves = Object.values(invP2).every(v => v === 0);
-            if (freeCells === 0 || (p1OutOfMoves && p2OutOfMoves)) {
-                isGameOver = true;
+                const card = document.createElement('div');
+                card.className = `p-5 rounded-3xl border transition shadow-xl ${task.completed ? 'bg-emerald-950/20 border-emerald-800/40' : 'bg-slate-800/90 border-slate-700 hover:border-sky-500/50'}`;
                 
-                let btnReset = document.getElementById('btn-reset');
-                btnReset.innerText = "Reiniciar Partida";
-                btnReset.disabled = false;
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-xs px-3 py-1 rounded-full font-bold ${task.completed ? 'bg-emerald-900/80 text-emerald-200 border border-emerald-700/50' : 'bg-amber-900/80 text-amber-200 border border-amber-700/50'}">
+                            ${task.completed ? '🏆 Tarea Completada' : '⏳ Pendiente por Evidencia'}
+                        </span>
+                        <span class="text-xs text-slate-400 font-mono">📅 ${task.schedule}</span>
+                    </div>
+                    <h2 class="text-base sm:text-lg font-bold text-slate-100 mb-4">${task.title}</h2>
+                `;
 
-                playerTotalGames++;
-                localStorage.setItem('dominio_total_games', playerTotalGames);
-
-                let diferencia = ptsP1 - ptsP2; 
-                let gananciaNetaRiesgo = diferencia * riskMultiplier;
-                let msg = "";
-
-                // 🎰 SISTEMA DE CASINO: Si el jugador se confía y sube el riesgo (>= 5x) 
-                // La casa activa el protocolo de destrucción en el 20% de los casos para destrozarlo
-                let casinoDestructionTrigger = (riskMultiplier >= 5 && (playerTotalGames % 5 === 0)); 
-
-                if (diferencia > 0 && !casinoDestructionTrigger) {
-                    playerWinsInRow++;
-                    localStorage.setItem('dominio_wins_row', playerWinsInRow);
-                    userBalance += totalInvested + gananciaNetaRiesgo;
-                    msg = `🎰 [CASA] ¡Ilusión concedida! Victoria (${riskMultiplier}x) de la suerte: +${gananciaNetaRiesgo} BS. ¡Cuidado, la casa observa tu confianza!`;
+                if (!task.completed) {
+                    hasPending = true;
+                    const actionDiv = document.createElement('div');
+                    actionDiv.className = "pt-3 border-t border-slate-700/60";
+                    actionDiv.innerHTML = `
+                        <button onclick="openVideoModal('${id}')" 
+                            class="w-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-500 hover:to-indigo-500 text-white text-xs sm:text-sm font-bold py-3 px-4 rounded-2xl transition shadow-lg shadow-sky-600/30 flex items-center justify-center gap-2">
+                            📹 Grabar Video para Marcar como Completa
+                        </button>
+                    `;
+                    card.appendChild(actionDiv);
+                    pendingContainer.appendChild(card);
                 } else {
-                    // 💀 DESTRUCCIÓN DE CASINO: La IA le voltea la partida o se activa el protocolo del 20% con riesgo alto
-                    playerWinsInRow = 0;
-                    localStorage.setItem('dominio_wins_row', playerWinsInRow);
-                    
-                    // Si la casa lo destruye por la fuerza del casino, se lleva toda la inversión y castiga el riesgo
-                    let perdidaCasino = casinoDestructionTrigger ? (totalInvested * riskMultiplier * 1.5) : Math.abs(gananciaNetaRiesgo);
-                    userBalance -= perdidaCasino; // Destrucción total del saldo apostado
-                    if (userBalance < 0) userBalance = 0;
-
-                    if (casinoDestructionTrigger) {
-                        msg = `🚨 ¡TRAMPA DE CASINO! Te confiaste con riesgo (${riskMultiplier}x). La IA activó el protocolo de la casa, te destruyó y barrió con tu saldo (-${perdidaCasino.toFixed(1)} BS). ¡La casa siempre gana!`;
-                    } else {
-                        userBalance = userBalance + totalInvested + gananciaNetaRiesgo; // recálculo normal de derrota
-                        msg = `💀 DERROTA DE CASINO (${riskMultiplier}x). La IA te leyó la jugada. Inversión devuelta menos la pérdida de ${gananciaNetaRiesgo} BS.`;
-                    }
-                }
-
-                document.getElementById('user-balance').value = userBalance;
-                document.getElementById('user-balance').dispatchEvent(new Event('change'));
-                document.getElementById('status-text').innerText = msg;
-                return true;
-            }
-            return false;
-        }
-
-                        function turnIA() {
-            if (isGameOver) return;
-
-            let availableNumbers = [];
-            for (let n = 1; n <= 9; n++) {
-                if (invP2[n] > 0) availableNumbers.push(n);
-            }
-
-            if (availableNumbers.length === 0) return;
-
-            const emptyIndices = [];
-            boardState.forEach((val, idx) => { if (val === null) emptyIndices.push(idx); });
-
-            let bestMove = null;
-            let freeCellsCount = emptyIndices.length;
-            const { ptsP1, ptsP2 } = updateScores();
-            let isLosing = ptsP2 < ptsP1; // Verifica si la IA va perdiendo
-
-            if (aiDifficulty === 'easy') {
-                let randomIdx = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-                let randomNum = availableNumbers[Math.floor(Math.random() * availableNumbers.length)];
-                bestMove = { index: randomIdx, val: randomNum };
-            } else {
-                let corners = [0, 4, 20, 24];
-                let emptyCorners = emptyIndices.filter(idx => corners.includes(idx));
-
-                // Si el jugador humano tiene patrones recientes guardados, replicar tendencias de apertura
-                let learnedPreferredNum = null;
-                if (playerMoveHistory.length > 0) {
-                    let lastPlayerMove = playerMoveHistory[playerMoveHistory.length - 1];
-                    if (lastPlayerMove && availableNumbers.includes(lastPlayerMove.val)) {
-                        learnedPreferredNum = lastPlayerMove.val;
-                    }
-                }
-
-                // Táctica conservadora: guardar fichas altas (8, 9) para el final (cuando queden <= 10 casillas libres)
-                let bestScore = -Infinity;
-                let depth = (aiDifficulty === 'hard') ? 2 : 1;
-
-                emptyIndices.sort((a, b) => {
-                    let rA = Math.floor(a / SIZE), cA = a % SIZE;
-                    let rB = Math.floor(b / SIZE), cB = b % SIZE;
-                    return (Math.abs(rA - 2) + Math.abs(cA - 2)) - (Math.abs(rB - 2) + Math.abs(cB - 2));
-                });
-
-                for (let idx of emptyIndices) {
-                    let sortedNums = [...availableNumbers];
-                    if (freeCellsCount > 10) {
-                        // Conservador al inicio: prioriza fichas bajas y medias (1 al 6), guardando altas
-                        sortedNums.sort((a, b) => a - b);
-                    } else {
-                        // Explotar fichas altas al final
-                        sortedNums.sort((a, b) => b - a);
-                    }
-                    for (let num of sortedNums) {
-                        // REGLA MEGA DIFÍCIl: Prohibido absoluto usar 8 o 9 si quedan más de 15 casillas libres (guardar para el final)
-                        if ((num === 8 || num === 9) && freeCellsCount > 15) {
-                            continue;
-                        }
-
-                        // REGLA: No gastar un 8 o 9 para comer un 1 o 2 a menos que la IA esté perdiendo
-                        let isHighNumWaste = (num >= 8);
-                        if (isHighNumWaste && !isLosing && freeCellsCount > 8) {
-                            let row = Math.floor(idx / SIZE), col = idx % SIZE;
-                            let neighbors = [{r:row-1,c:col}, {r:row+1,c:col}, {r:row,c:col-1}, {r:row,c:col+1}];
-                            let eatingSmall = neighbors.some(n => {
-                                if (n.r >= 0 && n.r < SIZE && n.c >= 0 && n.c < SIZE) {
-                                    let nIdx = n.r * SIZE + n.c;
-                                    let cell = boardState[nIdx];
-                                    return cell && cell.owner === 'player1' && cell.val <= 2;
-                                }
-                            });
-                            if (eatingSmall) continue; 
-                        }
-
-                        let tempBoard = cloneBoard(boardState);
-                        let tempInv = {...invP2};
-                        tempInv[num]--;
-                        
-                        aplicarJugadaSimulada(tempBoard, idx, num, 'player2');
-                        
-                        let score = minimax(tempBoard, depth, false, -Infinity, Infinity, tempInv);
-                        
-                        // Bonificación estratégica por esquinas en fase temprana ("hacerse el güebón" con fichas bajas)
-                        let isCorner = [0, 4, 20, 24].includes(idx);
-                        if (freeCellsCount > 15 && isCorner && num <= 4) {
-                            score += 8; 
-                        }
-
-                        // Bonificación por aprendizaje si anticipa el movimiento del humano
-                        if (learnedPreferredNum && num === learnedPreferredNum) {
-                            score += 4;
-                        }
-
-                        // Explotar con fichas altas de forma agresiva cuando queden pocas casillas
-                        if (freeCellsCount <= 12 && (num === 8 || num === 9)) {
-                            score += 12; 
-                        }
-                        
-                        if (score > bestScore) {
-                            bestScore = score;
-                            bestMove = { index: idx, val: num };
-                        }
-                    }
-
-                }
-            }
-
-            if (!bestMove && availableNumbers.length > 0) {
-                bestMove = { index: emptyIndices[0], val: availableNumbers[0] };
-            }
-            if (bestMove) {
-                invP2[bestMove.val]--;
-                ejecutarJugada(bestMove.index, bestMove.val, 'player2');
-                if (!checkGameOver()) {
-                    turn = 'p1';
-                    renderPicker();
-                    document.getElementById('status-text').innerText = `Tu turno. La IA respondió con ficha [${bestMove.val}].`;
-                    iniciarTurnoTimer();
-                }
-            }
-        }
-
-        function minimax(board, depth, isMaximizing, alpha, beta, currentAiInv) {
-            let freeCount = board.filter(c => c === null).length;
-            if (depth === 0 || freeCount === 0) {
-                return evaluarTablero(board);
-            }
-
-            const emptyIndices = [];
-            board.forEach((val, idx) => { if (val === null) emptyIndices.push(idx); });
-
-            if (isMaximizing) {
-                let maxEval = -Infinity;
-                let availableNumbers = [];
-                for (let n = 1; n <= 9; n++) { if (currentAiInv[n] > 0) availableNumbers.push(n); }
-                availableNumbers.sort((a, b) => b - a);
-
-                for (let idx of emptyIndices) {
-                    for (let num of availableNumbers) {
-                        let tempBoard = cloneBoard(board);
-                        let nextInv = {...currentAiInv};
-                        nextInv[num]--;
-                        aplicarJugadaSimulada(tempBoard, idx, num, 'player2');
-                        
-                        let evalState = minimax(tempBoard, depth - 1, false, alpha, beta, nextInv);
-                        maxEval = Math.max(maxEval, evalState);
-                        alpha = Math.max(alpha, evalState);
-                        if (beta <= alpha) break;
-                    }
-                }
-                return maxEval;
-            } else {
-                let minEval = Infinity;
-                let availableP1 = [];
-                for (let n = 1; n <= 9; n++) { if (invP1[n] > 0) availableP1.push(n); }
-                availableP1.sort((a, b) => b - a);
-
-                for (let idx of emptyIndices) {
-                    for (let num of availableP1) {
-                        let tempBoard = cloneBoard(board);
-                        aplicarJugadaSimulada(tempBoard, idx, num, 'player1');
-                        
-                        let evalState = minimax(tempBoard, depth - 1, true, alpha, beta, currentAiInv);
-                        minEval = Math.min(minEval, evalState);
-                        beta = Math.min(beta, evalState);
-                        if (beta <= alpha) break;
-                    }
-                }
-                return minEval;
-            }
-        }
-
-        function evaluarTablero(board) {
-            let ptsAI = 0;
-            let ptsP1 = 0;
-            let countAI = 0;
-            let countP1 = 0;
-            let freeCount = board.filter(c => c === null).length;
-
-            board.forEach((cell, idx) => {
-                if (cell) {
-                    let r = Math.floor(idx / SIZE), c = idx % SIZE;
-                    let isCorner = (r === 0 || r === 4) && (c === 0 || c === 4);
-                    let isCenter = (r >= 1 && r <= 3 && c >= 1 && c <= 3);
-                    
-                    let positionWeight = 1;
-                    if (freeCount > 12) {
-                        if (isCorner) positionWeight = 2.5; // Premia esquinas al inicio
-                    } else {
-                        if (isCenter) positionWeight = 2.0; // Premia el centro al cierre
-                    }
-
-                    if (cell.owner === 'player2') {
-                        ptsAI += cell.val * positionWeight;
-                        countAI++;
-                    } else if (cell.owner === 'player1') {
-                        ptsP1 += cell.val * positionWeight;
-                        countP1++;
-                    }
+                    hasHistory = true;
+                    const historyDiv = document.createElement('div');
+                    historyDiv.className = "pt-3 border-t border-slate-700/60 text-xs text-emerald-400 flex items-center justify-between";
+                    historyDiv.innerHTML = `
+                        <span>✅ Evidencia registrada y asegurada en la nube</span>
+                        <span class="text-slate-500 font-mono italic">Historial protegido (Solo Admin puede borrar)</span>
+                    `;
+                    card.appendChild(historyDiv);
+                    historyContainer.appendChild(card);
                 }
             });
-            return (ptsAI - ptsP1) * 2 + (countAI - countP1) * 5;
-        }
 
-        function aplicarJugadaSimulada(board, index, val, owner) {
-
-                    board[index] = { val: val, owner: owner };
-            const row = Math.floor(index / SIZE);
-            const col = index % SIZE;
-            const neighbors = [
-                { r: row - 1, c: col }, { r: row + 1, c: col },
-                { r: row, c: col - 1 }, { r: row, c: col + 1 }
-            ];
-            neighbors.forEach(n => {
-                if (n.r >= 0 && n.r < SIZE && n.c >= 0 && n.c < SIZE) {
-                    const nIndex = n.r * SIZE + n.c;
-                    if (board[nIndex] && board[nIndex].owner !== owner && val > board[nIndex].val) {
-                        board[nIndex].owner = owner;
-                    }
-                }
-            });
-        }
-
-        function cloneBoard(board) {
-            return board.map(cell => cell ? { val: cell.val, owner: cell.owner } : null);
-        }
-
-        function abrirLog() {
-            let textarea = document.getElementById('log-textarea');
-            if (gameLogList.length === 0) {
-                textarea.value = "Aún no se ha realizado ninguna jugada en esta partida.";
-            } else {
-                textarea.value = gameLogList.join('\n\n');
+            if (!hasPending) {
+                pendingContainer.innerHTML = '<div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-center text-slate-400">🎉 ¡Excelente trabajo! No tienes tareas pendientes.</div>';
             }
-            document.getElementById('log-modal').style.display = 'flex';
+            if (!hasHistory) {
+                historyContainer.innerHTML = '<div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700 text-center text-slate-400">🏆 Tu historial aparecerá aquí al completar tareas con video.</div>';
+            }
+
+            const percentage = totalTasks > 0 ? (completedTasksCount / totalTasks) * 100 : 0;
+            document.getElementById('task-counter').innerText = `${completedtasksCount || completedTasksCount} de ${totalTasks} completadas`;
+            document.getElementById('progress-bar').style.width = `${percentage}%`;
+        });
+
+        // Lógica de grabación de video con Canvas Watermark (Fecha y Hora exactas inalterables)
+        window.openVideoModal = async function(id) {
+            activeTaskId = id;
+            document.getElementById('video-modal').classList.remove('hidden');
+            try {
+                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 }, audio: true });
+                const sourceVideo = document.getElementById('source-video');
+                sourceVideo.srcObject = mediaStream;
+                sourceVideo.play();
+
+                const canvas = document.getElementById('watermark-canvas');
+                canvas.width = 1280;
+                canvas.height = 720;
+                const ctx = canvas.getContext('2d');
+
+                function renderWatermark() {
+                    if (!sourceVideo.paused && !sourceVideo.ended) {
+                        ctx.drawImage(sourceVideo, 0, 0, canvas.width, canvas.height);
+                        
+                        // Estilo de la marca de agua con fecha y hora exacta
+                        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+                        ctx.fillRect(30, 30, 520, 85);
+                        ctx.strokeStyle = 'rgba(56, 189, 248, 0.9)';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(30, 30, 520, 85);
+
+                        ctx.fillStyle = '#38bdf8';
+                        ctx.font = 'bold 22px monospace';
+                        ctx.fillText('🛡️ HOGAR SEGURO - EVIDENCIA', 50, 65);
+
+                        const exactTime = new Date(Date.now() + currentServerOffset);
+                        ctx.fillStyle = '#ffffff';
+                        ctx.font = 'bold 18px monospace';
+                        ctx.fillText(`Fecha: ${exactTime.toLocaleDateString()} ${exactTime.toLocaleTimeString()}`, 50, 95);
+                    }
+                    animationFrameId = requestAnimationFrame(renderWatermark);
+                }
+                renderWatermark();
+
+                canvasStream = canvas.captureStream(30);
+                const audioTrack = mediaStream.getAudioTracks()[0];
+                if (audioTrack) {
+                    canvasStream.addTrack(audioTrack);
+                }
+            } catch (err) {
+                alert("No se pudo acceder a la cámara o micrófono. Verifica los permisos de tu navegador.");
+                closeModal();
+            }
+        };
+
+        document.getElementById('start-record').onclick = () => {
+            recordedChunks = [];
+            try {
+                mediaRecorder = new MediaRecorder(canvasStream, { mimeType: 'video/webm;codecs=vp9,opus' });
+            } catch (e) {
+                mediaRecorder = new MediaRecorder(canvasStream);
+            }
+
+            mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+            mediaRecorder.onstop = async () => {
+                document.getElementById('uploading-msg').classList.remove('hidden');
+                const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                const videoPath = `evidencias/${activeTaskId}_${Date.now()}.webm`;
+                const sRef = storageRef(storage, videoPath);
+
+                try {
+                    await uploadBytes(sRef, blob);
+                    const videoUrl = await getDownloadURL(sRef);
+
+                    // Al subir la evidencia con marca de agua, la tarea pasa automáticamente a completada
+                    await update(ref(db, `tasks/${activeTaskId}`), {
+                        videoUrl,
+                        videoPath,
+                        completed: true
+                    });
+
+                    alert("¡Video y evidencia con marca de agua subidos con éxito! Tarea completada.");
+                } catch (err) {
+                    console.error(err);
+                    alert("Hubo un error al subir el video a la nube.");
+                } finally {
+                    document.getElementById('uploading-msg').classList.add('hidden');
+                    closeModal();
+                }
+            };
+
+            mediaRecorder.start();
+            document.getElementById('start-record').classList.add('hidden');
+            document.getElementById('stop-record').classList.remove('hidden');
+            document.getElementById('recording-status').classList.remove('hidden');
+        };
+
+        document.getElementById('stop-record').onclick = () => {
+            if (mediaRecorder) mediaRecorder.stop();
+        };
+
+        document.getElementById('cancel-record').onclick = closeModal;
+
+        function closeModal() {
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+            }
+            document.getElementById('video-modal').classList.add('hidden');
+            document.getElementById('start-record').classList.remove('hidden');
+            document.getElementById('stop-record').classList.add('hidden');
+            document.getElementById('recording-status').classList.add('hidden');
+            const sourceVideo = document.getElementById('source-video');
+            sourceVideo.srcObject = null;
         }
-
-        function cerrarLog() {
-            document.getElementById('log-modal').style.display = 'none';
-        }
-
-        function copiarLog() {
-            let textarea = document.getElementById('log-textarea');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999);
-            navigator.clipboard.writeText(textarea.value).then(() => {
-                alert("¡Registro copiado al portapapeles!");
-            }).catch(() => {
-                document.execCommand('copy');
-                alert("¡Registro copiado!");
-            });
-        }
-
-        function reiniciarJuego() {
-            detenerTimer();
-            boardState = Array(SIZE * SIZE).fill(null);
-            invP1 = { 1:3, 2:3, 3:3, 4:3, 5:3, 6:2, 7:2, 8:2, 9:2 };
-            invP2 = { 1:3, 2:3, 3:3, 4:3, 5:3, 6:2, 7:2, 8:2, 9:2 };
-            totalInvested = 0; // Reiniciamos el acumulador de inversión
-            gameStarted = false;
-            gameLogList = [];
-            moveCounter = 0;
-            
-            // Cambiar texto a "Comenzar" al iniciar una nueva partida y habilitar el botón
-            let btnReset = document.getElementById('btn-reset');
-            btnReset.innerText = "Comenzar";
-            btnReset.disabled = false;
-
-            turn = 'p1';
-            isGameOver = false;
-            document.getElementById('status-text').innerText = "Partida lista. ¡Configura tu riesgo, apuesta y presiona una casilla para jugar!";
-            init();
-        }
-
-        init();
     </script>
 </body>
 </html>
-
